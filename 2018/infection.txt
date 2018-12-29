@@ -1,0 +1,10 @@
+671,17509,immune,weak,52 cold,12
+7194,41062,immune cold,weak radiation,11 bludgeoning,20
+1147,37194,immune,weak radiation fire,56 slashing,11
+569,27107,immune,weak slashing bludgeoning,93 slashing,17
+140,19231,immune slashing,weak bludgeoning,247 slashing, 19
+2894,30877,immune radiation bludgeoning,weak,15 radiation,10
+1246,8494,immune,weak fire,12 bludgeoning,9
+4165,21641,immune fire,weak radiation,10 radiation,6
+7374,24948,immune,weak cold,5 fire,13
+4821,26018,immune,weak,10 fire,15
