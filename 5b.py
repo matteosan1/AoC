@@ -9,23 +9,18 @@ msgs = data[0]
 
 good_msg = 0
 for m in msgs:
-    # pairs of letters
-    pairs = {}
+    #pairs = {}
     isGood = False
     last_pair = ""
-    for ic in range(0, len(m)-1):
-        pair = m[ic] + m[ic+1]
-        if pair != last_pair:
-            pairs[pair] = pairs.setdefault(pair, 0) + 1
-        last_pair = pair
-
-    for p in pairs.values():
-        if p >= 2:
+    for ic in range(0, len(m)-3):
+        pair = m[ic:ic+2]
+        if pair in m[ic+2:]:
             for ic in range(0, len(m)-2):                    
                 if m[ic] == m[ic+2]:
                     isGood = True
                     break
     if isGood:
+        print (m)
         good_msg += 1
         
 print (good_msg)
