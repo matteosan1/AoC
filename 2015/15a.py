@@ -2,44 +2,86 @@
 class Ingredient:
     def __init__(self, name, capacity, durability, flavor, texture, calories):
         self.name = name
-        self.properties = [capacity, durability, flavor, texture, calories]
+        self.capacity = capacity
+        self.durability = durability
+        self.flavor = flavor
+        self.texture = texture
+        self.calories = calories
 
-    def __repr__(self):
-        return self.name + " " + str(self.properties)
+    def property(self, spoons):
+        return spoons * (max(0, self.capacity) +
+                         max(0, self.durability) +
+                         max(0, self.flavor) +
+                         max(0, self.texture))
 
-def score(ingredients, spoons):
-    properties = [0 for _ in range(5)]
-    for i in range(5):
-        for ii, ing in enumerate(ingredients):
-            properties[i] += spoons[ii]*ing.properties[i]
+filename = "instructions15a.txt"
+#filename = "examples14a.txt"
 
-    s = 1
-    for p in properties[:-1]:
-        s *= max(0, p)
-    return s, properties[-1]
-
-with open("instructions15a.txt", "r") as f:
+with open(filename, "r") as f:
     data = f.readlines()
 
-ingredients =  []
+ing = []
 for d in data:
     d = d.split("\n")[0].split(" ")
-    ingredients.append(Ingredient(d[0], int(d[2][:-1]), int(d[4][:-1]),
-                                  int(d[6][:-1]), int(d[8][:-1]), int(d[10])))
+    name = d[0][:-1]
+    capacity = int(d[2][:-1])
+    durability = int(d[4][:-1])
+    flavor = int(d[6][:-1])
+    texture = int(d[8][:-1])
+    calories = int(d[10])
+    ing.append(Ingredient(name, capacity, durability, flavor, texture, calories))
 
-max_spoons = None
-max_score = 0
-for i1 in range(0, 101, 1):
-    for i2 in range(0, 101, 1):
-        for i3 in range(0, 101, 1):
-            for i4 in range(0, 101, 1):
-                if i1+i2+i3+i4 == 100:
-                    spoons = [i1, i2, i3, i4]
-        #if i1+i2 == 100:
-            #spoons = [i1, i2]
-                    s, p = score(ingredients, spoons)
-                    if p == 500:
-                        if s > max_score:
-                            max_score = s
-                            max_spoons = spoons
-print (max_score)
+def tot_prop(x):
+    tot = ing[0].property(x[0])
+    tot += ing[1].property(x[1])
+    tot += ing[2].property(x[2])
+    tot += ing[3].property(x[3])
+
+    return tot #+ 1000000 * abs(100 - sum(x))
+
+
+#from scipy.optimize import brute, fmin
+
+#bounds = [slice(0, 100, 1), slice(0, 100, 1), slice(0, 100, 1), slice(0, 100, 1)]
+#result = brute(tot_prop, bounds, full_output=True, finish=fmin)
+
+#print (result)
+
+test = []
+for i1 in range(0, 100, 1):
+    for i2 in range(0, 100, 1):
+        for i3 in range(0, 100, 1):
+            for i4 in range(0, 100, 1):
+                if (i1+i2+i3+i4) == 100:
+                    test.append([i1,i2,i3,i4])
+
+print ("combination done")
+max_prop = 0
+comb = None
+for t in test:
+    prop = tot_prop(t)
+    if prop > max_prop:
+        comb = t
+        max_prop = prop
+
+
+print (max_prop)
+print (comb)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

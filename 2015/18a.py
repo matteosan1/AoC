@@ -1,49 +1,36 @@
-import numpy, copy
+import pandas as pd
+import numpy as np
 
-size = 100
-matrix = numpy.zeros(shape=(size+2, size+2))
+def decrypt(m):
+    m = m.split(" ")
+    if len(m) == 5:
+        s = m[2].split(",")
+        e = m[4].split(",")
+        if m[1] == "off":
+            v = 0
+        else:
+            v = 1
+    elif len(m) == 4:
+        s = m[1].split(",")
+        e = m[3].split(",")
+        v = 2
 
-def update(x, y):
-    global temp, matrix
-    xmin = x - 1
-    xmax = x + 1
-    ymin = y - 1
-    ymax = y + 1
-    on = numpy.sum(temp[ymin:ymax+1, xmin:xmax+1]) - temp[y, x]
-    #if x == 6 and y==1:
-    #    print (temp[ymin:ymax+1, xmin:xmax+1])
-    #    print (x, y, on, xmin, ymin, xmax, ymax)
-    if temp[y, x] == 1 and (on == 2 or on == 3):
-        matrix[y, x] = 1
-    elif temp[y, x] == 1 and not (on == 2 or on == 3):
-        matrix[y, x] = 0
-    elif temp[y, x] == 0 and on == 3:
-        matrix[y, x] = 1
-    elif temp[y, x] == 0 and on != 3:
-        matrix[y, x] = 0
+    return [v] + list(map(int, s)) + list(map(int, e))
 
-filename = "instructions18a.txt"
-with open(filename, "r") as f:
-    lines = f.readlines()
 
-y = 1
-for l in lines:
-    x = 1
-    l = l.split("\n")[0]
-    for c in l:
-        if c == "#":
-            matrix[y, x] = 1
-        x += 1
-    y += 1
+data = pd.read_csv("instructions6a.txt", header = None, delimiter=":")
+#data = pd.read_csv("examples6a.txt", header = None, delimiter=":")
+msgs = data[0]
 
-#print (matrix[1:-1, 1:-1])
+grid = np.zeros(shape=(1000, 1000))
+for m in msgs:
+    i = decrypt(m)
+    #print (i)
+    if i[0] == 2:
+        temp = np.where(grid[i[1]:i[3]+1, i[2]:i[4]+1] == 0, 1, 0)
+        grid[i[1]:i[3]+1, i[2]:i[4]+1] = temp
+    else:
+        grid[i[1]:i[3]+1, i[2]:i[4]+1] = i[0]
 
-step = 100
-for _ in range(step):
-    temp = copy.deepcopy(matrix)
-    for x in range(1, size + 1):
-        for y in range(1, size + 1):
-            update(x, y)
-    #print (temp[1:-1, 1:-1])
-print (matrix[1:-1, 1:-1])
-print (numpy.sum(matrix))
+print (grid)
+print(np.count_nonzero(grid == 1))
