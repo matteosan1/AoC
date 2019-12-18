@@ -231,34 +231,20 @@ class Robot:
                 self.position = self.move("F")[0]
                 counter += 1
                 self.visited.add(self.position)
-                #drawDict[self.position] = str(counter%10)
             elif self.tryRotateLeft():
                 if counter != 0:
                     steps.append(str(counter))
                 steps.append("L")
-                #drawDict[self.position] = str("L")
                 counter = 0
                 self.direction = self.move("L")[1]
             elif self.tryRotateRight():
                 if counter != 0:
                     steps.append(str(counter))
                 steps.append("R")
-                #drawDict[self.position] = str("R")
                 counter = 0
                 self.direction = self.move("R")[1]
         steps.append(str(counter))
-        #print(drawDictScreenSimple(drawDict))
-        #print(steps)
         return steps
-
-#process.start()
-#new_image = []
-#for k, v in image.items():
-#    if v not= ".":
-#        new_image.append(k)
-#current_position, direction = findBot(image)
-#r = Robot(current_position, direction, new_image)
-#path = r.traverse()
 
 def stepsToPattern(stepArray):
     stringSteps = ",".join(stepArray)
@@ -285,55 +271,17 @@ def dumbMatcher(stringSteps, sizes):
     stringSteps = stringSteps.replace(",", "")
     return patterns, stringSteps==""
 
+new_image = []
+for k, v in image.items():
+    if v != ".":
+        new_image.append(k)
+current_position, direction = findBot(image)
+r = Robot(current_position, direction, new_image)
+path = r.traverse()
+patterns = stepsToPattern(path)
 
-#patterns = stepsToPattern(path)
-patterns = ['ABABAC,BC,AC', 'L,10,L,12,R,6', 'R,10,L,4,L,4,L,12', 'L,10,R,10,R,6,L,4']
-patterns.append("n")
-
-# c = (20, 24)
-# patterns = ['A','B','A','B','A','C','B','C','A','C']
-# vals = {"A":['L','10','L','12','R','6'], "B":['R','10','L','4','L','4','L','12'], "C":['L','10','R','10','R','6','L','4']}
-#
-# dir = 0
-#
-# def turn(dir, d):
-#     if d == "L":
-#         dir -= 1
-#     elif d == "R":
-#         dir += 1
-#     dir = dir % 4
-#     return dir
-#
-# def move(c, dir):
-#     if dir == 0:
-#         c = (c[0], c[1] - 1)
-#     elif dir == 1:
-#         c = (c[0]+1, c[1])
-#     elif dir == 2:
-#         c = (c[0], c[1] + 1)
-#     elif dir == 3:
-#         c = (c[0]-1, c[1])
-#     return c
-#
-# xmax = max(list(image.keys()), key=lambda x: x[0])[0]
-# ymax = max(list(image.keys()), key=lambda x: x[1])[1]
-#
-# for p in patterns:
-#     for char in vals[p]:
-#         if char == "L" or char == "R":
-#             dir = turn(dir, char)
-#         else:
-#             for i in range(int(char)):
-#                 c = move(c, dir)
-#                 image[c] = "X"
-#
-# for y in range(ymax):
-#     for x in range(xmax):
-#         print(image[(x, y)], end='')
-#     print("")
-#
-# import sys
-# sys.exit()
+patterns = ['A,B,A,B,A,C,B,C,A,C\n', 'L,10,L,12,R,6\n', 'R,10,L,4,L,4,L,12\n', 'L,10,R,10,R,6,L,4\n']
+patterns.append("y\n")
 
 q_in = Queue()
 q_out = Queue()
@@ -343,40 +291,16 @@ process.start()
 
 ninput = 0
 char = 0
-#for n in range(len(patterns)):
-#    for p in patterns:
-#        for c in p:
-#            q_in.put(ord(c))
-#        q_in.put(10)
-
 while True:
     question = q_out.get()
     if question == "MOVE":
-        if ninput == 0:
-            for c in patterns[0]:
-                q_in.put(ord(c))
-            q_in.put(10)
+        if char == len(patterns[ninput]):
+            char = 0
             ninput += 1
-        else:
-            for i in range(1, 5):
-                for c in patterns[i]:
-                    q_in.put(ord(c))
-                q_in.put(10)
-            ninput += 1
-        # if char == len(patterns[ninput]):
-        #     q_in.put(10)
-        #     char = 0
-        #     ninput += 1
-        # else:
-        #     print(ord(patterns[ninput][char]))
-        #     q_in.put(ord(patterns[ninput][char]))
-        #     char += 1
+        q_in.put(ord(patterns[ninput][char]))
+        char += 1
 
     if question == "END":
        break
-process.join()
-    #    for c in patterns[i]:
-    #        q_in.put(ord(c))
-    #    q_in.put(10)
 
 
