@@ -1,6 +1,0 @@
-lines = []
-with open("input_3a.txt") as f:
-    for l in f:
-        lines.append(l.split("\n"))
-
-print (lines)
