@@ -24,8 +24,8 @@ from collections import defaultdict
 
 # This time input was given right away, in the task description
 # indata = InputForDay(4).get()
-left  = 130254
-right = 678275
+left  = 109165
+right = 576723
 
 # Convert a number to a list of digits.
 digits = lambda n: [int(x) for x in str(n)]

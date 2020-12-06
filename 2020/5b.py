@@ -12,11 +12,24 @@ def rule(code, up=128):
     return up - 1
 
 ids = []
+seats  = []
 for l in lines:
     row = rule(l[:7])
     col = rule(l[7:], 8)
     ids.append(row*8+col)
+    seats.append((col, row))
 
-seats = set(ids)
+ids = set(ids)
 all = set(range(59, 905))
-print (all-seats)
+print (all-ids)
+
+for y in range(128):
+    print ("{:3} ".format(y), end='')
+    for x in range(8):
+        if (x, y) in seats:
+            print ("X", end="")
+        else:
+            print (".", end="")
+        if x == 3:
+            print (" ", end="")
+    print ()

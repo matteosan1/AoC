@@ -1,5 +1,5 @@
 pixels = []
-with open("input8a.txt", "r") as f:
+with open("input_8a.txt", "r") as f:
     line = f.readlines()
 
 line = line[0].split("\n")[0]
