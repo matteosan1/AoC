@@ -23,8 +23,8 @@ def show(sat):
 
 r = re.compile("\w=(-?\d+)+")
 inputs = []
-filename = "example12a.txt"
-#filename = "input12a.txt"
+#filename = "example12a.txt"
+filename = "input12a.txt"
 with open(filename, "r") as f:
     for i, l in enumerate(f):
         inputs.append(l)

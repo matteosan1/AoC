@@ -13,11 +13,7 @@ for l in lines:
     else:
         temp.append(l)
 
-counts = 0
-for a in answers:
-    temp = []
-    for i in a:
-        temp += list(i)
-    counts += len(set(temp))
-print (counts)
+counts = [len(set.intersection(*list(map(set, a)))) for a in answers]
+count = sum(counts)
+print (count)
 
