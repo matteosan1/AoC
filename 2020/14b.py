@@ -1,4 +1,6 @@
 import re
+import time
+start_time = time.time()
 
 class Docking():
     def __init__(self, filename):
@@ -51,4 +53,7 @@ class Docking():
                 self.memory[addr] = value
 
 d = Docking("input_14a.txt")
-print (sum(d.memory.values()))
+
+print('🎄 Part 2: {} 🎄'.format(sum(d.memory.values())))
+
+print("\n--- %.7s secs ---" % (time.time() - start_time))
