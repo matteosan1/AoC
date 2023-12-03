@@ -5,15 +5,15 @@ def loadInput():
     lines = readInput("prova.txt")
     #lines = readInput("input_DAY.txt")
 
-    return lines
+    return
 
-def part1(inputs):
+def part1():
     pass
-    #print (f"🎄 Part 1: {}")
+    #print ("🎄 Part 1: {}".format())
 
-def part2(inputs):
+def part2():
     pass
-    #print (f"🎄🎅 Part 2: {}")
+    #print ("🎄🎅 Part 2: {}".format())
 
 print("⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄")
 print("⛄        Day DAY         ⛄")
@@ -23,8 +23,8 @@ inputs = loadInput()
 
 t0 = time.time()
 part1(inputs)
-print (f"Time: {time.time()-t0:.5f}")
+print ("Time: {:.5f}".format(time.time()-t0))
 
 t0 = time.time()
 part2(inputs)
-print (f"Time: {time.time()-t0:.5f}")
+print ("Time: {:.5f}".format(time.time()-t0))

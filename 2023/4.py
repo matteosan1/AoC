@@ -3,7 +3,7 @@ from utils import readInput
 
 def loadInput():
     lines = readInput("prova.txt")
-    #lines = readInput("input_DAY.txt")
+    #lines = readInput("input_4.txt")
 
     return lines
 
@@ -16,7 +16,7 @@ def part2(inputs):
     #print (f"🎄🎅 Part 2: {}")
 
 print("⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄")
-print("⛄        Day DAY         ⛄")
+print("⛄        Day 4         ⛄")
 print("⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄")
 
 inputs = loadInput()
