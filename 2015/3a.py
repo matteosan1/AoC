@@ -1,3 +1,6 @@
+import time
+
+t0 = time.time()
 with open("instructions3a.txt", "r") as f:
 #with open("example3a.txt", "r") as f:
     lines = f.readlines()
@@ -18,4 +21,4 @@ for l in lines:
         presents[pos] = presents.setdefault(pos, 0) + 1
 
 print (len(presents))
-
+print (time.time() - t0)

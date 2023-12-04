@@ -1,3 +1,4 @@
+import time
 from concurrent.futures import ProcessPoolExecutor, ALL_COMPLETED, wait
 import hashlib
 
@@ -20,10 +21,11 @@ def pooler(key, hash_begin, nmax):
         stuffed_futures.append(f)
     wait(stuffed_futures, return_when=ALL_COMPLETED)
 
+t0 = time.time()
 key = b"ckczppom"
 #key = b"abcdef"
 
 pooler(key, "000000", 7)
-
+print (time.time() - t0)
     
 

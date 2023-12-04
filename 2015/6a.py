@@ -1,3 +1,4 @@
+import time
 import pandas as pd
 import numpy as np
 
@@ -18,6 +19,7 @@ def decrypt(m):
     return [v] + list(map(int, s)) + list(map(int, e))
 
 
+t0 = time.time()
 data = pd.read_csv("instructions6a.txt", header = None, delimiter=":")
 #data = pd.read_csv("examples6a.txt", header = None, delimiter=":")
 msgs = data[0]
@@ -34,3 +36,4 @@ for m in msgs:
 
 print (grid)
 print(np.count_nonzero(grid == 1))
+print (time.time() - t0)

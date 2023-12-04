@@ -1,8 +1,9 @@
+import time
 import pandas as pd
 import numpy as np
 
 nlines=300
-
+t0 = time.time()
 def decrypt(m):
     m = m.split(" ")
     if len(m) == 5:
@@ -33,4 +34,4 @@ for m in msgs[:nlines]:
         grid[i[1]:i[3]+1, i[2]:i[4]+1] = temp
 #print (grid)
 print(np.sum(grid))
-
+print (time.time() - t0)

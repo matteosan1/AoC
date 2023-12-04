@@ -1,3 +1,6 @@
+import time
+
+t0 = time.time()
 with open("instructions3a.txt", "r") as f:
 #with open("example3b.txt", "r") as f:
     lines = f.readlines()
@@ -21,3 +24,4 @@ for l in lines:
         #print ("isSanta", isSanta, pos)
 print (len(presents))
 #print (presents)
+print (time.time() - t0)

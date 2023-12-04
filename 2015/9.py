@@ -1,5 +1,7 @@
+import time
 from itertools import permutations
 
+t0 = time.time()
 filename = "instructions9a.txt"
 with open(filename, "r") as f:
     data = f.readlines()
@@ -27,3 +29,4 @@ for p in permutations(distances.keys()):
         
 print (min_dist)
 print (max_dist)
+print (time.time() - t0)
