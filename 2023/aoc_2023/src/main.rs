@@ -3,13 +3,13 @@ use std::time::Instant;
 extern crate aoc;
 use aoc::utils;
 
-mod day6;
+mod day7;
 
 fn main() {
     let now = Instant::now();
-    let input = utils::read_input("../input_6.txt");
-    day6::day6::part1(&input);
-    day6::day6::part2(&input);
+    let input = utils::read_input("../input_7.txt");
+    day7::day7::part1(&input);
+    day7::day7::part2(&input);
 
     let elapsed = now.elapsed();
     println!("Elapsed: {:.2?}", elapsed); 
