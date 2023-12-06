@@ -1,5 +1,5 @@
 import time
-import numpy as np
+from numpy import sqrt, prod
 
 from utils import readInput
 
@@ -8,8 +8,8 @@ def loadInput():
     return lines 
 
 def find_interval(times, distances):
-    r = sorted(map(int, np.roots([1, -times, distances])))
-    return (r[1]-r[0])
+    diff = (times + sqrt(times**2 - 4*distances)) // 2 - (times - sqrt(times**2 - 4*distances)) // 2
+    return diff
 
 def part1(lines):
     times = list(map(int, lines[0][5:].split()))
@@ -19,7 +19,7 @@ def part1(lines):
     for it, best_time in enumerate(times):
         counts.append(find_interval(times[it], distances[it]))
         
-    print (f"🎄 Part 1: {np.prod(counts)}")
+    print (f"🎄 Part 1: {prod(counts)}")
     
 def part2(lines):
     times = int("".join(lines[0][5:].split()))
