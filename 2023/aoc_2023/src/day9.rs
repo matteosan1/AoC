@@ -1,4 +1,4 @@
-pub mod dayDAY {
+pub mod day9 {
     extern crate aoc;
     use aoc::utils;
 
@@ -12,12 +12,12 @@ pub mod dayDAY {
     
     pub fn part1(input: &Vec<String>) {
         
-        println!("{} {}", utils::santa(DAY, 1), );
+        println!("{} {}", utils::santa(9, 1), );
     }
 
 
     pub fn part2(input: &Vec<String>) {
         
-        println!("{} {}", utils::christmas_tree(DAY, 2), );
+        println!("{} {}", utils::christmas_tree(9, 2), );
     }
 }
