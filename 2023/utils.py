@@ -130,6 +130,9 @@ class Point:
 
     def __repr__(self):
         return f"({self.x},{self.y})"
+        
+def manhattan_dist(p1, p2):
+    return abs(p1.x-p2.x) + abs(p1.y-p2.y)
 
 def convert_to_coordinates(lines, start_symb="@", end_symb="X"):
     m = {}
