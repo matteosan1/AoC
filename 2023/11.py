@@ -5,7 +5,7 @@ from itertools import combinations
 from utils import readInput, Point, manhattan_dist
         
 def loadInput():
-    lines = readInput("input_11.txt")
+    lines = readInput("prova.txt")
     
     new_lines = []
     for l in lines:
@@ -48,7 +48,9 @@ def distances(inputs, expansion_factor):
     lengths = 0
     for c in combinations(galaxies, 2):
         n = count_rowcol(*c, grow, gcol)
-        lengths += manhattan_dist(*c) + n*expansion_factor
+        d = manhattan_dist(*c) + n*expansion_factor
+        print (c, d)
+        lengths += d
     return lengths
 
 def part1(inputs): 
