@@ -52,21 +52,24 @@ def distances(inputs, expansion_factor):
     return lengths
 
 def part1(inputs): 
-    print (f"🎄 Part 1: {distances(inputs, 2)}")
+    return distances(inputs, 2)
 
 def part2(inputs):
-    print (f"🎄🎅 Part 2: {distances(inputs, 1000000)}")
+    return distances(inputs, 1000000)
 
-print("⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄")
-print("⛄        Day 11        ⛄")
-print("⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄")
+if __name__ == '__main__':
+    print("⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄")
+    print("⛄        Day 11        ⛄")
+    print("⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄")
+    
+    inputs = loadInput()
 
-inputs = loadInput()
-
-t0 = time.time()
-part1(inputs)
-print (f"Time: {time.time()-t0:.5f}")
-
-t0 = time.time()
-part2(inputs)
-print (f"Time: {time.time()-t0:.5f}")
+    t0 = time.time()
+    res1 = part1(inputs)
+    t1 = time.time()-t0
+    
+    t0 = time.time()
+    res2 = part2(inputs)
+    t2 = time.time()-t0
+    
+    print (f"🎄 Part 1: {res1} ({t1:.5f}) - 🎄🎅 Part 2: {res2} ({t2:.5f})")

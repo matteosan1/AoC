@@ -4,27 +4,29 @@ from utils import readInput
 def loadInput():
     lines = readInput("prova.txt")
     #lines = readInput("input_DAY.txt")
-
     return lines
 
 def part1(inputs):
     pass
-    #print (f"🎄 Part 1: {}")
+    #return res1
 
 def part2(inputs):
     pass
-    #print (f"🎄🎅 Part 2: {}")
+    #return res2
 
-print("⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄")
-print("⛄        Day DAY         ⛄")
-print("⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄")
+if __name__ == '__main__':
+    print("⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄")
+    print("⛄        Day DAY         ⛄")
+    print("⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄")
+    
+    inputs = loadInput()
 
-inputs = loadInput()
-
-t0 = time.time()
-part1(inputs)
-print (f"Time: {time.time()-t0:.5f}")
-
-t0 = time.time()
-part2(inputs)
-print (f"Time: {time.time()-t0:.5f}")
+    t0 = time.time()
+    res1 = part1(inputs)
+    t1 = time.time()-t0
+    
+    t0 = time.time()
+    res2 = part2(inputs)
+    t2 = time.time()-t0
+    
+    print (f"🎄 Part 1: {res1} ({t1:.5f}) - 🎄🎅 Part 2: {res2} ({t2:.5f})")
