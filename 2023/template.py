@@ -7,12 +7,10 @@ def loadInput():
     return lines
 
 def part1(inputs):
-    pass
-    #return res1
+    return 0
 
 def part2(inputs):
-    pass
-    #return res2
+    return 0
 
 if __name__ == '__main__':
     print("⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄")
