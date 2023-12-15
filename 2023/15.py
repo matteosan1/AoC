@@ -24,9 +24,7 @@ def part1(inputs):
 def focusing_power(boxes):
     val = 0
     for nb, box in boxes.items():
-        for i,b in enumerate(box.values()):
-            power = (nb+1) * (i+1) * b
-            val += power
+        val += sum([(nb+1) * (i+1) * b for i,b in enumerate(box.values())])
     return val
     
 def part2(inputs):

@@ -111,7 +111,7 @@
 
 \section{Year 2023}
 
-\subsection{Day 5 - Schoelace Formula}
+\subsection{Day 5 - If You Give A Seed A Fertilizer}
 \subsubsection{Schoelace Formula}
 
 Suppose the polygon $P$ has vertices $(x_1, y_1)$, $(x_2, y_2)$, ... , $(x_n, y_n)$, listed in clockwise order. Then the area ($A$) of $P$ is
@@ -251,4 +251,29 @@ def arridx_in_list(myarr, list_arrays):
                  if np.array_equal(elem, myarr)), -1)
 \end{ipython}
 
+\subsection{Floyd's Tortoise and Hare}
+
+\emph{Floyd's Cycle Detection Algorithm}, often referred to as the \emph{tortoise and hare} algorithm, is used to detect the presence of a cycle in a linked list. This algorithm is named after American computer scientist Robert W. Floyd, who described it in 1967. It's a simple yet efficient technique that works by using two pointers to traverse the linked list at different speeds.
+
+Yes, it works like the story. There will be two pointers running simultaneously within the same linked list. If the linked list has a cycle (i.e if the tail is connected to another node) the two pointers will meet together at some point. If not, the pointers will never meet.
+
+\subsubsection {Implementation with Python}
+\begin{ipython}
+class ListNode:
+    def __init__(self, val):
+        self.val = val
+        self.next = None
+
+    def detectCycle(head):
+        slow = head
+        fast = head
+
+        while fast and fast.next:
+            slow = slow.next
+            fast = fast.next.next
+
+            if slow == fast:
+                return True  
+		return False
+\end{ipython}
 \end{document}
