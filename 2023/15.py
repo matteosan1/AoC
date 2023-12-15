@@ -2,20 +2,54 @@ import time
 from utils import readInput
 
 def loadInput():
-    lines = readInput("prova.txt")
-    #lines = readInput("input_15.txt")
-    return lines
+    with open("input_15.txt", "r") as f:
+        line = f.readline()
+    instructions = line[:-1].split(",")
+    return instructions
 
+def hash_algo(instr):
+    val = 0
+    for c in instr:
+        val += ord(c)
+        val *= 17
+        val %= 256
+    return val
+    
 def part1(inputs):
-    return 0
+    codes = []
+    for instr in inputs:
+        codes.append(hash_algo(instr))
+    return sum(codes)
 
+def focusing_power(boxes):
+    val = 0
+    for nb, box in boxes.items():
+        for i,b in enumerate(box.values()):
+            power = (nb+1) * (i+1) * b
+            val += power
+    return val
+    
 def part2(inputs):
-    return 0
+    boxes = {k:{} for k in range(0, 256)}
+    for instr in inputs:
+        add = True
+        if "=" in instr:
+            label, value = instr.split("=")
+        else:
+            add = False
+            label = instr[:-1]
+        box = hash_algo(label)
+        if not add and label in boxes[box]:
+            del boxes[box][label]
+        elif add:
+            boxes[box][label] = int(value)
+                
+    return focusing_power(boxes)
 
 if __name__ == '__main__':
-    print("⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄")
-    print("⛄        Day 15         ⛄")
-    print("⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄")
+    print("⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄")
+    print("⛄ Day 15: Lens Library ⛄")
+    print("⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄")
     
     inputs = loadInput()
 
