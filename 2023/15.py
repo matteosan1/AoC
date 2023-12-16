@@ -45,9 +45,9 @@ def part2(inputs):
     return focusing_power(boxes)
 
 if __name__ == '__main__':
-    print("⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄")
+    print("⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄")
     print("⛄ Day 15: Lens Library ⛄")
-    print("⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄")
+    print("⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄")
     
     inputs = loadInput()
 
