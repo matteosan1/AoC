@@ -42,16 +42,22 @@ def part2(inputs):
         powers.append(cubes)
     print (f"🎄🎅 Part 2: {sum(powers)}")
 
-print("⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄")
-print("⛄        Day 2         ⛄")
-print("⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄")
 
-inputs = loadInput()
+if __name__ == "__main__":
+    title = "Day 2: Cube Conundrum"
+    #sub = "⛄"*(len(title)//2+2)
+    sub = "-"*(len(title)+2)
 
-t0 = time.time()
-part1(inputs)
-print (f"Time: {time.time()-t0:.5f}")
-
-t0 = time.time()
-part2(inputs)
-print (f"Time: {time.time()-t0:.5f}")
+    print()
+    print(f" {title} ")
+    print(sub) #"⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄")
+    
+    inputs = loadInput()
+    
+    t0 = time.time()
+    part1(inputs)
+    print (f"Time: {time.time()-t0:.5f}")
+    
+    t0 = time.time()
+    part2(inputs)
+    print (f"Time: {time.time()-t0:.5f}")

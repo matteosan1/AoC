@@ -3,7 +3,7 @@ from utils import readInput
 
 def loadInput():
     lines = readInput("prova.txt")
-    #lines = readInput("input_DAY.txt")
+    #lines = readInput("input_18.txt")
     return lines
 
 def part1(inputs):
@@ -13,7 +13,7 @@ def part2(inputs):
     return 0
 
 if __name__ == '__main__':
-    title = "Day DAY: Cube Conundrum"
+    title = "Day 18: Cube Conundrum"
     sub = "-"*(len(title)+2)
 
     print()

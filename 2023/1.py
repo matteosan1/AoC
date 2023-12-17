@@ -49,16 +49,20 @@ def part2(lines):
         
     print (f"🎄🎅 Part 2: {sum(codes)}")
 
-print("⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄")
-print("⛄        Day 1         ⛄")
-print("⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄")
+if __name__ == "__main__":
+    title = "Day 1: Trebuchet?!"
+    sub = "⛄"*(len(title)//2-1+2)
 
-inputs = loadInput()
-
-t0 = time.time()
-part1(inputs)
-print ("Time: {:.5f}".format(time.time()-t0))
-
-t0 = time.time()
-part2(inputs)
-print ("Time: {:.5f}".format(time.time()-t0))
+    print()
+    print(f" {title} ")
+    print(sub) #"⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄")
+    
+    inputs = loadInput()
+    
+    t0 = time.time()
+    part1(inputs)
+    print ("Time: {:.5f}".format(time.time()-t0))
+    
+    t0 = time.time()
+    part2(inputs)
+    print ("Time: {:.5f}".format(time.time()-t0))

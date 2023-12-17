@@ -1,21 +1,137 @@
 import time
+from queue import PriorityQueue
+from copy import deepcopy
+import heapq
+
 from utils import readInput
+
+class Lavatube:
+    def __init__(self):
+        self.map = {}
+        self.xlims = (0, 0)
+        self.ylims = (0, 0)
+
+    def load(self, lines):
+        for y, l in enumerate(lines):
+            for x, c in enumerate(l):
+                self.map[(x, y)] = int(c) 
+                    
+        xs = [p[0] for p in self.map.keys()]
+        ys = [p[1] for p in self.map.keys()]
+        self.xlims = (0, max(xs))
+        self.ylims = (0, max(ys))
 
 def loadInput():
     lines = readInput("prova.txt")
     #lines = readInput("input_17.txt")
-    return lines
+    lavatube = Lavatube()
+    lavatube.load(lines)
+    return lavatube
 
-def part1(inputs):
-    return 0
+dirs = {0:lambda c:c + complex(0,1),
+        1:lambda c:c + complex(1,0),
+        2:lambda c:c + complex(0,-1),
+        3:lambda c:c + complex(-1,0),}
 
-def part2(inputs):
+#class State:
+#    def __init__(self, start):
+#        self.pos = start
+#        self.cost = 0
+#        self.prev = start
+#        self.dir = 1
+#        self.forward = 0
+#
+#    def __eq__(self, other):
+#        return self.cost == other.cost
+#
+#    def __leq__(self, other):
+#        return self.cost < other.cost
+
+def get_neighs(state, m):
+    new_dir = [state.dir-1, state.dir, state.dir+1]
+    new_states = []
+    for i, d in enumerate(new_dir):
+        if i == 1 and state.forward == 3:
+            continue
+        new_state = deepcopy(state)
+        new_state.dir = d%4
+        new_state.pos = dirs[new_state.dir](new_state.pos)
+        if new_state.pos in m.map:
+            if i == 1:
+                new_state.forward += 1
+            else:
+                new_state.forward = 1
+            new_states.append(new_state)
+    return new_states
+
+def backtrack(visited, start, target):
+    d = target
+    path = [target]
+    while d != start:
+        path.append(visited[d].prev)
+        d = visited[d].prev
+    return list(reversed(path))
+
+Right = (1, 0)
+Down = (0, 1)
+Left = (-1, 0)
+Up = (0, -1)
+
+def dijkstra_bis(m, start, target, min_conse, max_conse):
+    visited = set()
+    worklist = [(0, start[0], start[1], Right, 1),
+                (0, start[0], start[1], Down, 1)]
+    i = 0
+    while len(worklist) > 0:
+        print (f"-------------- {i} ----------------")
+        cost, x, y, dir, dir_count = heapq.heappop(worklist)
+        print (cost, x,y, dir)
+        print (visited)
+        if (x, y, dir, dir_count) in visited:
+            print ("visited")
+            continue
+        else:
+            visited.add((x, y, dir, dir_count))
+            
+        new_pos = (x + dir[0], y + dir[1])
+        print ("new_pos", new_pos)
+        if new_pos not in m.map:
+            continue
+        new_cost = cost + m.map[new_pos]
+        if dir_count >= min_conse and dir_count <= max_conse:
+            if new_pos == target:
+                return new_cost
+        for d in [Right, Down, Left, Up]:
+            if (d[0] + dir[0], d[1]+dir[1]) == (0, 0):
+                continue
+
+            new_d_count = dir_count + 1 if d == dir else 1
+            if (d != dir and dir_count < min_conse) or new_d_count > max_conse:
+                continue
+            print ("d:", d)
+            heapq.heappush(worklist, (new_cost, new_pos[0], new_pos[1], d, new_d_count))
+        print ("worklist", worklist)
+            
+        i += 1
+        if i == 28:
+            break
+
+def part1(lavatube):
+    start = (0, 0)
+    target = (lavatube.xlims[1], lavatube.ylims[1])
+    cost = dijkstra_bis(lavatube, start, target, 0, 3)
+    return cost
+
+def part2(lavatube):
     return 0
+    start = (0, 0)
+    target = (lavatube.xlims[1], lavatube.ylims[1])
+    cost = dijkstra_bis(lavatube, start, target, 4, 10)
+    return cost
 
 if __name__ == '__main__':
-    print("⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄")
-    print("⛄        Day 17         ⛄")
-    print("⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄")
+    print(" Day 17:  Clumsy Crucible ")
+    print("--------------------------")
     
     inputs = loadInput()
 

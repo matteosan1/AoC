@@ -1,4 +1,5 @@
-import time, copy
+import time
+from copy import deepcopy
 
 from utils import readInput, Point
 
@@ -42,20 +43,20 @@ class Beam:
             return True
 
         if self.pos not in self.path:
-            self.path[copy.deepcopy(self.pos)] = [copy.deepcopy(self.dir)]
+            self.path[deepcopy(self.pos)] = [deepcopy(self.dir)]
         else:
             if self.dir not in self.path[self.pos]:
-                self.path[self.pos].append(copy.deepcopy(self.dir))
+                self.path[self.pos].append(deepcopy(self.dir))
             else:
                 return False
 
         if self.pos in cave.cave:
             c = cave.cave[self.pos]
             if c == "-" and (self.dir == 0 or self.dir == 2):
-                beams.append(Beam(copy.deepcopy(self.pos), 3, self.path))
+                beams.append(Beam(deepcopy(self.pos), 3, self.path))
                 self.dir = 1
             elif c == "|" and (self.dir == 1 or self.dir == 3):
-                beams.append(Beam(copy.deepcopy(self.pos), 0, self.path))
+                beams.append(Beam(deepcopy(self.pos), 0, self.path))
                 self.dir = 2
             elif c == "\\":
                 if self.dir == 0:
