@@ -76,6 +76,36 @@ pub fn print_path(arr: &Vec<Coord>, xlim: &(i32, i32), ylim: &(i32, i32), path: 
     }
 }
 
+pub type Point = [i64; 2]; 
+
+pub fn manhattan_dist(p1: &Point, p2: &Point) -> i64 {
+    i64::abs(p1[0]-p2[0]) + i64::abs(p1[1]-p2[1])
+}
+
+pub fn perimeter(vertices: &Vec::<Point>) -> i64 {
+    let mut perimeter = 0;
+    for i in 0..vertices.len() {
+        if i == vertices.len()-1 {
+            perimeter += manhattan_dist(&vertices[i], &vertices[0]);
+        } else {
+            perimeter += manhattan_dist(&vertices[i], &vertices[i+1]);
+        }
+    }
+    perimeter
+}
+
+pub fn shoelace(vertices: &Vec::<Point>) -> i64 {
+    let mut area = 0;
+    for i in 0..vertices.len() {
+        if i == vertices.len()-1 {
+            area += vertices[i][0]*vertices[0][1] - vertices[i][1]*vertices[0][0];
+        } else {
+            area += vertices[i][0]*vertices[i+1][1] - vertices[i][1]*vertices[i+1][0];
+        }
+    }
+    i64::abs(area/2 as i64)
+}
+
 pub fn santa(day: i32, part: usize) -> String {
     let message = format!("Day {} - part {} {}:", day, part, std::char::from_u32(0x1F385).unwrap().to_string());
     message
