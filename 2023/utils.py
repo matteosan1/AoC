@@ -134,6 +134,27 @@ class Point:
 def manhattan_dist(p1, p2):
     return abs(p1.x-p2.x) + abs(p1.y-p2.y)
 
+def shoelace(vertices):
+    A = 0
+    for i in range(len(vertices)):
+        if i == len(vertices)-1:
+            A += vertices[i].x*vertices[0].y - vertices[i].y*vertices[0].x
+        else:
+            A += vertices[i].x*vertices[i+1].y - vertices[i].y*vertices[i+1].x
+    return abs(A//2)
+    
+def perimeter(vertices):
+    P = 0
+    for i in range(len(vertices)):
+        if i == len(vertices)-1:
+            P += manhattan_dist(vertices[i],vertices[0])
+        else:
+            P += manhattan_dist(vertices[i],vertices[i+1])
+    return P
+    
+def hex_to_rgb(value):
+    return tuple(int(value[i:i+2], 16) for i in (0, 2, 4))
+    
 def convert_to_coordinates(lines, start_symb="@", end_symb="X"):
     m = {}
     for y in range(len(lines)):
