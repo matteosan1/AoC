@@ -59,7 +59,7 @@ def part2():
     return sum(poly[i]*target**i for i in range(3))
 
 if __name__ == '__main__':
-    title = "Day 21: Cube Conundrum"
+    title = "Day 21: Step Counter"
     sub = "-"*(len(title)+2)
 
     print()
