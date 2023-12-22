@@ -1,78 +1,67 @@
 import time
-from operator import methodcaller
-import numpy as np
 
 from utils import readInput
 
-class Brick:
-    def __init__(self):
-        self.c1 = [0, 0, 0]
-        self.c2 = [0, 0, 0]
-
-    def __lt__(self, other):
-        return self.c1[2] < other.c1[2]
-        
-    def __repr__(self):
-        return f"{self.c1} - {self.c2}"
-            
-
 def loadInput():
-    lines = readInput("prova.txt")
-    #lines = readInput("input_22.txt")
+    lines = readInput("input_22.txt")
+    xs = []
+    for l in lines:        
+        xs.append(list(map(int, l.replace("~", ",").split(","))))
+    xs.sort(key=lambda b: b[2])
+    
     wall = []
-    for l in lines:
-        b = Brick()
-        c1, c2 = list(map(methodcaller("split", ","), l.split("~")))
-        if c1[0] > c2[0] or c1[1] > c2[1] or c1[2] > c2[2]:
-            c2, c1 = c1, c2
-        b.c1 = list(map(int, c1))
-        b.c2 = list(map(int, c2))
-        wall.append(b)
+    for x,y,z,i,j,k in xs:
+        b = []
+        for c1 in range(x, i+1):
+            b.append((c1, y, z))
+        for c2 in range(y, j+1):
+            b.append((x, c2, z))
+        for c3 in range(z, k+1):
+            b.append((x, y, c3))
+        wall.append(set(b))
     return wall
     
-def check_collision(b1, b2): #c1, c2, d1, d2):
-    print (b1, b2)
-    fall = [False, False]
-    for k in range(2):
-        if b2.c1[k] <= b1.c2[k] <= b2.c2[k] or b2.c1[k] <= b1.c1[k] <= b2.c2[k] or (b1.c1[k] < b2.c1[k] and b1.c2[k] > b2.c2[k]):
-            fall[k] = True
-    return all(fall)
-        
-        
+def fall_down(wall, floor=set()):
+    count = 0
+    for i in range(len(wall)):
+        brick = wall[i]
+        start_pos = brick
+        while True:
+            if any(b[2]==1 for b in brick) or any((x, y, z-1) in floor for (x, y, z) in brick):
+                break
+            brick = [(x, y, z-1) for (x, y, z) in brick]
+        if brick != start_pos:
+            count += 1
+        floor.update(brick)
+        wall[i] = brick
+    return count
+
+def check_safety(wall, brick):
+    idx = wall.index(brick)
+    new_wall = wall[idx+1:]
+    floor = []
+    for b in wall[:idx]:
+        for x in b:
+            if x not in brick:
+                floor.append(x)
+    c = fall_down(new_wall, set(floor))
+    return c == 0, c
 
 def part1(wall):
-    wall.sort()
-    while True:
-        fall = False
-        for i in range(len(wall)):
-            if wall[i].c1[2] == 1:
-                continue
-            z = wall[i].c1[2]
-            collision = False
-            for j in range(i):
-                if wall[j].c1[2] != z - 1:
-                    continue
-                c = check_collision(wall[j], wall[i])
-                if c:
-                    collision = True
-                    break
-            if not collision:
-                fall = True
-                wall[i].c1[2] -= 1
-                wall[i].c2[2] -= 1
-        wall.sort()
-        if not fall:
-            break
-        
+    safe = 0
+    fall_down(wall)
     for b in wall:
-        print (b)
-    return 0
+        safe += check_safety(wall, b)[0]
+    return safe
 
-def part2(inputs):
-    return 0
+def part2(wall):
+    tot = 0
+    for b in wall:
+        tot += check_safety(wall, b)[1]
+    return tot
 
 if __name__ == '__main__':
-    title = "Day 22: Cube Conundrum"
+    title = "Day 22: Sand Slabs"
     sub = "-"*(len(title)+2)
 
     print()
