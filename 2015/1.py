@@ -1,12 +1,27 @@
-with open("instructions1a.txt", "r") as f:
-    lines = f.readlines()
+import time
+from utils import readInput
 
-part = 2
-char = 0
-floor = 0
-for l in lines:
-    l = l.split("\n")[0]
-    for c in l:
+def loadInput():
+    lines = readInput("instructions1a.txt")
+    return lines
+
+def part1(lines):
+    char = 0
+    floor = 0
+    for c in lines[0]:
+        if c == "(":
+            char += 1
+            floor += 1
+        elif c == ")":
+            char += 1
+            floor -= 1
+
+    print (f"🎄 Part 1: {floor}")
+
+def part2(lines):
+    char = 0
+    floor = 0
+    for c in lines[0]:
         if c == "(":
             char += 1
             floor += 1
@@ -14,9 +29,23 @@ for l in lines:
             char += 1
             floor -= 1
         if floor == -1:
-            if part == 2:
-                print ("char to reach -1:", char)
-                import sys
-                sys.exit()
+            print (f"🎄🎅 Part 2: {char}")
+            return
 
-print (floor)
+if __name__ == "__main__":
+    title = "Day 1: Not Quite Lisp"
+    sub = "-"*(len(title)//2-1+2)
+
+    print()
+    print(f" {title} ")
+    print(sub)
+    
+    inputs = loadInput()
+    
+    t0 = time.time()
+    part1(inputs)
+    print ("Time: {:.5f}".format(time.time()-t0))
+    
+    t0 = time.time()
+    part2(inputs)
+    print ("Time: {:.5f}".format(time.time()-t0))

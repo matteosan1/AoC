@@ -56,7 +56,6 @@ def part1(inputs):
                 attached = None
         if store and attached:
             numbers.append(int(number))
-        
     print (f"🎄 Part 1: {sum(numbers)}")
 
 def part2(inputs):
