@@ -1,13 +1,8 @@
-part = 2
-if part == 1:
-    register = {"a":0, "b":0}
-else:
-    register = {"a":1, "b":0}
-il = 0
+import time
 
-def compiler(l):
-    global register, il
+from utils import readInput
 
+def compiler(l, il, register):
     if l.startswith("hlf"):
         register[l[-1]] //= 2
         il += 1
@@ -36,15 +31,43 @@ def compiler(l):
         print ("Wrong command {}".format(l))
         import sys
         sys.exit()
+    return il
 
-filename = "instructions23a.txt"
-#filename = "examples23a.txt"
-with open (filename, "r") as f:
-    lines = f.readlines()
+def loadInput():
+    lines = readInput("instructions23a.txt")
+    return lines
 
-while il < len(lines):
-    l = lines[il].split("\n")[0]
-    compiler(l)
-    print(l, il, register)
+def run(lines, register):    
+    il = 0
+    while il < len(lines):
+        l = lines[il]
+        il = compiler(l, il, register)
 
-print (register)
+def part1(lines):
+    register = {"a":0, "b":0}
+    run(lines, register)
+    print (f"🎄 Part 1: {register['b']}")
+
+def part2(lines):
+    register = {"a":1, "b":0}
+    run(lines, register)
+    print (f"🎄🎅 Part 2: {register['b']}")
+    
+if __name__ == "__main__":
+    title = "Day 23: Opening the Turing Lock"
+    sub = "-"*(len(title)+2)
+
+    print()
+    print(f" {title} ")
+    print(sub)
+    
+    inputs = loadInput()
+
+    t0 = time.time()
+    part1(inputs)
+    print ("Time: {:.5f}".format(time.time()-t0))
+    
+    t0 = time.time()
+    part2(inputs)
+    print ("Time: {:.5f}".format(time.time()-t0))
+

@@ -1,6 +1,9 @@
-import re
-r1 = re.compile("(\d+):")
-r2 = re.compile("(\w+:\s\d+)")
+import time, re
+
+from utils import readInput
+
+r1 = re.compile("(\\d+):")
+r2 = re.compile("(\\w+:\\s\\d+)")
 
 class Aunt:
     def __init__(self, name, things):
@@ -38,30 +41,54 @@ mfcsam = {'children': 3,
           'cars': 2,
           'perfumes': 1}
 
-with open("instructions16a.txt", "r") as f:
-    data = f.readlines()
+def loadInput():
+    lines = readInput("instructions16a.txt")
+    aunts = []
+    for d in lines:
+        name = r1.findall(d)[0]
+        temp = r2.findall(d)
+        things = {}
+        for k in temp:
+            items = k.split(" ")
+            things[items[0][:-1]] = int(items[1])
+        aunts.append(Aunt(name, things))
+    return aunts
 
-aunts = []
-for d in data:
-    d = d.split("\n")[0]
-    name = r1.findall(d)[0]
-    temp = r2.findall(d)
-    things = {}
-    for k in temp:
-        items = k.split(" ")
-        things[items[0][:-1]] = int(items[1])
-    aunts.append(Aunt(name, things))
-
-part = 2
-aunt = -1
-best = 0
-for i, a in enumerate(aunts):
-    if part == 1:
+def part1(aunts):
+    aunt = -1
+    best = 0
+    for i, a in enumerate(aunts):
         m =  a.check1(mfcsam)
-    else:
-        m =  a.check2(mfcsam)
-    if m >= best:
-        aunt = i
-        best = m
+        if m >= best:
+            aunt = i
+            best = m
+    print (f"🎄 Part 1: {aunts[aunt].name} {aunts[aunt].things}")
 
-print (aunts[aunt].name, aunts[aunt].things)
+def part2(aunts):
+    aunt = -1
+    best = 0
+    for i, a in enumerate(aunts):
+        m =  a.check2(mfcsam)
+        if m >= best:
+            aunt = i
+            best = m
+    print (f"🎄🎅 Part 2: {aunts[aunt].name} {aunts[aunt].things}")
+    
+if __name__ == "__main__":
+    title = "Day 16: Aunt Sue"
+    sub = "-"*(len(title)+2)
+
+    print()
+    print(f" {title} ")
+    print(sub)
+    
+    inputs = loadInput()
+    
+    t0 = time.time()
+    part1(inputs)
+    print ("Time: {:.5f}".format(time.time()-t0))
+    
+    t0 = time.time()
+    part2(inputs)
+    print ("Time: {:.5f}".format(time.time()-t0))
+

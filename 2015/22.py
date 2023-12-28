@@ -1,8 +1,9 @@
+import time, sys
+
 from collections import namedtuple
 from functools import reduce
 from heapq import heappop, heappush
 from itertools import count
-import sys
 
 class Spell(namedtuple('BaseSpell',
                        'name cost effect turns damage heal armour mana')):
@@ -11,7 +12,6 @@ class Spell(namedtuple('BaseSpell',
         return super().__new__(
             cls, name, cost, effect, turns, damage, heal, armour, mana)
 
-
 spells = (
     Spell('Magic Missile', 53,  damage=4),
     Spell('Drain',         73,  damage=2, heal=2),
@@ -19,7 +19,6 @@ spells = (
     Spell('Poison',        173, effect=True, turns=6, damage=3),
     Spell('Recharge',      229, effect=True, turns=5, mana=101),
 )
-
 
 class State(object):
     def __init__(self, hp, mana, boss_hp, boss_damage,
@@ -93,7 +92,6 @@ class State(object):
             if new_state.hp > 0:
                 yield new_state
 
-
 def search_a_star(start):
     open_states = {start}
     pqueue = [(0, start)]
@@ -111,18 +109,41 @@ def search_a_star(start):
             open_states.add(state)
             heappush(pqueue, (state.mana_spent, next(unique), state))
 
+def part1():
+    boss_hp = 71
+    boss_attack = 10
+    player_hp, player_mana = 50, 500
 
+    start = State(player_hp, player_mana, boss_hp, boss_attack)
+    end = search_a_star(start)
+    #print(*end.iter_path(), sep=' -> ')
+    print (f"🎄 Part 1: {end.mana_spent}")
 
-boss_hp = 71
-boss_attack = 10
-player_hp, player_mana = 50, 500
+def part2():
+    boss_hp = 71
+    boss_attack = 10
+    player_hp, player_mana = 50, 500
 
-start = State(player_hp, player_mana, boss_hp, boss_attack)
-end = search_a_star(start)
-print('Part 1:', end.mana_spent)
-print(*end.iter_path(), sep=' -> ')
+    start = State(player_hp, player_mana, boss_hp, boss_attack)
+    start.hard = True
+    end = search_a_star(start)
+    #print(*end.iter_path(), sep=' -> ')
+    print (f"🎄🎅 Part 2: {end.mana_spent}")
+    
+if __name__ == "__main__":
+    title = "Day 22: Wizard Simulator 20XX"
+    sub = "-"*(len(title)+2)
 
-start.hard = True
-end = search_a_star(start)
-print('Part 2:', end.mana_spent)
-print(*end.iter_path(), sep=' -> ')
+    print()
+    print(f" {title} ")
+    print(sub)
+    
+    #inputs = loadInput()
+    t0 = time.time()
+    part1()
+    print ("Time: {:.5f}".format(time.time()-t0))
+    
+    t0 = time.time()
+    part2()
+    print ("Time: {:.5f}".format(time.time()-t0))
+

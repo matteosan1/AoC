@@ -1,31 +1,50 @@
-import json
+import time, json
 
-part = 2
-c = 0
-to_ignore = "red"
-
-def counter(obj):
-    global c
+def counter(obj, part=1, to_ignore='', c=0):
     if isinstance(obj, dict):
         if part == 2 and to_ignore in obj.values():
-            return
+            return 0
         for k, v in obj.items():
-            counter(v)
+            c += counter(v, part, to_ignore)
+        return c
     elif isinstance(obj, list):
         for i in obj:
-            counter(i)
+            c += counter(i, part, to_ignore)
+        return c
     elif isinstance(obj, str):
-        return
+        return 0
     elif isinstance(obj, int):
-        c += obj
-    return
+        return obj
+    return c
 
+def loadInput():
+    with open("instructions12a.txt", "r") as f:
+        data = json.load(f)
+    return data
 
-filename = "instructions12a.txt"
-#filename = "examples12a.txt"
+def part1(inputs):
+    c = counter(inputs)
+    print (f"🎄 Part 1: {c}")
 
-with open(filename, "r") as f:
-    data = json.load(f)
+def part2(inputs):
+    c = counter(inputs, to_ignore='red', part=2)
+    print (f"🎄🎅 Part 2: {c}")
+    
+if __name__ == "__main__":
+    title = "Day 12: JSAbacusFramework.io"
+    sub = "-"*(len(title)+2)
 
-counter(data)
-print (c)
+    print()
+    print(f" {title} ")
+    print(sub)
+    
+    inputs = loadInput()
+    
+    t0 = time.time()
+    part1(inputs)
+    print ("Time: {:.5f}".format(time.time()-t0))
+    
+    t0 = time.time()
+    part2(inputs)
+    print ("Time: {:.5f}".format(time.time()-t0))
+

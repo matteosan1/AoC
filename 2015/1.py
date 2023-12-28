@@ -34,7 +34,7 @@ def part2(lines):
 
 if __name__ == "__main__":
     title = "Day 1: Not Quite Lisp"
-    sub = "-"*(len(title)//2-1+2)
+    sub = "-"*(len(title)+2)
 
     print()
     print(f" {title} ")

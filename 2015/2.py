@@ -26,8 +26,8 @@ def part2(lines):
     print (f"🎄🎅 Part 2: {tot_ribbon}")
          
 if __name__ == "__main__":
-    title = "Day 1: I Was Told There Would Be No Math"
-    sub = "-"*(len(title)//2-1+2)
+    title = "Day 2: I Was Told There Would Be No Math"
+    sub = "-"*(len(title)+2)
 
     print()
     print(f" {title} ")

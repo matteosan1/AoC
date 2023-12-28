@@ -1,3 +1,5 @@
+import time
+
 def check_consecutive(p):
     s = ord(p[0])
     if ord(p[1]) == (s + 1) and ord(p[2]) == (s + 2):
@@ -51,15 +53,40 @@ def increase(pwd, i=None):
         pwd = pwd[:i] + inc + pwd[i+1:]
     return pwd
 
+def loadInput():
+    return 'vzbxkghb'
 
-#pwd = 'vzbxkghb'
-pwd = "vzbxxzaa"
+def part1(pwd):
+    pwd = prevalidate(pwd)
 
-pwd = prevalidate(pwd)
+    while not validate(pwd):
+        pwd = increase(pwd)
+    
+    print (f"🎄 Part 1: {pwd}")
+    return pwd
 
-while not validate(pwd):
-    pwd = increase(pwd)
-    #print (pwd)
+def part2(pwd):
+    pwd = prevalidate(pwd)
 
-print (pwd)
+    while not validate(pwd):
+        pwd = increase(pwd)
+    print (f"🎄🎅 Part 2: {pwd}")
+    
+if __name__ == "__main__":
+    title = "Day 11: Corporate Policy"
+    sub = "-"*(len(title)+2)
+
+    print()
+    print(f" {title} ")
+    print(sub)
+    
+    inputs = loadInput()
+    
+    t0 = time.time()
+    pwd = part1(inputs)
+    print ("Time: {:.5f}".format(time.time()-t0))
+    
+    t0 = time.time()
+    part2(increase(pwd))
+    print ("Time: {:.5f}".format(time.time()-t0))
 

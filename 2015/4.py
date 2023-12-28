@@ -1,31 +1,39 @@
-import time
-from concurrent.futures import ProcessPoolExecutor, ALL_COMPLETED, wait
-import hashlib
+import time, hashlib
 
-def task(key, hash_begin, range):
-    for i in range:
+def loadInput():
+    return b"bgvyzdsv"
+
+def task(arange, key, hash_begin):
+    for i in arange:
         r = hashlib.md5(key + str(i).encode())
         hexa = r.hexdigest()
         if hexa[:len(hash_begin)] == hash_begin:
-            print (i, hexa)
+            return (i, hexa)
+    return None
 
-def pooler(key, hash_begin, nmax):
-    threads = 6
-    executor = ProcessPoolExecutor(threads)
+def part1(key):
+    res = task(range(1, 2000000), key, "00000")
+    print (f"🎄 Part 1: {res[0]} {res[1]}")
+
+def part2(key):
+    res = task(range(1, 2000000), key, "000000")
+    print (f"🎄🎅 Part 2: {res[0]} {res[1]}")
     
-    stuffed_futures = []
-    for thread in range(threads):
-        r = range(1 + thread, 10**nmax + thread, threads)
-        f = executor.submit(task, key, hash_begin, r)
+if __name__ == "__main__":
+    title = "Day 4: The Ideal Stocking Stuffer"
+    sub = "-"*(len(title)+2)
 
-        stuffed_futures.append(f)
-    wait(stuffed_futures, return_when=ALL_COMPLETED)
-
-t0 = time.time()
-key = b"ckczppom"
-#key = b"abcdef"
-
-pooler(key, "000000", 7)
-print (time.time() - t0)
+    print()
+    print(f" {title} ")
+    print(sub)
     
+    inputs = loadInput()
+    
+    t0 = time.time()
+    part1(inputs)
+    print ("Time: {:.5f}".format(time.time()-t0))
+    
+    t0 = time.time()
+    part2(inputs)
+    print ("Time: {:.5f}".format(time.time()-t0))
 
