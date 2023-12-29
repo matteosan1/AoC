@@ -1,95 +1,72 @@
-pub mod day14 {
-    use regex::Regex;
-    use std::cmp::min;
-    use std::cmp::Ordering;
-    use std::collections::HashMap;
-    
-    extern crate aoc;
-    use aoc::utils;
+fn reset(reindeers: &mut Vec<[i32; 6]>) {
+    for r in reindeers {
+        r[4] = 0;
+    }
+}
 
-    struct Reindeer {
-        speed: i32,
-        time: i32,
-        rest: i32,
-        name: String,
-        dist: i32,
+fn assign_points(reindeers: &mut Vec<[i32; 6]>) {
+    let mdist = reindeers.iter().map(|x| x[4]).max().unwrap();
+    for r in reindeers {
+        if r[4] == mdist {
+            r[5] += 1;
+        }
+    }
+}
+
+fn main() {
+    let lines = vec![
+//"Comet can fly 14 km/s for 10 seconds, but then must rest for 127 seconds.",
+//"Dancer can fly 16 km/s for 11 seconds, but then must rest for 162 seconds."    
+"Rudolph can fly 22 km/s for 8 seconds, but then must rest for 165 seconds.",
+"Cupid can fly 8 km/s for 17 seconds, but then must rest for 114 seconds.",
+"Prancer can fly 18 km/s for 6 seconds, but then must rest for 103 seconds.",
+"Donner can fly 25 km/s for 6 seconds, but then must rest for 145 seconds.",
+"Dasher can fly 11 km/s for 12 seconds, but then must rest for 125 seconds.",
+"Comet can fly 21 km/s for 6 seconds, but then must rest for 121 seconds.",
+"Blitzen can fly 18 km/s for 3 seconds, but then must rest for 50 seconds.",
+"Vixen can fly 20 km/s for 4 seconds, but then must rest for 75 seconds.",
+"Dancer can fly 7 km/s for 20 seconds, but then must rest for 119 seconds."
+];
+
+    let mut names = Vec::<&str>::new();
+    let mut reindeers = Vec::<[i32; 6]>::new();
+    for (i, l) in lines.iter().enumerate() {
+        let parts = l[0..l.len()-1].split_whitespace().collect::<Vec<&str>>();
+        let speed = parts[3].parse::<i32>().unwrap();
+        let t1 = parts[6].parse::<i32>().unwrap();
+        let rest = parts[13].parse::<i32>().unwrap();
+        names.push(parts[0]);
+        reindeers.push([i as i32, speed, t1, rest, 0, 0]);
     }
 
-    impl Ord for Reindeer {
-        fn cmp(&self, other: &Self) -> Ordering {
-            self.dist.cmp(&(other.dist))
-        }
-    }
-    
-    impl PartialOrd for Reindeer {
-        fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-            Some(self.cmp(other))
-        }
-    }
-    
-    impl PartialEq for Reindeer {
-        fn eq(&self, other: &Self) -> bool {
-            self.dist == other.dist
-        }
-    }
-    
-    impl Eq for Reindeer { }
-    
-    impl Reindeer {
-        fn run(self: &mut Reindeer, t: i32) {
-            self.dist = t/(self.time + self.rest)*self.speed*self.time + min(t%(self.time+self.rest), self.time)*self.speed;
-        }
-    }
-    
-    fn initialize(input: &Vec<String>, players: &mut Vec::<Reindeer>, ranking: &mut HashMap::<String, i32>) {
-        let re = Regex::new(r"^(\w+)( \w+)+ (\d+) km\/s for (\d+) seconds,( \w+)+ (\d+)").unwrap();
-        
-        for line in input.iter() {
-            for (_, [name, _, speed, time, _, rest]) in re.captures_iter(line).map(|c| c.extract()) {
-                players.push(Reindeer {speed: speed.parse::<i32>().unwrap(),
-                                       time: time.parse::<i32>().unwrap(),
-                                       rest: rest.parse::<i32>().unwrap(),
-                                       name: name.to_string(), dist: 0 as i32});
-                ranking.insert(name.to_string(), 0);
+    for t in 0..=2502 {
+        for i in 0..reindeers.len() {
+            let state = t % (reindeers[i][2]+reindeers[i][3]);
+            if state < reindeers[i][2] {
+                reindeers[i][4] += reindeers[i][1];
             }
         }
     }
     
-    pub fn part1(input: &Vec<String>) {
-        let mut players = Vec::<Reindeer>::with_capacity(9);
-        let mut ranking = HashMap::<String, i32>::new();
-        initialize(&input, &mut players, &mut ranking);
-        
-        for p in &mut players {
-            p.run(2503);
-        }
-        
-        players.sort();
-        players.reverse();
-        
-        println!("{} {}-{}", utils::santa(14, 1), players[0].name, players[0].dist);
-    }
+    reindeers.sort_by(|a, b| b[4].cmp(&a[4]));
+    println!("{} {}", names[reindeers[0][0] as usize].to_string(), reindeers[0][4]);
     
-    pub fn part2(input: &Vec<String>) {
-        let mut players = Vec::<Reindeer>::with_capacity(9);
-        let mut ranking = HashMap::<String, i32>::new();
-        initialize(&input, &mut players, &mut ranking);
-
-        for t in 1..=2503 {
-            for p in &mut players {
-                p.run(t);
-            }
-
-            players.sort();
-            players.reverse();
-            let names = players.iter().filter(|x| x.dist == players[0].dist);
-            for n in names {
-                let score = ranking.get_mut(&n.name).unwrap();
-                *score += 1;
+    reset(&mut reindeers);
+    
+    for t in 0..=2502 {
+        for i in 0..reindeers.len() {
+            let state = t % (reindeers[i][2]+reindeers[i][3]);
+            if state < reindeers[i][2] {
+                reindeers[i][4] += reindeers[i][1];
             }
         }
-
-        let max_score = ranking.values().max();
-        println!("{} {}", utils::christmas_tree(14, 2), max_score.unwrap());
+        
+        reindeers.sort_by(|a, b| b[4].cmp(&a[4]));
+        assign_points(&mut reindeers);
+        //println!("{:?}", reindeers);
     }
+ 
+    reindeers.sort_by(|a, b| b[5].cmp(&a[5]));
+    println!("{} {}", names[reindeers[0][0] as usize].to_string(), reindeers[0][5]);
+   
 }
