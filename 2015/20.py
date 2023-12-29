@@ -1,5 +1,24 @@
 import time, numpy as np
 
+def get_prime_divisors(n):
+    divisors = []
+    while n % 2 == 0:
+        divisors.append(2)
+        n //= 2
+    while n % 3 == 0:
+        divisors.append(3)
+        n //= 3
+    i = 5
+    while i*i <= n:
+        for k in (i, i+2):
+            while n % k == 0:
+                divisors.append(k)
+                n //= k
+        i += 6
+    if n > 1:
+        divisors.append(n)
+    return divisors
+    
 def run():
     BIG_NUM = 1000000  # try larger numbers until solution found
     goal = 34000000
@@ -17,6 +36,7 @@ def part1():
     return b
 
 def part2(b):
+    return 0
     print (f"🎄🎅 Part 2: {b}")
     
 if __name__ == "__main__":
