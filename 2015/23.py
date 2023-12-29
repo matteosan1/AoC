@@ -34,7 +34,7 @@ def compiler(l, il, register):
     return il
 
 def loadInput():
-    lines = readInput("instructions23a.txt")
+    lines = readInput("input_23.txt")
     return lines
 
 def run(lines, register):    
