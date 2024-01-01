@@ -1,6 +1,6 @@
 import time, numpy as np
 
-from itertools import product
+from itertools import combinations_with_replacement, permutations, combinations
 
 from utils import readInput
 
@@ -25,13 +25,53 @@ def loadInput():
     for d in lines:
         d = d.split(" ")
         name = d[0][:-1]
-        capacity = int(d[2][:-1])
-        durability = int(d[4][:-1])
-        flavor = int(d[6][:-1])
-        texture = int(d[8][:-1])
-        calories = int(d[10])
-        ing.append(Ingredient(name, capacity, durability, flavor, texture, calories))
+        vals = [int(d[i][:-1]) if d[i].endswith(",") else int(d[i]) for i in (2, 4, 6, 8, 10)] 
+        ing.append(Ingredient(name, *vals))
     return ing
+
+def starting_solution(n):
+    norm = 100
+    solution = np.zeros(shape=(n,))
+    for i in range(n-1):
+        solution[i] = np.random.randint(norm-solution.sum())
+    solution[0] = 27
+    solution[-1] = norm - solution.sum()
+    return solution.astype('int')
+
+def shift_solution(ingredients, solution, c, max_score):
+    if solution[c[0]] > 0 and solution[c[1]] < 100:
+        solution[c[0]] -= 1
+        solution[c[1]] += 1
+        new_score = tot_prop(ingredients, solution)
+        if new_score > max_score:
+            max_score = new_score
+            return (True, max_score)
+        else:
+            solution[c[0]] += 1
+            solution[c[1]] -= 1
+    return (False, max_score)
+        
+def optimize(ingredients):
+    max_score = 0
+    for _ in range(10):
+        solution = starting_solution(len(ingredients))
+        score = tot_prop(ingredients, solution)
+        max_score = max(score, max_score)
+        while True:
+            for c in combinations(range(len(ingredients)), 2):
+                res = shift_solution(ingredients, solution, c, max_score)
+                if res[0]:
+                    max_score = res[1]
+                    break
+                else:
+                    c = c[::-1]
+                    res = shift_solution(ingredients, solution, c, max_score)
+                    if res[0]:
+                        max_score = res[1]
+                        break
+            else:
+                break
+    return max_score
 
 def tot_prop(ing, q):
     totals = ing[0].property(q[0])
@@ -41,31 +81,22 @@ def tot_prop(ing, q):
     totals[totals<0] = 0
     return np.prod(totals)
 
-def part1(ing):
-    tot = 0
-    for p in product(range(101), repeat=len(ing)):
-        if sum(p) != 100:
-            continue
-        temp = tot_prop(ing, p)
-        if temp >= tot:
-            tot = temp
-            idx = p
+def part1(ingredients):
+    tot = optimize(ingredients)
     print (f"🎄 Part 1: {tot}")
 
 def tot_calories(ing, q):
     return sum([ing[i].calories*q[i] for i in range(len(ing))])
 
-def part2(ing):               
+def part2(ing):
     tot = 0
-    for p in product(range(101), repeat=len(ing)):
-        if sum(p) != 100:
+    for c in combinations_with_replacement(range(101), len(ing)):
+        if sum(c) != 100:
             continue
-        if tot_calories(ing, p) != 500:
-            continue
-        temp = tot_prop(ing, p)
-        if temp >= tot:
-            tot = temp
-            idx = p
+        for p in permutations(c, 4):
+            if tot_calories(ing, p) != 500:
+                continue
+            tot = max(tot, tot_prop(ing, p))
     print (f"🎄🎅 Part 2: {tot}")
     
 if __name__ == "__main__":

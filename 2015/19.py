@@ -15,7 +15,6 @@ def loadInput():
 
 def part1(transf, molecule):
     new_molecules = []
-    molecules = 0
     for k in transf.keys():
         for m in re.finditer(k, molecule):
             for i in transf[k]:

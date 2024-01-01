@@ -51,8 +51,6 @@ def part2(instructions):
     vars = {}
     while len(instructions) != 0:
         m = instructions.popleft()
-        if m.startswith("#"):
-            continue
         cmd = decrypt(m)
         try:
             #print("executing:", cmd)
