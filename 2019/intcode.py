@@ -15,11 +15,6 @@ class IntCode:
 
     def get_modes(self, op):
         return [(op//(10**i))%10 for i in range(1, 5)]
-
-    def check_mem_availability(self, idx):
-        if idx >= len(self.code):
-            #print ("delta ", (idx-len(self.code)+5))
-            self.code += [0]*(idx-len(self.code)+5)
             
     def get_val(self, modes, offset=0, is_input=False):
         #print (modes[offset])
@@ -64,14 +59,15 @@ class IntCode:
                         break
                     else:
                         idx = self.code[self.pointer+1]
-                        self.code[self.code[self.pointer+1]] = self.mem[self.name].pop()
+                        self.code[self.code[self.pointer+1]] = self.mem[self.name].popleft()
                 self.pointer += 2
             elif op == 4:
                 if self.mode == "manual":
                     print (f"val: {self.get_val(modes, 1)}")
                 elif self.mode == "channel":
                     #print (f"val: {self.get_val(modes, 1)}")
-                    self.mem.setdefault(self.output, []).insert(0, self.get_val(modes, 1))                
+                    self.mem[self.output].append(self.get_val(modes, 1))
+                    #print (self.mem)
                 self.pointer += 2
             elif op == 5:
                 val = self.get_val(modes, 1)

@@ -1,62 +1,170 @@
-import numpy as np
+import time
 
-fabric = np.zeros(shape=(1000, 1000))
-
-def intersect(f1, f2):
-    #f1 = ids[id1]
-    #f2 = ids[id2]
-    l1 = (f1[0], f1[1])
-    r1 = (f1[0]+f1[2], f1[1]+f1[3])
-    l2 = (f2[0], f2[1])
-    r2 = (f2[0]+f2[2], f2[1]+f2[3])
-
-    if r1[0] < l2[0] or l1[0] > r2[0]:
-        return False
-    
-    #if (l1[0] > r2[0] or l2[0] > r1[0]):
-    #    return False 
-
-    if r1[1] < l2[1] or r2[1] < l1[1]:
-    #if (l1[1] < r2[1] or l2[1] < r1[1]):
-        return False
-  
-    return True
-
-def assign(l, t, w, h):
-    for x in range(l, l+w):
-        for y in range(t, t+h):
-            fabric[x][y] = fabric[x][y] + 1
+from utils import readInput
             
+def loadInput():
+    #lines = readInput("input_3.txt")
+    lines = readInput("prova.txt")
+    wires = [[],[]]
+    wires[0] = lines[0].split(",")
+    wires[1] = lines[1].split(",")
+    return wires
 
-with open("squares.txt") as f:
-    lines = f.readlines()
+def show_hull(hull):
+    xs = [h.real for h in hull]
+    ys = [h.imag for h in hull]
+    xmin, xmax = min(xs), max(xs)
+    ymin, ymax = min(ys), max(ys)
+    for y in range(int(ymin), int(ymax+1)):
+        for x in range(int(xmin), int(xmax+1)):
+            pos = complex(x, y)
+            if pos in hull:
+                if hull[pos] == 0:
+                    print("▮", end='')
+                else:
+                    print(".", end='')
+            else:
+                print(" ", end='')                
+        print()
 
-ids = {}
-for l in lines:
-    l = l.split("\n")[0]
-    items = l.split(" ")
-    l, t = items[2][:-1].split(",")
-    w, h = items[3].split("x")
-    ids[int(items[0][1:])] = (int(l), int(t), int(w), int(h))
-    #1331 @ 308,708: 27x23
+def part1(wires):
+    pos = complex(0, 0)
+    paths = []
+    for i in range(2):
+        pos = complex(0, 0)
+        path = [pos]
+        for p in wires[i]:
+            val = int(p[1:])
+            if p.startswith("R"):
+                pos += val
+            elif p.startswith("L"):
+                pos -= val
+            elif p.startswith("U"):
+                pos -= val*complex(0, 1)
+            elif p.startswith("D"):
+                pos += val*complex(0, 1)
+            path.append(pos)
+        paths.append(path)
+    print (paths[0])
+    crossings = []
+    for ip in range(len(paths[0])):
+        if ip == len(paths[0])-1:
+            s1 = (paths[0][-1], paths[0][0])
+        else:
+            s1 = (paths[0][ip], paths[0][ip+1])
+        for ip2 in range(len(paths[1])):
+            if ip2 == len(paths[1])-1:
+                s2 = (paths[1][-1], paths[1][0])
+            else:
+                s2 = (paths[1][ip2], paths[1][ip2+1])
+            #if s1[0].real == s1[1].real and s2[0].real == s2[1].real:
+            #    continue
+            #elif s1[0].imag == s1[1].imag and s2[0].imag == s2[1].imag:
+            #    continue
+            if s1[0].real == s1[1].real:
+                if s2[0].real <= s2[1].real and s2[0].real <= s1[0].real <= s2[1].real:
+                    crossings.append(complex(s1[0].real, s2[0].imag))
+                    print ("1", crossings[-1])
+                elif s2[1].real <= s2[0].real and s2[1].real <= s1[0].real <= s2[0].real:
+                    crossings.append(complex(s1[0].real, s2[0].imag))
+                    print ("2", crossings[-1])
+            if s2[0].real == s2[1].real:
+                if s1[0].real <= s1[1].real and s1[0].real <= s2[0].real <= s1[1].real:
+                    crossings.append(complex(s2[0].real, s1[0].imag))
+                    print ("3", crossings[-1])
+            #    elif s1[1].real < s1[0].real and s1[1].real <= s2[0].real <= s1[0].real:
+            #        crossings.append(complex(s2[0].real, s1[0].imag))
+            #        print ("4", crossings[-1])
+            #elif s2[0].imag < s2[1].imag and s2[0].imag <= s1[0].imag <= s2[1].imag:
+            #    crossings.append(complex(s2[0].real, s1[0].imag))
+            #    print ("3", crossings[-1])
+            #elif s2[1].imag < s2[0].imag and s2[1].imag <= s1[0].imag <= s2[0].imag:
+            #    crossings.append(complex(s2[0].real, s1[0].imag))
 
+    #print (crossings)
+    dist = min([abs(c.real)+abs(c.imag) for c in crossings])
+    print (f"🎅 Part 1: {dist}")
 
-for i in ids.values():
-    assign(*i)
-
-values = fabric[fabric>=2]
-print (len(values))
-
-good = []
-for i1 in sorted(ids.keys()):
-    inter = 0
-    for i2 in sorted(ids.keys()):
-        if i1 == i2:
-            continue
-        if intersect(ids[i1], ids[i2]):
-            inter = inter + 1
-
-    if inter == 0:
-        good.append(i1)
-print good
+#def show_game(playground, dir):
+#    xs = [h.real for h in playground[1]]
+#    ys = [h.imag for h in playground[1]]
+#    xmin, xmax = min(xs), max(xs)
+#    ymin, ymax = min(ys), max(ys)
+#    for y in range(int(ymin), int(ymax+1)):
+#        for x in range(int(xmin), int(xmax+1)):
+#            pos = complex(x, y)
+#            if pos in playground[0]:
+#                print("▮", end='')
+#            elif pos == playground[2]:
+#                if dir == -1:
+#                    print("<", end='')
+#                elif dir == 1:
+#                    print(">", end='')
+#                else:
+#                    print("W", end='')
+#            elif pos == playground[3]:
+#                print("O", end='')
+#            else:
+#                print(" ", end='')
+#        print()
     
+def part2(lines):
+    return 0
+    channel = {"Sim":deque([]), "me":deque([])}
+    prog = IntCode("Sim", lines[0], channel=channel, mode="channel", output="me")
+    prog.code[0] = 2
+    prog.run()
+    playground = read_output(channel["me"])
+    dir = 1
+    ball_old = playground[3]
+    pad_old = playground[2]
+    score_old = playground[4]
+    channel["Sim"].append(0)
+    while playground[3].imag < 20:
+        prog.run()
+        if not prog.alive:
+            break;
+        playground = read_output(channel["me"])
+        ball = playground[3]
+        pad = playground[2]
+        score = playground[4]
+        if ball.real > ball_old.real:
+            dir = 1
+        else:
+            dir = -1
+
+        move = 0
+        if ball.real == pad.real:
+            move = dir
+        else:
+            if ball.real > pad.real:
+                move = 1
+            else:
+                move = -1
+        channel["Sim"].append(move)
+        #show_game(playground, move)
+        
+        ball_old = ball
+        pad_old = pad
+        channel["me"].clear()
+    final_score = channel['me'][-1]
+    print (f"🎅🎄 Part 2: {final_score}")
+
+if __name__ == "__main__":
+    title = "Day 3: Crossed Wires"
+    sub = "-"*(len(title)+2)
+
+    print()
+    print(f" {title} ")
+    print(sub)
+    
+    lines = loadInput()
+    
+    t0 = time.time()
+    part1(lines)
+    print ("Time: {:.5f}".format(time.time()-t0))
+    
+    t0 = time.time()
+    part2(lines)
+    print ("Time: {:.5f}".format(time.time()-t0))
+

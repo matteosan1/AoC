@@ -38,17 +38,32 @@ def part1(lines):
     prog = IntCode("Robot", lines[0], channel=channel, mode="channel", output="me")
     hull = {}
     painting(prog, hull, channel)
-    print (f"ðŸŽ„ Part 1: {len(hull)}")
+    print (f"🎅 Part 1: {len(hull)}")
 
+def show_hull(hull):
+    xs = [h.real for h in hull]
+    ys = [h.imag for h in hull]
+    xmin, xmax = min(xs), max(xs)
+    ymin, ymax = min(ys), max(ys)
+    for y in range(int(ymin), int(ymax+1)):
+        for x in range(int(xmin), int(xmax+1)):
+            val = hull.get(complex(x, y), 0)
+            if val == 1:
+                print("▮", end='')
+            else:
+                print(" ", end='')
+        print()
+    
 def part2(lines):
     channel = {"Robot":[1], "me":[]}
     prog = IntCode("Robot", lines[0], channel=channel, mode="channel", output="me")
     hull = {}
     painting(prog, hull, channel)
-    print (f"ðŸŽ„ðŸŽ… Part 2: {len(hull)}")
+    print (f"🎅🎄 Part 2:")
+    show_hull(hull)
 
 if __name__ == "__main__":
-    title = "Day 9: Sensor Boost"
+    title = "Day 11: Space Police"
     sub = "-"*(len(title)+2)
 
     print()

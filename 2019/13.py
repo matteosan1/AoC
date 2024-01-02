@@ -1,78 +1,118 @@
+import time, copy
 
-G = []
-for line in open('carts.txt'):
-    if line:
-        G.append([c for c in line])
+from utils import readInput
+from intcode import IntCode
+from collections import deque
+            
+def loadInput():
+    return readInput("input_13.txt")
 
-# up, right, down, left
-DR = [-1, 0, 1, 0]
-DC = [0,1,0,-1]
-def left(d):
-    return (d+3)%4
-def right(d):
-    return (d+1)%4
+def read_output(deq):
+    blocks = []
+    walls = []
+    ball = None
+    pad = None
+    score = 0
+    for i in range(2, len(deq), 3):
+        pos = complex(deq[i-2], deq[i-1])
+        tile_id = deq[i]
+        if tile_id == 2:
+            blocks.append(pos)
+        elif tile_id == 1:
+            walls.append(pos)
+        elif tile_id == 3:
+            pad = pos
+        elif tile_id == 4:
+            ball = pos
+        elif pos.real == -1:
+            score = tile_id
+    return (blocks, walls, pad, ball, score)
 
-class Cart(object):
-    def __init__(self, r, c, d, inter):
-        self.r = r
-        self.c = c
-        self.d = d
-        self.inter = inter
-carts = []
-for r in range(len(G)):
-    for c in range(len(G[r])):
-        if G[r][c] == '^':
-            G[r][c] = '|'
-            carts.append(Cart(r,c,0,0))
-        if G[r][c] == '>':
-            G[r][c] = '-'
-            carts.append(Cart(r,c,1,0))
-        elif G[r][c] == 'v':
-            G[r][c] = '|'
-            carts.append(Cart(r,c,2,0))
-        elif G[r][c] == '<':
-            G[r][c] = '-'
-            carts.append(Cart(r,c,3,0))
+def part1(lines):
+    channel = {"Sim":deque([])}
+    prog = IntCode("Sim", lines[0], channel=channel, mode="channel", output="Sim")
+    prog.run()
+    playground = read_output(channel["Sim"])    
+    print (f"🎅 Part 1: {len(playground[0])}")
 
-def show():
-    global G
-    global carts
-    for r in range(len(G)):
-        for c in range(len(G[r])):
-            has_cart = False
-            for cart in carts:
-                if cart.r == r and cart.c == c:
-                    print ({0: '^', 1:'>', 2:'v', 3:'<'}[cart.d],end='')
-                    has_cart = True
-            if not has_cart:
-                print (G[r][c],end='')
-        print
+def show_game(playground, dir):
+    xs = [h.real for h in playground[1]]
+    ys = [h.imag for h in playground[1]]
+    xmin, xmax = min(xs), max(xs)
+    ymin, ymax = min(ys), max(ys)
+    for y in range(int(ymin), int(ymax+1)):
+        for x in range(int(xmin), int(xmax+1)):
+            pos = complex(x, y)
+            if pos in playground[0]:
+                print("▮", end='')
+            elif pos == playground[2]:
+                if dir == -1:
+                    print("<", end='')
+                elif dir == 1:
+                    print(">", end='')
+                else:
+                    print("W", end='')
+            elif pos == playground[3]:
+                print("O", end='')
+            else:
+                print(" ", end='')
+        print()
+    
+def part2(lines):
+    channel = {"Sim":deque([]), "me":deque([])}
+    prog = IntCode("Sim", lines[0], channel=channel, mode="channel", output="me")
+    prog.code[0] = 2
+    prog.run()
+    playground = read_output(channel["me"])
+    dir = 1
+    ball_old = playground[3]
+    pad_old = playground[2]
+    score_old = playground[4]
+    channel["Sim"].append(0)
+    while playground[3].imag < 20:
+        prog.run()
+        if not prog.alive:
+            break;
+        playground = read_output(channel["me"])
+        ball = playground[3]
+        pad = playground[2]
+        score = playground[4]
+        if ball.real > ball_old.real:
+            dir = 1
+        else:
+            dir = -1
 
-while True:
-    if len(carts) == 1:
-        print ('{},{}'.format(carts[0].c, carts[0].r))
-        import sys
-        sys.exit(0)
-    #show()
-    carts = sorted(carts, key=lambda cart:(cart.r, cart.c))
-    for cart in carts:
-        rr = cart.r+DR[cart.d]
-        cc = cart.c+DC[cart.d]
-        # up, right, down, left
-        if G[rr][cc] == '\\':
-            cart.d = {0: 3, 1:2, 2:1, 3:0}[cart.d]
-        elif G[rr][cc] == '/':
-            cart.d = {0: 1, 1:0, 2:3, 3:2}[cart.d]
-        elif G[rr][cc] == '+':
-            if cart.inter == 0:
-                cart.d = left(cart.d)
-            elif cart.inter == 1:
-                pass
-            elif cart.inter == 2:
-                cart.d = right(cart.d)
-            cart.inter = (cart.inter + 1)%3
-        if (rr,cc) in [(other.r, other.c) for other in carts]:
-            carts = [other for other in carts if (other.r, other.c) not in [(cart.r, cart.c),(rr,cc)]]
-            print ('{},{}'.format(cc,rr))
-        cart.r = rr
-        cart.c = cc
+        move = 0
+        if ball.real == pad.real:
+            move = dir
+        else:
+            if ball.real > pad.real:
+                move = 1
+            else:
+                move = -1
+        channel["Sim"].append(move)
+        #show_game(playground, move)
+        
+        ball_old = ball
+        pad_old = pad
+        channel["me"].clear()
+    final_score = channel['me'][-1]
+    print (f"🎅🎄 Part 2: {final_score}")
+
+if __name__ == "__main__":
+    title = "Day 13: Care Package"
+    sub = "-"*(len(title)+2)
+
+    print()
+    print(f" {title} ")
+    print(sub)
+    
+    lines = loadInput()
+    
+    t0 = time.time()
+    part1(lines)
+    print ("Time: {:.5f}".format(time.time()-t0))
+    
+    t0 = time.time()
+    part2(lines)
+    print ("Time: {:.5f}".format(time.time()-t0))
