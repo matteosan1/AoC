@@ -1,34 +1,66 @@
-import numpy as np
-grid_sn = 9445
-
-pls = np.zeros(shape=(301, 301))
-
-for x in range(1, 301):
-    for y in range(1, 301):
-        rack_id = x + 10
-        power_level = (rack_id*y + grid_sn)*rack_id
-        power_level = (power_level / 100) % 10 - 5
-        pls[x,y] = power_level
-
-max_3x3_cell_id = (0,0)
-max_3x3_cell = 0
-max_3x3_cell_size = 0
-
 import time
-for s in range(1,301):
-    print (s)
-    for x in range(1, 301):
-        for y in range(1, 301):
-            temp = 0
-            if not((x+s) > 300 or (y+s) > 300):
-                temp = np.sum(pls[x:x+s,y:y+s])
-                if temp > max_3x3_cell:
-                    max_3x3_cell_id = (x, y)
-                    max_3x3_cell = temp
-                    max_3x3_cell_size = s
 
-print (max_3x3_cell)
-print (max_3x3_cell_id, max_3x3_cell_size)
+from utils import readInput
+from intcode import IntCode
+            
+def loadInput():
+    return readInput("input_11.txt")
 
-            
-            
+def painting(prog, hull, channel):
+    dir = 0
+    pos = complex(0, 0)
+    while True:
+        prog.run()
+        if len(channel['me']) == 0:
+            break
+        for i in range(2):
+            val = channel["me"].pop()
+            if i == 0:
+                hull[pos] = val
+            else:
+                if val == 0:
+                    dir -= 1
+                else:
+                    dir += 1
+                dir = dir % 4
+        if dir == 0:
+            pos += complex(0,-1)
+        elif dir == 1:
+            pos += complex(1,0)
+        elif dir == 2:
+            pos += complex(0,1)
+        elif dir == 3:
+            pos += complex(-1,0)
+        channel["Robot"].insert(0, hull.get(pos, 0))         
+    
+def part1(lines):
+    channel = {"Robot":[0], "me":[]}
+    prog = IntCode("Robot", lines[0], channel=channel, mode="channel", output="me")
+    hull = {}
+    painting(prog, hull, channel)
+    print (f"ðŸŽ„ Part 1: {len(hull)}")
+
+def part2(lines):
+    channel = {"Robot":[1], "me":[]}
+    prog = IntCode("Robot", lines[0], channel=channel, mode="channel", output="me")
+    hull = {}
+    painting(prog, hull, channel)
+    print (f"ðŸŽ„ðŸŽ… Part 2: {len(hull)}")
+
+if __name__ == "__main__":
+    title = "Day 9: Sensor Boost"
+    sub = "-"*(len(title)+2)
+
+    print()
+    print(f" {title} ")
+    print(sub)
+    
+    lines = loadInput()
+    
+    t0 = time.time()
+    part1(lines)
+    print ("Time: {:.5f}".format(time.time()-t0))
+    
+    t0 = time.time()
+    part2(lines)
+    print ("Time: {:.5f}".format(time.time()-t0))

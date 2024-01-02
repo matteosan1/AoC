@@ -1,71 +1,62 @@
-from utils import readLines
-import networkx as nx
+import time
 
-lines = readLines("instructions.txt")
+from itertools import permutations
 
-# instr = []
-# temp = []
-# for l in lines:
-#     items = l.split()
-#     temp.append((items[1], items[7]))
+from utils import readInput
+from intcode import IntCode
+            
+def loadInput():
+    return readInput("input_7.txt")
+    
+#def replace_mem(code, n, val):
+#    code[n] = val
+    
+def part1(lines):
+    max_val = 0
+    phases = [0,1,2,3,4]
+    for perm in permutations(phases, 5):
+        channels = {i:[p] for i, p in enumerate(perm)}
+        channels[0].insert(0, 0)
+        progs = [IntCode(i, lines[0], channels, mode="channel", output=(i+1)%5) for i in range(5)]
+        progs[-1].output = "T"
+        for i in range(5):
+            progs[i].run()
 
-# for i in range(3):
-#     for t in temp:
-#         if t[0] not in instr and t[1] not in instr:
-#             instr.append(t[0])
-#             instr.append(t[1])
-#         elif t[0] not in instr:
-#             index = instr.index(t[1])
-#             i = 1
-#             while ord(instr[index-i]) > ord(t[0]):
-#                 i = i + 1
-#             instr.insert(index-i, t[0])
-#         elif t[1] not in instr:
-#             index = instr.index(t[0])
-#             i = 1
-#             while index+i < len(instr) and ord(instr[index+i]) < ord(t[1]):
-#                 i = i + 1
-#             instr.insert(index+i, t[1])
-#         else:
-#             index0 = instr.index(t[0])
-#             index1 = instr.index(t[1])
-#             if index1<index0:
-#                 instr.remove(t[1])
-#                 instr.insert(index0+1, t[1])
-#         print (instr)
-#
-# for t in temp:
-#     index0 = instr.index(t[0])
-#     index1 = instr.index(t[1])
-#     if index0 > index1:
-#         print ("Errore: ", t)
-#
-# print ("".join(instr))
-def solve(lines):
-    G = nx.DiGraph()
-    for line in lines:
-        parts = line.split(" ")
-        G.add_edge(parts[1], parts[7])
-    print (''.join(nx.lexicographical_topological_sort(G)))
-    return G
+        max_val = max(max_val, channels["T"][0])
+    print (f"ðŸŽ„ Part 1: {max_val}")
 
-G = solve(lines)
+def part2(lines):
+    max_val = 0
+    phases = [9,8,7,6,5]
+    for perm in permutations(phases, 5):
+        channels = {i:[p] for i, p in enumerate(perm)}
+        channels[0].insert(0, 0)
+        progs = [IntCode(i, lines[0], channels, mode="channel", output=(i+1)%5) for i in range(5)]
+        nalive = sum([p.alive for p in progs])
+        while nalive > 0:
+            for i in range(5):
+                if progs[i].alive:
+                    progs[i].run()
+            
+            nalive = sum([p.alive for p in progs])            
 
-task_times = []
-tasks = []
-time = 0
-while task_times or G:
-    available_tasks = [t for t in G if t not in tasks and G.in_degree(t) == 0]
-    if available_tasks and len(task_times) < 5:
-        task = min(available_tasks)  # min gets smallest task alphabetically
-        task_times.append(ord(task) - 4)
-        tasks.append(task)
-    else:
-        min_time = min(task_times)
-        completed = [tasks[i] for i, v in enumerate(task_times) if v == min_time]
-        task_times = [v - min_time for v in task_times if v > min_time]
-        tasks = [t for t in tasks if t not in completed]
-        time += min_time
-        G.remove_nodes_from(completed)
+        max_val = max(max_val, channels[0][0])
+    print (f"ðŸŽ„ðŸŽ… Part 2: {max_val}")
 
-print(time)
+if __name__ == "__main__":
+    title = "Day 7: Amplification Circuit"
+    sub = "-"*(len(title)+2)
+
+    print()
+    print(f" {title} ")
+    print(sub)
+    
+    lines = loadInput()
+    
+    t0 = time.time()
+    part1(lines)
+    print ("Time: {:.5f}".format(time.time()-t0))
+    
+    t0 = time.time()
+    part2(lines)
+    print ("Time: {:.5f}".format(time.time()-t0))

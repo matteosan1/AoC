@@ -1,43 +1,62 @@
-from utils import readLines
+import time
+from utils import readInput
 
-ids = readLines("ids.txt")
+def init_code(line):
+    return list(map(int, line.split(",")))
 
-letters2 = []
-letters3 = []
-for id in ids:
-    temp = list(id)
-    in2 = False
-    in3 = False
-    for c in temp:
-        count = temp.count(c)
-        if count == 2 and not in2:
-            in2 = True
-            letters2.append(id)
-        if count == 3 and not in3:
-            in3 = True
-            letters3.append(id)
+def loadInput():
+    return readInput("input_2.txt")
+    
+def replace_mem(code, n, val):
+    code[n] = val
+    
+def run(code):
+    pointer = 0
+    while True:
+        op = code[pointer]
+        if op == 99:
+            break
+        elif op == 1:
+            code[code[pointer+3]] = code[code[pointer+1]] + code[code[pointer+2]]
+            pointer += 4        
+        elif op == 2:
+            code[code[pointer+3]] = code[code[pointer+1]] * code[code[pointer+2]]
+            pointer += 4        
+        else:
+            raise ValueError(f"Unknown instruction: {op}")
+    
+def part1(code):
+    replace_mem(code, 1, 12)
+    replace_mem(code, 2, 2)
+    run(code)
+    print (f"ðŸŽ„ Part 1: {code[0]}")
 
-print ("With 2: ", len(letters2))
-print ("With 3: ", len(letters3))
-print (len(letters2) * len(letters3))
+def part2(lines):
+    for noun in range(0, 100):
+        for verb in range(0, 100):
+            code = init_code(lines[0])
+            replace_mem(code, 1, noun)
+            replace_mem(code, 2, verb)
+            run(code)
+            if code[0] == 19690720:
+                print (f"ðŸŽ„ðŸŽ… Part 2: {100*noun+verb}")
+                return
 
-ids = list(set(letters2 + letters3))
-right_ids = []
-for i1 in range(len(ids)-1):
-    id1 = ids[i1]
-    for i2 in range(i1, len(ids)):
-        id2 = ids[i2]
-        diff = 0
-        for i in range(len(id1)):
-            if id1[i] != id2[i]:
-                diff = diff + 1
+if __name__ == "__main__":
+    title = "Day 2: 1202 Program Alarm"
+    sub = "-"*(len(title)+2)
 
-        if diff == 1:
-            right_ids.append(id1)
-            right_ids.append(id2)
-            
-print (right_ids[0])
-print (right_ids[1])
-
-
-
+    print()
+    print(f" {title} ")
+    print(sub)
+    
+    lines = loadInput()
+    
+    t0 = time.time()
+    code = read_code(lines[0])
+    part1(code)
+    print ("Time: {:.5f}".format(time.time()-t0))
+    
+    t0 = time.time()
+    part2(lines)
+    print ("Time: {:.5f}".format(time.time()-t0))

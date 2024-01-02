@@ -1,17 +1,37 @@
-from collections import deque, defaultdict
+import time
 
-nplayers = 418
-nmarble = 7076900
+from itertools import permutations
 
-scores = defaultdict(int)
-circle = deque([0])
-for i in range(1, nmarble+1):
-    if i % 23 == 0:
-        circle.rotate(7)
-        scores[i%nplayers] += i + circle.pop()
-        circle.rotate(-1)
-    else:
-        circle.rotate(-1)
-        circle.append(i)
+from utils import readInput
+from intcode import IntCode
+            
+def loadInput():
+    return readInput("input_9.txt")
 
-print (max(scores.values()))
+def part1(lines):
+    prog = IntCode(0, lines[0])
+    prog.run()
+    print (f"ðŸŽ„ Part 1: Intcode output")
+
+def part2(lines):
+    prog = IntCode(0, lines[0])
+    prog.run()
+    print (f"ðŸŽ„ðŸŽ… Part 2: Intcode output")
+
+if __name__ == "__main__":
+    title = "Day 9: Sensor Boost"
+    sub = "-"*(len(title)+2)
+
+    print()
+    print(f" {title} ")
+    print(sub)
+    
+    lines = loadInput()
+    
+    t0 = time.time()
+    part1(lines)
+    print ("Time: {:.5f}".format(time.time()-t0))
+    
+    t0 = time.time()
+    part2(lines)
+    print ("Time: {:.5f}".format(time.time()-t0))
