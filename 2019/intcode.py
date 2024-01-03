@@ -59,7 +59,10 @@ class IntCode:
                         break
                     else:
                         idx = self.code[self.pointer+1]
-                        self.code[self.code[self.pointer+1]] = self.mem[self.name].popleft()
+                        val = self.mem[self.name].popleft()
+                        print ("val ", val)
+                        self.code[self.code[self.pointer+1]] = val
+                        print ("intcode ", chr(self.code[self.code[self.pointer+1]]), len(self.mem[self.name]))
                 self.pointer += 2
             elif op == 4:
                 if self.mode == "manual":
@@ -67,7 +70,7 @@ class IntCode:
                 elif self.mode == "channel":
                     #print (f"val: {self.get_val(modes, 1)}")
                     self.mem[self.output].append(self.get_val(modes, 1))
-                    #print (self.mem)
+                    #print(self.mem[self.output])
                 self.pointer += 2
             elif op == 5:
                 val = self.get_val(modes, 1)
