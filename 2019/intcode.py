@@ -58,13 +58,9 @@ class IntCode:
                     if self.name not in self.mem or len(self.mem[self.name]) == 0:
                         break
                     else:
-                        #print (self.code[self.pointer], self.relative_base)
-                        idx = self.get_val(modes, 1, True)#code[self.pointer+1]
-                        #print ("intcode ", self.mem['Robot'])
+                        idx = self.get_val(modes, 1, True)
                         val = self.mem[self.name].popleft()
-                        #print ("val ", val, idx)
                         self.code[idx] = val
-                        #print ("intcode ", chr(self.code[self.code[self.pointer+1]]), self.code[574], len(self.mem['Robot']))
                 self.pointer += 2
             elif op == 4:
                 if self.mode == "manual":
@@ -72,7 +68,6 @@ class IntCode:
                 elif self.mode == "channel":
                     #print (f"val: {self.get_val(modes, 1)}")
                     self.mem[self.output].append(self.get_val(modes, 1))
-                    #print(self.mem[self.output])
                 self.pointer += 2
             elif op == 5:
                 val = self.get_val(modes, 1)
@@ -87,17 +82,11 @@ class IntCode:
                     self.pointer += 3
             elif op == 7:
                 idx = self.get_val(modes, 3, True)
-                if self.get_val(modes, 1) < self.get_val(modes, 2):
-                    self.code[idx] = 1
-                else:
-                    self.code[idx] = 0
+                self.code[idx] = int(self.get_val(modes, 1) < self.get_val(modes, 2))
                 self.pointer += 4
             elif op == 8:
                 idx = self.get_val(modes, 3, True)
-                if self.get_val(modes, 1) == self.get_val(modes, 2):
-                    self.code[idx] = 1
-                else:
-                    self.code[idx] = 0
+                self.code[idx] = int(self.get_val(modes, 1) == self.get_val(modes, 2))
                 self.pointer += 4
             elif op == 9:
                 self.relative_base += self.get_val(modes, 1)

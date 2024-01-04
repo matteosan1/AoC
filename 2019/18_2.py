@@ -1,181 +1,157 @@
-import time
+import heapq
+import os
+import pathlib
+import sys
 
-# Nothing ever depends on the count of OPEN,
-# so we are safe to make OPEN 0.
-# Otherwise, we'd have to number elements 1, 2, 3.
-# Not that it matters anyway; either way, space is being wasted.
-# (two bits can represent four elements, but we only have three)
-OPEN = 0
-TREE = 1
-LUMBER = 2
+def parse_grid(lines):
+  grid = {}
+  doors = {}
+  keys = {}
 
-# 2 bits per cell, 9 cells in 3x3 neighbourhood,
-# arranged in this way:
-# [top left,  top, top right]
-# [left    , self, right]
-# [bot left,  bot, bot right]
-# Move across the array while keeping three bit patterns,
-# one for each row, masking off the left as we go.
-# We compress the entire thing into an 18-bit integer
-# and index into a lookup table.
+  pos = None
 
-BITS_PER_CELL = 2
-CELLS_PER_ROW = 3
-CELL_MASK = (1 << BITS_PER_CELL) - 1
-ROW_MASK = (1 << (BITS_PER_CELL * CELLS_PER_ROW)) - 1
-MID_OFFSET = BITS_PER_CELL * CELLS_PER_ROW
-TOP_OFFSET = BITS_PER_CELL * CELLS_PER_ROW * 2
+  for y, row in enumerate(lines):
+    for x, cell in enumerate(row):
+      grid[(x, y)] = cell
 
-# Note that the current cell (the one whose next state is being considered)
-# is index 4 here
-ME = 4
-NOT_ME = (0...9).to_a - [ME]
-#
-#verbose = ARGV.delete('-v')
-#
-before_lookup = time.time()
+      if cell == "@":
+        pos = (x, y)
+      elif cell >= "a" and cell <= "z":
+        keys[cell] = (x, y)
+      elif cell >= "A" and cell <= "Z":
+        doors[cell.lower()] = (x, y)
 
-# It takes about half a second to build the lookup table,
-# but the time it saves makes it worth it!
-NEXT_STATE = (1 << 18).times.map { |i|
-  trees = 0
-  lumber = 0
-  NOT_ME.each { |j|
-    n = (i >> (j * BITS_PER_CELL)) & CELL_MASK
-    if n == TREE
-      trees += 1
-    elsif n == LUMBER
-      lumber += 1
-    end
-  }
-#  case (i >> (ME * BITS_PER_CELL)) & CELL_MASK
-#  when OPEN
-#    trees >= 3 ? TREE : OPEN
-#  when TREE
-#    lumber >= 3 ? LUMBER : TREE
-#  when LUMBER
-#    lumber > 0 && trees > 0 ? LUMBER : OPEN
-#  else
-#    # Note that 3 is unfortunately a waste of space.
-#  end
-#}.freeze
-#
-#puts "Lookup table in #{Time.now - before_lookup}" if verbose
-#
-## Next state resulting from `src` is written into `dest`
-#def iterate(src, dest)
-#  dest.each_with_index { |write_row, y|
-#    top = y == 0 ? nil : src[y - 1]
-#    mid = src[y]
-#    bot = src[y + 1]
-#
-#    top_bits = top ? top[0] : 0
-#    mid_bits = mid[0]
-#    bot_bits = bot ? bot[0] : 0
-#
-#    (1...write_row.size).each { |right_of_write|
-#      top_bits = ((top_bits << BITS_PER_CELL) & ROW_MASK) | top[right_of_write] if top
-#      mid_bits = ((mid_bits << BITS_PER_CELL) & ROW_MASK) | mid[right_of_write]
-#      bot_bits = ((bot_bits << BITS_PER_CELL) & ROW_MASK) | bot[right_of_write] if bot
-#      write_row[right_of_write - 1] = NEXT_STATE[(top_bits << TOP_OFFSET) | (mid_bits << MID_OFFSET) | bot_bits]
-#    }
-#
-#    # The last element in the row (which has no elements to its right)
-#    top_bits = (top_bits << BITS_PER_CELL) & ROW_MASK
-#    mid_bits = (mid_bits << BITS_PER_CELL) & ROW_MASK
-#    bot_bits = (bot_bits << BITS_PER_CELL) & ROW_MASK
-#    write_row[-1] = NEXT_STATE[(top_bits << TOP_OFFSET) | (mid_bits << MID_OFFSET) | bot_bits]
-#  }
-#end
-#
-#def compress(grid)
-#  # grid.flatten *does* work, of course,
-#  # but let's see if we can do better.
-#  grid.map { |r| r.reduce(0) { |acc, cell| (acc << BITS_PER_CELL) | cell } }
-#end
-#
-#TESTDATA = <<SAMPLE
-#.#.#...|#.
-#.....#|##|
-#.|..|...#.
-#..|#.....#
-##.#|||#|#|
-#...#.||...
-#.|....|...
-#||...#|.#|
-#|.||||..|.
-#...#.|..|.
-#SAMPLE
-#
-#print_grid = ARGV.delete('-g')
-#current = (ARGV.include?('-t') ? TESTDATA : ARGV.empty? ? DATA : ARGF).each_line.map { |l|
-#  l.chomp.each_char.map { |c|
-#    case c
-#    when ?.; OPEN
-#    when ?|; TREE
-#    when ?#; LUMBER
-#    else raise "invalid #{c}"
-#    end
-#  }
-#}
-#
-#def resources(grid, verbose)
-#  flat = grid.flatten
-#  trees = flat.count(TREE)
-#  lumber = flat.count(LUMBER)
-#  "#{"#{trees} * #{lumber} = " if verbose}#{trees * lumber}"
-#end
-#
-#patterns = {}
-#
-#buffer = current.map { |row| [nil] * row.size }
-#
-#1.step { |t|
-#  iterate(current, buffer)
-#  current, buffer = buffer, current
-#
-#  puts resources(current, verbose) if t == 10
-#
-#  key = compress(current)
-#
-#  if (prev = patterns[key])
-#    cycle_len = t - prev
-#
-#    # If we stored in `patterns` in a reasonable way,
-#    # we could just look in `patterns`...
-#    # instead we'll just iterate more.
-#    more = (1000000000 - t) % cycle_len
-#    previous = t + more - cycle_len
-#    #prev_flat = patterns.reverse_each.find { |k, v| v == previous }[0]
-#
-#    puts "t=#{t} repeats t=#{prev}. #{more} more cycles needed (or rewind to #{previous})" if verbose
-#
-#    more.times {
-#      iterate(current, buffer)
-#      current, buffer = buffer, current
-#    }
-#
-#    puts resources(current, verbose)
-#
-#    break
-#  end
-#
-#  patterns[key] = t
-#}
-#
-#current.each { |row|
-#  puts row.map { |cell|
-#    case cell
-#    when OPEN; ?.
-#    when TREE; ?|
-#    when LUMBER; ?#
-#    else raise "Unknown #{cell}"
-#    end
-#  }.join
-#} if print_grid
-#
-#__END__
-#..|.#...||..||.#|#..|...#.#..#.|#.|...|#|.#.|.||#.
-#.|#....##.#||.......|..|...|..#.#...#...|.#.......
-#omitted
+  return grid, doors, keys, pos
 
+
+def render_grid(grid):
+  min_x = min(x for x, _ in grid.keys())
+  min_y = min(y for _, y in grid.keys())
+  max_x = max(x for x, _ in grid.keys())
+  max_y = max(y for _, y in grid.keys())
+
+  grid_str = "\n".join(("".join(grid[(x, y)] for x in range(min_x, max_x + 1))) for y in range(min_y, max_y + 1))
+  print(f"{grid_str}\n")
+
+
+def update_grid(grid, pos):
+  all_pos = []
+
+  grid[pos] = "#"
+  for dx, dy in ((0, -1), (1, 0), (0, 1), (-1, 0)):
+    pt = (pos[0] + dx, pos[1] + dy)
+    grid[pt] = "#"
+
+  for dx, dy in ((1, -1), (1, 1), (-1, 1), (-1, -1)):
+    pt = (pos[0] + dx, pos[1] + dy)
+    all_pos.append(pt)
+    grid[pt] = "@"
+
+  return all_pos
+
+
+def shortest_path(grid, p1, p2):
+  path_steps = None
+  doors = set()
+  visited = set()
+
+  q = [(0, p1, set())]
+
+  while len(q):
+    steps, pos, doors = heapq.heappop(q)
+    visited.add(pos)
+
+    if pos == p2:
+      path_steps = steps
+      break
+
+    if grid[pos] >= "A" and grid[pos] <= "Z":
+      doors = doors.copy()
+      doors.add(grid[pos].lower())
+
+    for dx, dy in ((0, -1), (1, 0), (0, 1), (-1, 0)):
+      nx, ny = pos[0] + dx, pos[1] + dy
+      if grid.get((nx, ny), "#") != "#" and (nx, ny) not in visited:
+        heapq.heappush(q, (steps + 1, (nx, ny), doors))
+
+  return path_steps, doors
+
+
+def find_key_paths(grid, doors, keys, starts):
+  keypaths = {k: {} for k in keys.keys()}
+
+  for i, pos in enumerate(starts):
+    keypaths["@" + str(i)] = {}
+
+    for key, key_pt in keys.items():
+      print (key, key_pt)
+      steps, doors = shortest_path(grid, starts[i], key_pt)
+      if steps is not None:
+        keypaths["@" + str(i)][key] = {"pos": key_pt, "steps": steps, "doors": doors}
+
+      for dest, dest_pt in keys.items():
+        print (dest, dest_pt)
+        if dest != key and key not in keypaths[dest]:
+          steps, doors = shortest_path(grid, key_pt, dest_pt)
+          if steps is not None:
+            keypaths[key][dest] = {"pos": dest_pt, "steps": steps, "doors": doors}
+            keypaths[dest][key] = {"pos": key_pt, "steps": steps, "doors": doors}
+  #print (keypaths)
+  return keypaths
+
+
+def find_keys(grid, keypaths, pos, bot_id="@0", key="@0", found=None, cache={}):
+  if found is None:
+    found = set(x for x in keypaths.keys() if x[0] == "@")
+
+  pos[bot_id] = key
+
+  if len(found) == len(keypaths):
+    return 0, [key]
+
+  cachekey = "".join(sorted(pos.values())) + "".join(sorted(set(keypaths.keys()) - found))
+  if cachekey not in cache:
+    paths = []
+
+    for bot, bot_key in pos.items():
+      for k in keypaths[bot]:
+        if k in found:
+          continue
+        elif keypaths[bot_key][k]["doors"] - found != set():
+          continue
+
+        ksteps, kpaths = find_keys(grid, keypaths, pos.copy(), bot, k, found | {k}, cache)
+        paths.append((keypaths[bot_key][k]["steps"] + ksteps, [key] + kpaths))
+
+    cache[cachekey] = min(paths)
+
+  return cache[cachekey]
+
+
+def run():
+  #input_file = aoc.inputfile('input.txt')
+  lines = open("prova.txt").read().strip()
+
+  grid, doors, keys, pos = parse_grid(lines.split("\n"))
+  #render_grid(grid)
+  import time
+  t0 = time.time()
+  keypaths = find_key_paths(grid, doors, keys, [pos])
+  print (time.time()-t0)
+  #steps, keypath = find_keys(grid, keypaths, {"@0": "@0"})
+  #print(f"Steps to find all keys: {steps}\nPath: {keypath[1:]})")
+
+
+
+
+
+  
+  #all_pos = update_grid(grid, pos)
+  #keypaths = find_key_paths(grid, doors, keys, all_pos)
+  #steps, keypath = find_keys(grid, keypaths, {"@" + str(i): "@" + str(i) for i in range(0, len(all_pos))})
+  #print(f"Steps to find all keys: {steps}\nPath: {keypath}")
+
+
+if __name__ == '__main__':
+  run()
+  sys.exit(0)
