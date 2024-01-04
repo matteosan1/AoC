@@ -1,75 +1,160 @@
 import time, copy
 
-xmax = 50
-ymax = 50
+from itertools import combinations
+from queue import PriorityQueue
 
-def printAcres(acres):
-    for y in range(ymax):
-        for x in range(xmax):
-            print acres[(x, y)],
-        print
+from utils import readInput
 
-def checkAcre(acres, changes, x, y):
-    o, t, l = 0, 0, 0
-    for i in range(x-1, x+2):
-        for j in range(y-1, y+2):
-            if i < 0 or i >= xmax or j < 0 or j >= ymax:
-                continue
-            if i == x and j == y:
-                continue
-            if acres[(i, j)] == ".":
-                o = o + 1
-            elif acres[(i, j)] == "|":
-                t = t + 1
-            elif acres[(i, j)] == "#":
-                l = l + 1
+def dfs(m, start, target, keys, doors):
+    paths = []
+    dirs = {0:-1j, 1:1, 2:1j, 3:-1}
 
-    if acres[(x, y)] == "." and t >= 3:
-        changes[(x, y)] = "|"
-    if acres[(x, y)] == "|" and l >= 3:
-        changes[(x, y)] = "#"
-    if acres[(x, y)] == "#":
-        if l >= 1 and t >= 1:
-            changes[(x, y)] = "#"
-        else:
-            changes[(x, y)] = "."
+    stack = [[(start, 0)]]    
+    while len(stack) != 0:
+        state = stack.pop()
+        pos, coll_k = state[-1]
+        
+        if coll_k == target:
+            paths.append(state)
             
+        for d in dirs.values():
+            new_pos = pos + d
+                        
+            if new_pos in m:
+                if ord('A') <= m[new_pos] <= ord('Z'):
+                    if coll_k & 2**(m[new_pos]-65) == 0:
+                        continue       
+                new_coll_k = coll_k
+                if ord('a') <= m[new_pos] <= ord('z'):
+                    if coll_k & 2**(m[new_pos]-97) == 0:        
+                        new_coll_k = set_key(new_coll_k, m[new_pos])
+                if (new_pos, new_coll_k) not in state:
+                    new_state = copy.deepcopy(state)
+                    new_state.append((new_pos, new_coll_k))
+                    stack.append(new_state)
+    print (min([len(s)-1 for s in paths]))
 
-with open("acres.txt", "r") as f:
-    lines = f.readlines()
+def loadInput():
+    lines = readInput("prova.txt")
+    dungeon = {}
+    #keys = {}
+    #doors = {}
+    for y, l in enumerate(lines):
+        for x, c in enumerate(l):
+            if c == "#":
+                continue
+            if c != ".":
+                dungeon[complex(x, y)] = ord(c)
+            else:
+                dungeon[complex(x, y)] = 1
+    return dungeon
 
-acres = {}
-for y,l in enumerate(lines):
-    for x in range(len(l)):
-        acres[(x, y)] = l[x]
+def set_key(keys, n):
+    return keys | 2**(n-97)
 
-#printAcres(acres)
-#print
-history = [copy.deepcopy(acres)]
+def set_door(doors, n):
+    return doors | 2**(n-64)
 
-for it in xrange(489 + 7):
-    changes = {}
-    t1 = time.time()
-    for y in range(ymax):
-        for x in range(xmax):
-            checkAcre(acres, changes, x, y)
-    acres.update(changes)
-    if acres not in history:
-        history.append(copy.deepcopy(acres))
-    else:
-        index = history.index(acres)
-        print it - index + 1
-        break
-    t2 = time.time()
-    #print (t2 - t1)
+def pre_dfs(m, start, target, keys, doors):
+    paths = []
+    dirs = {0:-1j, 1:1, 2:1j, 3:-1}
 
-#printAcres(acres)xs
+    stack = [[(start, 0)]]
+    #print ("target", target)
+    while len(stack) != 0:
+        state = stack.pop()
+        pos, found_doors = state[-1]
+        #print (state)
+        if pos == target:
+            paths.append(state)
+            continue
+        elif pos != start and ord('a') <= m[pos] <= ord('z'):
+            continue                
+        
+        for d in dirs.values():
+            new_pos = pos + d
+            if new_pos in m:
+                new_found_doors = found_doors
+                if ord('A') <= m[new_pos] <= ord('Z'):
+                    if found_doors & 2**(m[new_pos]-65) == 0:        
+                        new_found_doors = set_door(new_found_doors, m[new_pos])
+                if (new_pos, new_found_doors) not in state:
+                    new_state = copy.deepcopy(state)
+                    new_state.append((new_pos, new_found_doors))
+                    stack.append(new_state)
+    
+    best_path = (float('inf'), 0)
+    for p in paths:
+        if len(p) < best_path[0]:
+            best_path = (len(p), p[-1][1])
+    return best_path
 
-t, l = 0, 0
-for k, v in acres.iteritems():
-    if v == "|":
-        t = t + 1
-    elif v == "#":
-        l = l + 1
+def dijkstra(m, start, target, keys):
+    print ("target ", target)
+    visited = {}
+    D = {i:float('inf') for i in m}
+    D[start] = 0
 
-print t*l
+    pq = PriorityQueue()
+    pq.put((0, start, 0))
+
+    while not pq.empty():
+        dist, current, found_keys = pq.get()
+        print (dist, current, found_keys)
+        visited[current] = current
+        if found_keys == target:
+            print ("FINE ", dist, current, found_keys)
+            break
+        for neigh in m[current].keys():
+            print ("fk ", found_keys, m[current][neigh][1]) 
+            if found_keys != m[current][neigh][1]:
+                continue
+            print (neigh)
+            new_found_keys = found_keys
+            distance = m[current][neigh][0]
+            if neigh not in visited:
+                new_cost = D[current] + distance
+                if new_cost < D[neigh]:
+                    #neigh.prev = current                    
+                    new_found_keys = set_key(new_found_keys, neigh)
+                    pq.put((new_cost, neigh, new_found_keys))
+                    D[neigh] = new_cost
+    
+def part1(dungeon):
+    start = [i for i in dungeon.keys() if dungeon[i] == ord("@")].pop()
+    keys = [i for i in dungeon.keys() if ord('a') <= dungeon[i] <= ord('z')]
+    doors = [i for i in dungeon.keys() if ord('A') <= dungeon[i] <= ord('Z')]
+    poi = {v:k for k,v in dungeon.items() if ord('a') <= v <= ord('z')}
+    poi.update({ord("@"):start})
+    
+    reduced_map = {}
+    for comb in combinations(poi.keys(), 2):
+        best = pre_dfs(dungeon, poi[comb[0]], poi[comb[1]], keys, doors)
+        reduced_map.setdefault(comb[0], {}).update({comb[1]:best})
+        reduced_map.setdefault(comb[1], {}).update({comb[0]:best})
+    print (reduced_map)
+    dijkstra(reduced_map, ord('@'), 2**(len(keys))-1, keys)
+    #dfs(dungeon, start, target, keys, doors)
+    
+    print (f"ðŸŽ… Part 1: {0}")
+    
+def part2(lines):
+    print (f"ðŸŽ…ðŸŽ„ Part 2: Intcode")
+    
+if __name__ == "__main__":
+    title = "Day 18: Many-Worlds Interpretation"
+    sub = "-"*(len(title)+2)
+
+    print()
+    print(f" {title} ")
+    print(sub)
+    
+    lines = loadInput()
+    
+    t0 = time.time()
+    part1(lines)
+    print ("Time: {:.5f}".format(time.time()-t0))
+    
+    #t0 = time.time()
+    #path = part2(lines, path)
+    #print ("Time: {:.5f}".format(time.time()-t0))
