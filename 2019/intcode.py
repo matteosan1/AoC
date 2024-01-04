@@ -34,7 +34,7 @@ class IntCode:
 
     def run(self):
         while True:
-            op = self.code.get(self.pointer, 0)%100
+            op = self.code[self.pointer]%100
             modes = self.get_modes(self.code[self.pointer])
             #print (modes)
             #print (self.code[self.pointer], op, self.pointer, self.relative_base)
@@ -58,11 +58,13 @@ class IntCode:
                     if self.name not in self.mem or len(self.mem[self.name]) == 0:
                         break
                     else:
-                        idx = self.code[self.pointer+1]
+                        #print (self.code[self.pointer], self.relative_base)
+                        idx = self.get_val(modes, 1, True)#code[self.pointer+1]
+                        #print ("intcode ", self.mem['Robot'])
                         val = self.mem[self.name].popleft()
-                        print ("val ", val)
-                        self.code[self.code[self.pointer+1]] = val
-                        print ("intcode ", chr(self.code[self.code[self.pointer+1]]), len(self.mem[self.name]))
+                        #print ("val ", val, idx)
+                        self.code[idx] = val
+                        #print ("intcode ", chr(self.code[self.code[self.pointer+1]]), self.code[574], len(self.mem['Robot']))
                 self.pointer += 2
             elif op == 4:
                 if self.mode == "manual":
