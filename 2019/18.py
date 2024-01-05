@@ -1,4 +1,4 @@
-import time, copy
+import time, copy, heapq
 
 from itertools import combinations
 from queue import PriorityQueue
@@ -35,7 +35,7 @@ from utils import readInput
 #    print (min([len(s)-1 for s in paths]))
 
 def loadInput():
-    lines = readInput("input_18.txt")
+    lines = readInput("prova.txt")
     dungeon = {}
     #keys = {}
     #doors = {}
@@ -44,9 +44,9 @@ def loadInput():
             if c == "#":
                 continue
             if c != ".":
-                dungeon[complex(x, y)] = ord(c)
+                dungeon[(x, y)] = ord(c)
             else:
-                dungeon[complex(x, y)] = 1
+                dungeon[(x,y)] = 1
     return dungeon
 
 def set_key(keys, n):
@@ -54,41 +54,88 @@ def set_key(keys, n):
 
 def set_door(doors, n):
     return doors | 2**(n-65)
-
-def pre_dfs(m, start, target, keys, doors):
-    paths = []
-    dirs = {0:-1j, 1:1, 2:1j, 3:-1}
-
-    stack = [[(start, 0)]]
-    #print ("target", target)
-    while len(stack) != 0:
-        state = stack.pop()
-        pos, found_doors = state[-1]
-        #print (state)
-        if pos == target:
-            paths.append(state)
-            continue
-        #elif pos != start and ord('a') <= m[pos] <= ord('z'):
-        #    continue                
         
-        for d in dirs.values():
-            new_pos = pos + d
-            if new_pos in m:
-                new_found_doors = found_doors
-                if ord('A') <= m[new_pos] <= ord('Z'):
-                    if found_doors & 2**(m[new_pos]-65) == 0:        
-                        new_found_doors = set_door(new_found_doors, m[new_pos])
-                if (new_pos, new_found_doors) not in state:
-                    new_state = copy.deepcopy(state)
-                    new_state.append((new_pos, new_found_doors))
-                    stack.append(new_state)
-    
-    best_path = (float('inf'), 0)
-    for p in paths:
-        if len(p) < best_path[0]:
-            best_path = (len(p)-1, p[-1][1])
-    return best_path
+def pre_dfs(m, start, target, doors):
+    visited = set()
+    #dirs = [Complex(0,-1), Complex(1,0), Complex(0,1), Complex(-1,0)]
+    dirs = [(0,-1), (1,0), (0,1), (-1,0)]
+    pq = []
+    heapq.heappush(pq, (0, start, 0))
+    while len(pq):
+        state = heapq.heappop(pq)
+        steps, pos, found_doors = state
+        visited.add(pos)
+        if pos == target:
+            return state
+            
+        #new_found_doors = found_doors
+        if ord('A') <= m[pos] <= ord('Z'):
+            found_doors = set_door(found_doors, m[pos])
+        
+        for d in dirs:
+            new_pos = (pos[0] + d[0], pos[1] + d[1])
+            if new_pos in m and new_pos not in visited:
+                    heapq.heappush(pq, (steps+1, new_pos, found_doors))
+    return None
 
+def keys_doors_match(keys, doors):
+    if keys == 0:
+        return doors == 0
+    else:
+        return keys&doors == doors
+        
+def dfs(m, start, target):
+    #print ("target ", target)
+    visited = []
+    pq = []
+    heapq.heappush(pq, (0, start, 0))
+    found = False
+    best = None
+    i = 0
+    while len(pq):
+        state = heapq.heappop(pq)
+        steps, key, collected_keys = state
+        #print (steps, chr(key), collected_keys)
+        #visited.append((key, collected_keys))
+        #visited.append(key)
+            
+        if ord('a') <= key <= ord('z'):
+            collected_keys = set_key(collected_keys, key)
+
+        if collected_keys == target:
+            found = True
+            if best is None or best[0] > steps:
+                print ("NEW BEST FOUND ", state)
+                best = state
+        #print (collected_keys)
+        for new_key in m[key].keys():
+            #if m[key][new_key][2] & collected_keys != collected_keys:
+            #    continue
+            #print (collected_keys, set_key(0, new_key), keys_doors_match(collected_keys, new_key))
+            if keys_doors_match(collected_keys, set_key(0, new_key)):
+                continue
+            if not keys_doors_match(collected_keys, m[key][new_key][2]):# or new_key in visited:
+                continue
+            #print ("possible ", m[key][new_key], chr(new_key), new_key)
+            #if (new_key, collected_keys) not in visited:
+            #if new_key not in visited:
+            #state = (steps+m[key][new_key][0], new_key, collected_keys)
+            #idx = pq.index(state)
+            #if 
+               
+            #    if state[0] <
+            #if not state in pq:
+            heapq.heappush(pq, state)
+            
+        #if i == 8:
+        #    print (pq)
+        #    break
+        #i += 1
+    if found:
+        return best
+    else:
+        return None
+        
 def dijkstra(m, start, target, keys):
     print ("target ", target)
     visited = []
@@ -133,24 +180,31 @@ def part1(dungeon):
     start = [i for i in dungeon.keys() if dungeon[i] == ord("@")].pop()
     keys = [i for i in dungeon.keys() if ord('a') <= dungeon[i] <= ord('z')]
     doors = [i for i in dungeon.keys() if ord('A') <= dungeon[i] <= ord('Z')]
-    poi = {v:k for k,v in dungeon.items() if ord('a') <= v <= ord('z')}
-    poi.update({ord("@"):start})
-    
-    reduced_map = {}
+    #poi = {v:k for k,v in dungeon.items() if ord('a') <= v <= ord('z')}
+    #poi.update({ord("@"):start})
+    reduced_map = {dungeon[k]:{} for k in keys}
     t0 = time.time()
-    #print (poi)
-    for comb in combinations(poi.keys(), 2):
-        #print (comb)
-        best = pre_dfs(dungeon, poi[comb[0]], poi[comb[1]], keys, doors)
-        if best[0] != float('inf'):
-            if comb[1] != ord('@'):
-                reduced_map.setdefault(comb[0], {}).update({comb[1]:best})
-            if comb[0] != ord('@'):
-                reduced_map.setdefault(comb[1], {}).update({comb[0]:best})
+    for k in keys:
+        #if dungeon[k] != ord('i'):
+        #    continue
+        best = pre_dfs(dungeon, start, k, doors)
+        if best is not None:            
+            reduced_map.setdefault(ord('@'), {}).update({dungeon[k]:best})
+        for dest in keys:
+            if k == dest and dungeon[k] not in reduced_map[dungeon[dest]]:
+                continue
+            best = pre_dfs(dungeon, k, dest, doors)
+            if best is not None:
+                reduced_map.setdefault(dungeon[k], {}).update({dungeon[dest]:best})
+                reduced_map.setdefault(dungeon[dest], {}).update({dungeon[k]:best})
     print (time.time()-t0)
-    print (reduced_map)
+    print (len(reduced_map))
+    for k, v in reduced_map.items():
+        if k == ord('i'):
+            print ([chr(x) for x in v.keys()])
+        print (chr(k), len(v))
     #dijkstra(reduced_map, ord('@'), 2**(len(keys))-1, keys)
-    #dfs(dungeon, start, target, keys, doors)
+    #print (dfs(reduced_map, ord('@'), 2**(len(keys))-1))
     
     print (f"ðŸŽ… Part 1: {0}")
     
