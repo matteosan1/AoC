@@ -1,40 +1,68 @@
-from utils import readLines, manahattanDistance4d
+import time
 
-def checkConstellation(s, cs):
-    for c in cs:
-        if s in c:
-            return True
-    return False
+from collections import deque
 
-lines = readLines("constellation.txt")
+from utils import readInput
+from intcode import IntCode
 
-stars = []
-for l in lines:
-    items = list(map(int, l.split(",")))
-    stars.append(items)
+def loadInput():
+    return readInput("input_25.txt")
 
-constellations = []
+def toascii(txt):
+    converted = []
+    for c in txt:
+        converted.append(ord(c))
+    if converted[-1] != 10:
+        converted.append(10)
+    return converted
 
-while len(stars) > 0:
-    #if checkConstellation(s1, constellations):
-    #    continue
-    s1 = stars[0]
-    temp = [s1]
-    stars.remove(s1)
-    i = 0
-    while len(stars) > 0:
-        s2 = stars[i]
-        for t in temp:
-            if manahattanDistance4d(t, s2) <= 3:
-                temp.append(s2)
-                stars.remove(s2)
-                i = 0
-                break
+def output(msg):
+    while len(msg):
+        c = msg.popleft()
+        if c <= 256:
+            print (chr(c), end='')
         else:
-            i = i + 1
-        if i == len(stars):
-            break
-    constellations.append(temp)
+            return c
 
-print (constellations)
-print (len(constellations))
+def read_path():
+    with open("path.txt", "r") as f:
+        lines = f.readlines()
+    print (lines)
+    return [toascii(l) for l in lines]
+        
+def part1(lines):
+    instructions = read_path()
+    progs = []
+    channel = {"droid":deque([]), "me":deque([])}
+    prog = IntCode("droid", lines[0], channel=channel, mode="channel", output="me")
+
+    for ins in instructions:
+    #while True:
+        prog.run()
+        output(channel['me'])
+        #a = input()
+        #print (a)
+        #channel['droid'].extend(toascii(a))
+        channel['droid'].extend(ins)
+
+    objs = ["fuel cell", "space heater", "hologram", "space law space brochure", "food ration", "tambourine", "spool of cat6", "festive hat"]
+    
+
+    
+        
+    
+    print (f"🎅 Part 1: {0}")
+
+if __name__ == "__main__":
+    title = "Day 25: Cryostasis"
+    sub = "-"*(len(title)+2)
+
+    print()
+    print(f" {title} ")
+    print(sub)
+    
+    lines = loadInput()
+    
+    t0 = time.time()
+    part1(lines)
+    print ("Time: {:.5f}".format(time.time()-t0))

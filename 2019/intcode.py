@@ -1,3 +1,5 @@
+import time, copy
+
 class IntCode:
     def __init__(self, name, code, channel={}, mode="manual", output=0):
         self.code = {}
@@ -8,11 +10,19 @@ class IntCode:
         self.mode = mode
         self.mem = channel
         self.output = output
-        self.alive = True
+        self.state = "alive"
+
+    def copy_code(self):
+        self.orig_code = copy.deepcopy(self.code)
+
+    def reset(self):
+        self.code = copy.deepcopy(self.orig_code)
+        self.pointer = 0
+        self.relative_base = 0
         
     def init_code(self, line):
         self.code = {i:int(v) for i, v in enumerate(line.split(","))}
-
+        
     def get_modes(self, op):
         return [(op//(10**i))%10 for i in range(1, 5)]
             
@@ -39,7 +49,7 @@ class IntCode:
             #print (modes)
             #print (self.code[self.pointer], op, self.pointer, self.relative_base)
             if op == 99:
-                self.alive = False
+                self.state = "dead"
                 break
             elif op == 1:
                 idx = self.get_val(modes, 3, True)
@@ -47,7 +57,7 @@ class IntCode:
                 self.pointer += 4        
             elif op == 2:
                 idx = self.get_val(modes, 3, True)
-                self.code[idx] = self.get_val(modes, 1) * self.get_val(modes, 2)              
+                self.code[idx] = self.get_val(modes, 1) * self.get_val(modes, 2)
                 self.pointer += 4      
             elif op == 3:
                 if self.mode == "manual":
@@ -56,8 +66,11 @@ class IntCode:
                     self.code[idx] = int(a)
                 elif self.mode == "channel":
                     if self.name not in self.mem or len(self.mem[self.name]) == 0:
+                        #print (f"{self.name} waiting...")
+                        self.state = "blocked"
                         break
                     else:
+                        self.state = "alive"
                         idx = self.get_val(modes, 1, True)
                         val = self.mem[self.name].popleft()
                         self.code[idx] = val

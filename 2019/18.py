@@ -83,7 +83,32 @@ def keys_doors_match(keys, doors):
         return doors == 0
     else:
         return keys&doors == doors
-        
+
+def check_visited(visited, state):
+    for i in range(len(visited)):
+        if visited[i][1] == state[1] and visited[i][2] == state[2]:
+            if visited[i][0] > state[0]:
+                del visited[i]
+                return False
+            else:
+                return True
+    return False
+
+def find_keys(m, start):
+    visited = []
+    paths = []
+    key = start
+    keys = 0
+    doors = 0
+    steps = 0
+    for dest in m[key].keys():
+        if not keys_doors_match(keys, m[key][dest][2]):
+            continue
+        state = (steps+m[key][dest][0], dest, set_key(keys, dest))
+        if not check_visited(visited, state):
+            paths.append(state)
+    print (paths)
+    
 def dfs(m, start, target):
     #print ("target ", target)
     visited = []
@@ -198,13 +223,12 @@ def part1(dungeon):
                 reduced_map.setdefault(dungeon[k], {}).update({dungeon[dest]:best})
                 reduced_map.setdefault(dungeon[dest], {}).update({dungeon[k]:best})
     print (time.time()-t0)
-    print (len(reduced_map))
-    for k, v in reduced_map.items():
-        if k == ord('i'):
-            print ([chr(x) for x in v.keys()])
-        print (chr(k), len(v))
+    #print (len(reduced_map))
+    #for k, v in reduced_map.items():
+    #    print (chr(k), v)
+    #print (reduced_map)
     #dijkstra(reduced_map, ord('@'), 2**(len(keys))-1, keys)
-    #print (dfs(reduced_map, ord('@'), 2**(len(keys))-1))
+    find_keys(reduced_map, ord('@'))#, 2**(len(keys))-1))
     
     print (f"ðŸŽ… Part 1: {0}")
     
