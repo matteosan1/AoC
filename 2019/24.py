@@ -1,242 +1,135 @@
-# from utils import readLines
-# import operator
-#
-# class Group:
-#     def __init__(self, n, unit):
-#         self.n = n
-#         self.unit = unit
-#
-#     def effective_power(self):
-#         return self.n * self.unit.attack_damage
-#
-#     def __repr__(self):
-#         return str(self.n) + " " + str(self.effective_power())
-#
-# class Unit:
-#     def __init__(self, hp, ad, at, initiative, immu, weak):
-#         self.hit_points = hp #amount of damage a unit can take before it is destroyed
-#         self.attack_damage = ad #amount of damage each unit deals
-#         self.attack_type = at
-#         self.initiative = initiative #higher initiative units attack first and win ties)
-#         self.weaknesses = weak
-#         self.immunities = immu
-#
-# lines = readLines("immune.txt")
-#
-# immunes = []
-# for l in lines:
-#     items = l.split(",")
-#     u = Unit(int(items[1]), int(items[4].split()[0]), items[4].split()[1], int(items[5]), items[2].split()[1:], items[3].split()[1:])
-#     immunes.append(Group(int(items[0]), u))
-#
-# lines = readLines("infection.txt")
-#
-# infections = []
-# for l in lines:
-#     items = l.split(",")
-#     u = Unit(int(items[1]), int(items[4].split()[0]), items[4].split()[1], int(items[5]), items[2].split()[1:], items[3].split()[1:])
-#     infections.append(Group(int(items[0]), u))
-#
-# # TARGET SELECTION
-# immunes.sort(key=lambda c:int(c.n*c.unit.attack_damage), reverse=True)
-# infections.sort(key=lambda c:int(c.n*c.unit.attack_damage), reverse=True)
-# for g in immunes:
-#     g_max = None
-#     for i1, g1 in enumerate(infections):
-#         for at in g.attack_type:
-#             if at in g1.weaknesses:
-#
-#     print (g, g.n, g.unit.attack_damage)
-#
-#     If
-#     an
-#     attacking
-#     group is considering
-#     two
-#     defending
-#     groups
-#     to
-#     which
-#     it
-#     would
-#     deal
-#     equal
-#     damage, it
-#     chooses
-#     to
-#     target
-#     the
-#     defending
-#     group
-#     with the largest effective power; if there is still a tie, it chooses the defending group with the highest initiative.If it cannot deal any defending groups damage, it does not choose a target.Defending groups can only be chosen as a target by one attacking group.
+import time, numpy as np, copy
 
-import re
+from numpy import array_equal
 
+from utils import readInput
 
-def binary_search(f, lo=0, hi=None):
-    """
-    Returns a value x such that f(x) is true.
-    Based on the values of f at lo and hi.
-    Assert that f(lo) != f(hi).
-    """
-    lo_bool = f(lo)
-    if hi is None:
-        offset = 1
-        while f(lo + offset) == lo_bool:
-            offset *= 2
-        hi = lo + offset
-    else:
-        assert f(hi) != lo_bool
-    best_so_far = lo if lo_bool else hi
-    while lo <= hi:
-        mid = (hi + lo) // 2
-        result = f(mid)
-        if result:
-            best_so_far = mid
-        if result == lo_bool:
-            lo = mid + 1
-        else:
-            hi = mid - 1
-    return best_so_far
+def loadInput():
+    lines = readInput("input_24.txt")
+    #lines = readInput("prova.txt")
+    bugs = np.zeros(shape=(len(lines[0]), len(lines)))
+    for y, l in enumerate(lines):
+        for x, c in enumerate(l):
+            if c == '#':
+                bugs[y, x] = 1
+    return bugs
+    
+def arreq_in_list(myarr, list_arrays):
+    return next((True for elem in list_arrays if array_equal(elem, myarr)), False)
 
-
-inp = """
-Immune System:
-8233 units each with 2012 hit points (immune to radiation) with an attack that does 2 fire damage at initiative 5
-2739 units each with 5406 hit points (immune to fire) with an attack that does 16 fire damage at initiative 3
-229 units each with 6782 hit points (weak to slashing) with an attack that does 260 cold damage at initiative 7
-658 units each with 12313 hit points with an attack that does 132 bludgeoning damage at initiative 4
-3231 units each with 1872 hit points (weak to slashing, cold) with an attack that does 5 bludgeoning damage at initiative 1
-115 units each with 10354 hit points (immune to fire, radiation, bludgeoning) with an attack that does 788 cold damage at initiative 2
-1036 units each with 9810 hit points (weak to radiation) with an attack that does 94 bludgeoning damage at initiative 8
-3389 units each with 6734 hit points with an attack that does 19 cold damage at initiative 18
-2538 units each with 5597 hit points (weak to slashing, radiation) with an attack that does 15 slashing damage at initiative 16
-6671 units each with 6629 hit points (immune to bludgeoning) with an attack that does 8 slashing damage at initiative 14
-
-Infection:
-671 units each with 17509 hit points with an attack that does 52 cold damage at initiative 12
-7194 units each with 41062 hit points (immune to cold; weak to radiation) with an attack that does 11 bludgeoning damage at initiative 20
-1147 units each with 37194 hit points (weak to radiation, fire) with an attack that does 56 slashing damage at initiative 11
-569 units each with 27107 hit points (weak to slashing, bludgeoning) with an attack that does 93 slashing damage at initiative 17
-140 units each with 19231 hit points (immune to slashing; weak to bludgeoning) with an attack that does 247 slashing damage at initiative 19
-2894 units each with 30877 hit points (immune to radiation, bludgeoning) with an attack that does 15 radiation damage at initiative 10
-1246 units each with 8494 hit points (weak to fire) with an attack that does 12 bludgeoning damage at initiative 9
-4165 units each with 21641 hit points (weak to radiation; immune to fire) with an attack that does 10 radiation damage at initiative 6
-7374 units each with 24948 hit points (weak to cold) with an attack that does 5 fire damage at initiative 13
-4821 units each with 26018 hit points with an attack that does 10 fire damage at initiative 15
-""".strip()
-
-
-def doit(boost=0, part1=False):
-    lines = inp.splitlines()
-    immune, infection = inp.split("\n\n")
-
-    teams = []
-
-    REGEX = re.compile(
-        r"(\d+) units each with (\d+) hit points (\([^)]*\) )?with an attack that does (\d+) (\w+) damage at initiative (\d+)")
-
-    # namedtuple? who needs namedtuple with hacks like these?
-    UNITS, HP, DAMAGE, DTYPE, FAST, IMMUNE, WEAK = range(7)
-
-    blah = boost
-    for inps in [immune, infection]:
-        lines = inps.splitlines()[1:]
-        team = []
-        for line in lines:
-            s = REGEX.match(line)
-            units, hp, extra, damage, dtype, fast = s.groups()
-            immune = []
-            weak = []
-            if extra:
-                extra = extra.rstrip(" )").lstrip("(")
-                for s in extra.split("; "):
-                    if s.startswith("weak to "):
-                        weak = s[len("weak to "):].split(", ")
-                    elif s.startswith("immune to "):
-                        immune = s[len("immune to "):].split(", ")
-                    else:
-                        assert False
-            u = [int(units), int(hp), int(damage) + blah, dtype, int(fast), set(immune), set(weak)]
-            team.append(u)
-        teams.append(team)
-        blah = 0
-
-    def power(t):
-        return t[UNITS] * t[DAMAGE]
-
-    def damage(attacking, defending):
-        mod = 1
-        if attacking[DTYPE] in defending[IMMUNE]:
-            mod = 0
-        elif attacking[DTYPE] in defending[WEAK]:
-            mod = 2
-        return power(attacking) * mod
-
-    def sort_key(attacking, defending):
-        return (damage(attacking, defending), power(defending), defending[FAST])
-
-    while all(not all(u[UNITS] <= 0 for u in team) for team in teams):
-        teams[0].sort(key=power, reverse=True)
-        teams[1].sort(key=power, reverse=True)
-
-        targets = []
-
-        # target selection
-        for team_i in range(2):
-            other_team_i = 1 - team_i
-            team = teams[team_i]
-            other_team = teams[other_team_i]
-
-            remaining_targets = set(i for i in range(len(other_team)) if other_team[i][UNITS] > 0)
-            my_targets = [None] * len(team)
-
-            for i, t in enumerate(team):
-                if not remaining_targets:
-                    break
-                best_target = max(remaining_targets, key=lambda i: sort_key(t, other_team[i]))
-                enemy = other_team[best_target]
-                if damage(t, enemy) == 0:
-                    continue
-                my_targets[i] = best_target
-                remaining_targets.remove(best_target)
-            targets.append(my_targets)
-
-        # attacking
-        attack_sequence = [(0, i) for i in range(len(teams[0]))] + [(1, i) for i in range(len(teams[1]))]
-        attack_sequence.sort(key=lambda x: teams[x[0]][x[1]][FAST], reverse=True)
-        did_damage = False
-        for team_i, index in attack_sequence:
-            to_attack = targets[team_i][index]
-            if to_attack is None:
+def biodiversity(bugs, part=1):
+    tot = 0
+    for y in range(bugs.shape[1]):
+        for x in range(bugs.shape[0]):
+            if part == 2 and x == y == 2:
                 continue
-            me = teams[team_i][index]
-            other = teams[1 - team_i][to_attack]
+            val = bugs[y, x]
+            tot += 2**(x+y*bugs.shape[1]) if val == 1 else 0 
+    return tot
+    
+def part1(bugs):
+    old_times = []
+    update = np.zeros_like(bugs)
+    dirs = ((0,1), (1,0), (-1,0), (0,-1))
+    while True:
+        for y in range(bugs.shape[1]):
+            for x in range(bugs.shape[0]):
+                neighs = 0
+                for d in dirs:
+                    nx, ny = x+d[0], y+d[1]
+                    if 0 <= nx < bugs.shape[0] and 0 <= ny < bugs.shape[1]:
+                        neighs += bugs[nx, ny]
+                if bugs[x, y] == 0:
+                    if neighs in (1, 2):
+                        update[x, y] = 1
+                    else:
+                        update[x, y] = 0
+                else:
+                    if neighs == 1:
+                        update[x, y] = 1
+                    else:
+                        update[x, y] = 0
+        bugs = update.copy()
+        if arreq_in_list(bugs, old_times):
+            break
+        old_times.append(bugs)
 
-            d = damage(me, other)
-            d //= other[HP]
+    print (f"ðŸŽ… Part 1: {biodiversity(bugs)}")
+        
+def neighbours(levels, update, level):
+    dirs = ((0,1), (1,0), (-1,0), (0,-1))
+    xmax = levels[level].shape[0]-1
+    ymax = levels[level].shape[1]-1
+    for y in range(levels[level].shape[1]):
+        for x in range(levels[level].shape[0]):
+            if x == y == 2:
+                continue
+            neighs = 0
+            for d in dirs:
+                if d == (0,-1) and y == 0:
+                    neighs += levels[level+1][2, 1]
+                elif d == (-1,0) and x == 0:
+                    neighs += levels[level+1][1, 2]
+                elif d == (0, 1) and y == ymax:
+                    neighs += levels[level+1][2, 3]
+                elif d == (1, 0) and x == xmax:
+                    neighs += levels[level+1][3, 2]
+                elif d == (0, 1) and x == 2 and y == 1:
+                    neighs += levels[level-1][:, 0].sum()
+                elif d == (0, -1) and x == 2 and y == 3:
+                    neighs += levels[level-1][:, ymax].sum()                
+                elif d == (1, 0) and x == 1 and y == 2:
+                    neighs += levels[level-1][0, :].sum()
+                elif d == (-1, 0) and x == 3 and y == 2:
+                    neighs += levels[level-1][xmax, :].sum()
+                else:
+                    nx, ny = x+d[0], y+d[1]
+                    neighs += levels[level][nx, ny]
 
-            if teams[1 - team_i][to_attack][UNITS] > 0 and d > 0:
-                did_damage = True
+            if levels[level][x, y] == 0:
+                if neighs in (1, 2):
+                    update[level][x, y] = 1
+                else:
+                    update[level][x, y] = 0
+            else:
+                if neighs == 1:
+                    update[level][x, y] = 1
+                else:
+                    update[level][x, y] = 0
 
-            teams[1 - team_i][to_attack][UNITS] -= d
-            teams[1 - team_i][to_attack][UNITS] = max(teams[1 - team_i][to_attack][UNITS], 0)
-        if not did_damage:
-            return None
+def part2(bugs):
+    levels = {0:bugs}
+    for i in range(1, 200):
+        levels.update({i:np.zeros_like(bugs)})
+        levels.update({-i:np.zeros_like(bugs)})
+    min_level, max_level = min(levels.keys()), max(levels.keys())
+    for minutes in range(200):
+        update = copy.deepcopy(levels)
+        for k in levels:
+            if k == max_level or k == min_level:
+                continue
+            neighbours(levels, update, k)
+        levels = copy.deepcopy(update)
 
-    if part1:
-        return sum(u[UNITS] for u in teams[0]) or sum(u[UNITS] for u in teams[1])
-    asd = sum(u[UNITS] for u in teams[0])
-    if asd == 0:
-        return None
-    else:
-        return asd
+    tot = 0
+    for k in levels:
+        tot += levels[k].sum()
+    print (f"ðŸŽ„ Part 2: {tot}")
+    
+if __name__ == "__main__":
+    title = "Day 24: Planet of Discord"
+    sub = "-"*(len(title)+2)
 
+    print()
+    print(f" {title} ")
+    print(sub)
+    
+    inputs = loadInput()
 
-print(doit(part1=True))
-# I did a manual binary search, submitted the right answer, then added in did_damage.
-# Turns out that doit can infinite loop without the did_damage check!
-# WARNING: "doit" is not guaranteed to be monotonic! You should manually check values yourself.
-# print(doit(33))
-maybe = binary_search(doit)
-print(doit(maybe))
+    t0 = time.time()
+    part1(copy.deepcopy(inputs))
+    print ("Time: {:.5f}".format(time.time()-t0))
+    
+    t0 = time.time()
+    part2(inputs)
+    print ("Time: {:.5f}".format(time.time()-t0))

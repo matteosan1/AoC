@@ -1,6 +1,7 @@
 import time
 
 from collections import deque
+from itertools import combinations
 
 from utils import readInput
 from intcode import IntCode
@@ -46,12 +47,24 @@ def part1(lines):
         channel['droid'].extend(ins)
 
     objs = ["fuel cell", "space heater", "hologram", "space law space brochure", "food ration", "tambourine", "spool of cat6", "festive hat"]
-    
-
-    
-        
-    
-    print (f"🎅 Part 1: {0}")
+    current = set()
+    tot = 0
+    for i in range(1, 8):
+        for c in combinations(range(8), i):
+            to_remove = current - set(c)
+            to_add = set(c) - current
+            cmds = []
+            for a in to_add:
+                cmds.append(toascii(f"take {objs[a]}"))
+            for r in to_remove:
+                cmds.append(toascii(f"drop {objs[r]}"))
+            cmds.append(toascii("south"))
+            for cmd in cmds:
+                channel['droid'].extend(cmd)
+                prog.run()
+                output(channel['me'])
+            current = set(c)
+    print (f"🎅 Part 1: {[objs[c] for c in current]}")
 
 if __name__ == "__main__":
     title = "Day 25: Cryostasis"

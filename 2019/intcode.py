@@ -27,7 +27,6 @@ class IntCode:
         return [(op//(10**i))%10 for i in range(1, 5)]
             
     def get_val(self, modes, offset=0, is_input=False):
-        #print (modes[offset])
         if modes[offset] == 0:
             idx = self.code[self.pointer + offset]
         elif modes[offset] == 1:
@@ -46,8 +45,6 @@ class IntCode:
         while True:
             op = self.code[self.pointer]%100
             modes = self.get_modes(self.code[self.pointer])
-            #print (modes)
-            #print (self.code[self.pointer], op, self.pointer, self.relative_base)
             if op == 99:
                 self.state = "dead"
                 break
@@ -66,7 +63,6 @@ class IntCode:
                     self.code[idx] = int(a)
                 elif self.mode == "channel":
                     if self.name not in self.mem or len(self.mem[self.name]) == 0:
-                        #print (f"{self.name} waiting...")
                         self.state = "blocked"
                         break
                     else:
@@ -79,7 +75,6 @@ class IntCode:
                 if self.mode == "manual":
                     print (f"val: {self.get_val(modes, 1)}")
                 elif self.mode == "channel":
-                    #print (f"val: {self.get_val(modes, 1)}")
                     self.mem[self.output].append(self.get_val(modes, 1))
                 self.pointer += 2
             elif op == 5:
