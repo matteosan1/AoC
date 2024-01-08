@@ -8,6 +8,7 @@ def loadInput():
 
 def get_fuel(mass, tot_fuel=0):
     new_mass = mass//3-2
+    print (new_mass)
     if new_mass > 0:
         tot_fuel += new_mass
         return get_fuel(new_mass, tot_fuel)
