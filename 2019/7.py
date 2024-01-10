@@ -1,31 +1,36 @@
 import time
 
 from itertools import permutations
+#from queue import Queue
+from threading import Thread
 
 from utils import readInput
-from intcode import IntCode
+from intcode import IntCode, BlockingQueue
             
 def loadInput():
     return readInput("input_7.txt")
-    
-#def replace_mem(code, n, val):
-#    code[n] = val
-    
+        
 def part1(lines):
     max_val = 0
     phases = [0,1,2,3,4]
+    progs = []
+    threads = []
+    queue = BlockingQueue()
     for perm in permutations(phases, 5):
-        channels = {i:[p] for i, p in enumerate(perm)}
-        channels[0].insert(0, 0)
-        progs = [IntCode(i, lines[0], channels, mode="channel", output=(i+1)%5) for i in range(5)]
-        progs[-1].output = "T"
         for i in range(5):
-            progs[i].run()
-
-        max_val = max(max_val, channels["T"][0])
+            progs.append(IntCode(i, lines[0], queue=queue, mode="thread", output=(i+1)%5))
+            threads.append(Thread(target=progs[-1].run))
+            threads[-1].start()
+            queue.put((i, perm[i]))
+            if i == 0:
+                queue.put((0, 0))
+        threads[-1].join()
+        max_val = max(max_val, queue.get()[1])
+        break
     print (f"ðŸŽ„ Part 1: {max_val}")
 
 def part2(lines):
+    return 0
     max_val = 0
     phases = [9,8,7,6,5]
     for perm in permutations(phases, 5):

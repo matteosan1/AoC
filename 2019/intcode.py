@@ -1,7 +1,54 @@
-import time, copy
+import time, copy, threading, queue
+
+class BlockingQueue:
+    def __init__(self, maxsize=0):
+        self.queue = queue.Queue(maxsize)
+        self.lock = threading.Lock()
+        self.empty_event = threading.Event()
+        self.full_event = threading.Event()
+        
+    def empty(self):
+        return self.queue.empty()
+
+    def put(self, item):
+        with self.lock:
+            #while self.queue.full():
+            #    self.full_event.wait()
+
+            self.queue.put(item)
+            self.empty_event.set()
+            
+    def super_get(self, label):
+        val = None
+        with self.lock:
+            self.empty_event.wait()   
+            if self.peek() is not None
+                if self.peek()[0] == label:
+                    val = self.queue.get()[1]  
+        return val
+
+    def get(self, timeout=None):
+        with self.lock:
+            while self.queue.empty():
+                self.empty_event.wait(timeout)
+
+                if timeout and timeout < time.monotonic():
+                    return None
+
+            item = self.queue.get()
+            self.full_event.set()
+
+            return item
+
+    def peek(self):
+        with self.lock:
+            if self.queue.empty():
+                return None
+
+            return self.queue.queue[0]
 
 class IntCode:
-    def __init__(self, name, code, channel={}, mode="manual", output=0):
+    def __init__(self, name, code, queue=None, channel={}, mode="manual", output=0):
         self.code = {}
         self.pointer = 0
         self.relative_base = 0
@@ -11,6 +58,7 @@ class IntCode:
         self.mem = channel
         self.output = output
         self.state = "alive"
+        self.queue = queue
 
     def copy_code(self):
         self.orig_code = copy.deepcopy(self.code)
@@ -58,24 +106,36 @@ class IntCode:
                 self.pointer += 4      
             elif op == 3:
                 if self.mode == "manual":
-                    a = input("Give input ")
-                    idx = self.get_val(modes, 1, True)
-                    self.code[idx] = int(a)
+                    a = int(input("Give input "))
                 elif self.mode == "channel":
                     if self.name not in self.mem or len(self.mem[self.name]) == 0:
                         self.state = "blocked"
                         break
                     else:
                         self.state = "alive"
-                        idx = self.get_val(modes, 1, True)
                         val = self.mem[self.name].popleft()
-                        self.code[idx] = val
+                elif self.mode == "thread":
+                    print (f"{self.name} is waiting...")
+                    #val = None
+                    while True:
+                        val = self.queue.super_get(self.name)
+                        print (val)
+                        if val is not None:
+                            break
+                        time.sleep(0.1)
+                    #val = self.queue.get()[1]
+                    print (f"{self.name} {val}")
+                idx = self.get_val(modes, 1, True)
+                #print (idx, val)
+                self.code[idx] = val                
                 self.pointer += 2
             elif op == 4:
                 if self.mode == "manual":
                     print (f"val: {self.get_val(modes, 1)}")
                 elif self.mode == "channel":
                     self.mem[self.output].append(self.get_val(modes, 1))
+                elif self.mode == "thread":
+                    self.queue.put((self.output, self.get_val(modes, 1)))
                 self.pointer += 2
             elif op == 5:
                 val = self.get_val(modes, 1)
@@ -100,4 +160,4 @@ class IntCode:
                 self.relative_base += self.get_val(modes, 1)
                 self.pointer += 2
             else:
-                raise ValueError(f"Unknown instruction: {op}")
+                raise ValueError(f"Unknown instruction {op} for bot {self.name}")
