@@ -9,14 +9,14 @@ def loadInput():
     return readInput("input_9.txt")
 
 def part1(lines):
-    prog = IntCode(0, lines[0])
+    prog = IntCode(0, lines[0], mode="manual")
     prog.run()
-    print (f"ðŸŽ„ Part 1: Intcode output")
+    print (f"🎅 Part 1: {prog.output}")
 
 def part2(lines):
     prog = IntCode(0, lines[0])
     prog.run()
-    print (f"ðŸŽ„ðŸŽ… Part 2: Intcode output")
+    print (f"🎅🎄 Part 2: {prog.output}")
 
 if __name__ == "__main__":
     title = "Day 9: Sensor Boost"

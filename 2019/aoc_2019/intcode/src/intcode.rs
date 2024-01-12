@@ -1,8 +1,7 @@
-use std::convert::TryInto;
 use std::fmt;
 
 #[derive(Debug)]
-pub struct IntCode {
+pub struct Machine {
     mem: Vec<isize>,
     ip: isize,
     base: isize,
@@ -17,7 +16,7 @@ impl Machine {
         }
     }
     
-    pub reserve(&mut self, size: usize) {
+    pub fn reserve(&mut self, size: usize) {
         if self.mem.len() < size {
             self.mem.resize(size, 0);
         }
@@ -43,13 +42,13 @@ impl Machine {
     }
     
     fn read(&mut self, i: isize) -> Result<isize, Exit> {
-        let i: usize = i.try_into().map_err(|_| Exit::NegativePoiter)?;
+        let i: usize = i.try_into().map_err(|_| Exit::NegativePointer)?;
         
         self.reserve(i+1);
         Ok(self.mem[i])
     }
     
-    fn write(&mut self, i: isize, val: isize) -> result<(), Exit> {
+    fn write(&mut self, i: isize, val: isize) -> Result<(), Exit> {
         let i: usize = i.try_into().map_err(|_| Exit::NegativePointer)?;
         
         self.reserve(i+1);
@@ -126,7 +125,7 @@ impl Machine {
                 }
                 Ok(())
             }
-        
+            
             6 => {
                 let a = self.param(1)?;
                 let b = self.param(2)?;
@@ -137,7 +136,7 @@ impl Machine {
                 }
                 Ok(())
             }
-        
+            
             7 => {
                 let a = self.param(1)?;
                 let b = self.param(2)?;
@@ -145,7 +144,7 @@ impl Machine {
                 self.ip += 4;
                 Ok(())
             }
-
+            
             8 => {
                 let a = self.param(1)?;
                 let b = self.param(2)?;
@@ -154,6 +153,13 @@ impl Machine {
                 Ok(())
             }
 
+            9 => {
+                let a = self.param(1)?;
+                self.base += a;
+                self.ip += 2;
+                Ok(())
+            }
+            
             99 => Err(Exit::Halted),
             
             unknown => Err(Exit::IllegalInstruction(unknown))
@@ -169,11 +175,10 @@ impl Machine {
             }
         }
     }    
-    
+
     pub fn run<I, O>(&mut self, input: I, output: O) -> Exit
-    where
-        I: IntoIterator<Item = isize>,
-        O: FnMut(isize),
+    where I: IntoIterator<Item=isize>,
+          O: FnMut(isize)
     {
         let mut input = input.into_iter().peekable();
         let mut output = output;
@@ -195,7 +200,7 @@ impl Machine {
 #[derive(Debug, PartialEq)]
 pub enum Exit {
     NegativePointer,
-    IllegamMode(isize),
+    IllegalMode(isize),
     IllegalInstruction(isize),
     Input,
     Output(isize),
@@ -203,32 +208,14 @@ pub enum Exit {
 }
 
 impl fmt::Display for Exit {
-        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-            match self {
-                Exit::NegativePointer => write!(f, "attempted to use a negative value as pointer"),
-                Exit::IllegalMode(mode) => write!(f, "illegal mode: {}", mode),
-                Exit::IllegalInstruction(inst) => write!(f, "illegal instruction: {}", inst),
-                Exit::Input => write!(f, "need input"),
-                Exit::Output(a) => write!(f, "got output: {}", a),
-                Exit::Halted => write!(f, "halted"),
-            }
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Exit::NegativePointer => write!(f, "attempted to use a negative value as pointer"),
+            Exit::IllegalMode(mode) => write!(f, "illegal mode: {}", mode),
+            Exit::IllegalInstruction(inst) => write!(f, "illegal instruction: {}", inst),
+            Exit::Input => write!(f, "need input"),
+            Exit::Output(a) => write!(f, "got output: {}", a),
+            Exit::Halted => write!(f, "halted"),
         }
     }
 }
-
-
-fn run(program: &[isize], input: &[isize]) -> (Machine, Exit, Vec<isize>) {
-    let mut machine = Machine::with_program(program);
-    let mut output = Vec::new();
-    
-    let exit = machine.run(input.iter().copied(), |a| output.push(a));
-    (machine, exit, output)
-}
-
-fn day2() {
-    let (machine, exit, _output) = run(&[1,9,10,3,2,3,11,0,99,30,40,50], &[]);
-    assert_eq!(exit, Exit::Halted);
-    assert_eq!(machine.mem()[0], 3500);
-}
-    
-    

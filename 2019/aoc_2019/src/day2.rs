@@ -4,46 +4,46 @@ pub mod day2 {
     extern crate aoc;
     use aoc::utils;
 
-    use crate::intcode::intcode::{IntCode, IntCodeMode};
+    extern crate intcode;
+    use intcode::intcode::Machine;
 
     pub fn solve() {
         let input = utils::read_input("../input_2.txt");
+        let program = input[0].split(",").map(|x| x.parse::<isize>().unwrap()).collect::<Vec::<isize>>();
+        
+        let now = Instant::now();
+        
+        let res1 = part1(&program);
+        let elapsed = now.elapsed();                
+        println!("{} {} ({:.2?})", utils::santa(2, 1), res1, elapsed);
 
-        let mut prog = IntCode::new(0, input[0].to_string(), IntCodeMode::Manual);
-        prog.run();
-        
-  //      let now = Instant::now();
-        
-  //      let res1 = part1(&input);
-  //      let elapsed = now.elapsed();                
-  //      println!("{} {} ({:.2?})", utils::santa(2, 1), res1, elapsed);
-  //      
-  //      let res2 = part2(&input);
-  //      let elapsed = now.elapsed();
-  //      println!("{} {} ({:.2?})", utils::christmas_tree(2, 2), res2, elapsed);        
+        let res2 = part2(&program);
+        let elapsed = now.elapsed();
+        println!("{} {} ({:.2?})", utils::christmas_tree(2, 2), res2, elapsed);        
     }
 
-//    fn part1(input: &Vec<String>) -> i32 {
-//        let area = input.iter()
-//            .map(|line| {
-//                let x: Vec<_> = line.split("x")
-//                    .map(|val| val.parse::<i32>().unwrap())
-//                    .collect();
-//                let a = [x[0]*x[1], x[1]*x[2], x[0]*x[2]];
-//                2*a.iter().sum::<i32>()+*a.iter().min().unwrap()
-//            }).sum::<i32>();
-//        area
-//    }
-//
-//    pub fn part2(input: &Vec<String>) -> i32 {
-//     let length = input.iter()
-//         .map(|line| {
-//             let x: Vec<_> = line.split("x")
-//                 .map(|val| val.parse::<i32>().unwrap())
-//                 .collect();
-//             let a = [x[0]+x[1], x[1]+x[2], x[0]+x[2]];
-//             x[0]*x[1]*x[2] + *a.iter().min().unwrap()*2
-//         }).sum::<i32>();
-//        length
-//    }
+    fn part1(program: &[isize]) -> isize {
+        let mut machine = Machine::with_program(program);
+        let mut output = Vec::<isize>::new();
+        machine.mem_mut()[1] = 12;
+        machine.mem_mut()[2] = 2;
+        let _exit = machine.run([], |a| output.push(a));
+        machine.mem()[0]
+    }
+
+    fn part2(program: &[isize]) -> isize {
+        for noun in 1..100 {
+            for verb in 1..100 {
+                let mut machine = Machine::with_program(program);
+                let mut output = Vec::<isize>::new();
+                machine.mem_mut()[1] = noun;
+                machine.mem_mut()[2] = verb;
+                let _exit = machine.run([], |a| output.push(a));
+                if machine.mem()[0] == 19690720 {
+                    return noun*100 + verb;
+                }
+            }
+        }
+        0
+    }
 }

@@ -1,103 +1,121 @@
 import time, copy
 
+from queue import Queue
+from threading import Thread
+
 from utils import readInput
 from intcode import IntCode
-from collections import deque
             
 def loadInput():
     return readInput("input_13.txt")
 
-def read_output(deq):
-    blocks = []
-    walls = []
-    ball = None
-    pad = None
-    score = 0
-    for i in range(2, len(deq), 3):
-        pos = complex(deq[i-2], deq[i-1])
-        tile_id = deq[i]
-        if tile_id == 2:
-            blocks.append(pos)
-        elif tile_id == 1:
-            walls.append(pos)
-        elif tile_id == 3:
-            pad = pos
-        elif tile_id == 4:
-            ball = pos
-        elif pos.real == -1:
-            score = tile_id
-    return (blocks, walls, pad, ball, score)
+class Board:
+    def __init__(self):
+        self.blocks = []
+        self.walls = []
+        self.pad = (0, 0)
+        self.ball = (0, 0)
+        self.score = 0
+
+    def read(self, queue):
+        triplet = []
+        for i in range(3):
+            try:
+                triplet.append(queue.get(block=False))
+            except:
+                return False
+            if triplet[-1] == "BYE":
+                return False
+        if triplet[2] == 2:
+            self.blocks.append((triplet[0], triplet[1]))
+        elif triplet[2] == 1:
+            self.walls.append((triplet[0], triplet[1]))
+        elif triplet[2] == 3:
+            self.pad = (triplet[0], triplet[1])
+        elif triplet[2] == 4:
+            self.ball = (triplet[0], triplet[1])
+        elif triplet[0] == -1:
+            self.score = triplet[2]
+        return True
+                
+    def show_game(self, dir):
+        xs = [h[0] for h in self.walls]
+        ys = [h[1] for h in self.walls]
+        xmin, xmax = min(xs), max(xs)
+        ymin, ymax = min(ys), max(ys)
+        for y in range(int(ymin), int(ymax+1)):
+            for x in range(int(xmin), int(xmax+1)):
+                pos = (x, y)
+                if pos in self.blocks:
+                    print("▮", end='')
+                elif pos == self.pad:
+                    if dir == -1:
+                        print("<", end='')
+                    elif dir == 1:
+                        print(">", end='')
+                    else:
+                        print("W", end='')
+                elif pos == self.ball:
+                    print("O", end='')
+                else:
+                    print(" ", end='')
+            print()
 
 def part1(lines):
-    channel = {"Sim":deque([])}
-    prog = IntCode("Sim", lines[0], channel=channel, mode="channel", output="Sim")
+    board = Board()
+    channel = {"Sim":Queue(), "me":Queue()}
+    prog = IntCode("Sim", lines[0], qin=channel['Sim'], qout=channel['me'], mode="channel")
+    
     prog.run()
-    playground = read_output(channel["Sim"])    
-    print (f"🎅 Part 1: {len(playground[0])}")
+    while True:
+        if not board.read(channel["me"]):
+            break
+    print (f"🎅 Part 1: {len(board.blocks)}")
 
-def show_game(playground, dir):
-    xs = [h.real for h in playground[1]]
-    ys = [h.imag for h in playground[1]]
-    xmin, xmax = min(xs), max(xs)
-    ymin, ymax = min(ys), max(ys)
-    for y in range(int(ymin), int(ymax+1)):
-        for x in range(int(xmin), int(xmax+1)):
-            pos = complex(x, y)
-            if pos in playground[0]:
-                print("▮", end='')
-            elif pos == playground[2]:
-                if dir == -1:
-                    print("<", end='')
-                elif dir == 1:
-                    print(">", end='')
-                else:
-                    print("W", end='')
-            elif pos == playground[3]:
-                print("O", end='')
-            else:
-                print(" ", end='')
-        print()
+from threading import Thread
     
 def part2(lines):
-    channel = {"Sim":deque([]), "me":deque([])}
-    prog = IntCode("Sim", lines[0], channel=channel, mode="channel", output="me")
+    board = Board()
+    channel = {"Sim":Queue(), "me":Queue()}
+    prog = IntCode("Sim", lines[0], qin=channel['Sim'], qout=channel['me'], mode="channel")
     prog.code[0] = 2
     prog.run()
-    playground = read_output(channel["me"])
+    while True:
+        if not board.read(channel["me"]):
+            break
     dir = 1
-    ball_old = playground[3]
-    pad_old = playground[2]
-    score_old = playground[4]
-    channel["Sim"].append(0)
-    while playground[3].imag < 20:
+    ball_old = board.ball
+    pad_old = board.ball
+    score_old = board.score
+    channel["Sim"].put(0)
+
+    while board.ball[1] < 20:    
         prog.run()
-        if not prog.alive:
-            break;
-        playground = read_output(channel["me"])
-        ball = playground[3]
-        pad = playground[2]
-        score = playground[4]
-        if ball.real > ball_old.real:
+        while True:
+            if not board.read(channel["me"]):
+                break
+
+        if prog.state == "dead":
+            break
+
+        ball = board.ball
+        pad = board.pad
+        if ball[0] > ball_old[0]:
             dir = 1
         else:
             dir = -1
-
         move = 0
-        if ball.real == pad.real:
+        if ball[0] == pad[0]:
             move = dir
         else:
-            if ball.real > pad.real:
+            if ball[0] > pad[0]:
                 move = 1
             else:
                 move = -1
-        channel["Sim"].append(move)
-        #show_game(playground, move)
-        
+        channel["Sim"].put(move)
         ball_old = ball
         pad_old = pad
-        channel["me"].clear()
-    final_score = channel['me'][-1]
-    print (f"🎅🎄 Part 2: {final_score}")
+    print (f"🎅🎄 Part 2: {board.score}")
 
 if __name__ == "__main__":
     title = "Day 13: Care Package"

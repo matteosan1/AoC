@@ -1,71 +1,40 @@
 pub mod day9 {
-    use regex::Regex;
-    use itertools::Itertools;
-    use std::collections::HashMap;
+    use std::time::Instant;
     
     extern crate aoc;
     use aoc::utils;
 
-    fn insert_location<'a>(locations: &mut HashMap::<&'a str, HashMap<&'a str, i32>>, start: &'a str, end: &'a str, dist: &str) {
-        let km = dist.parse::<i32>().unwrap();
+    extern crate intcode;
+    use intcode::intcode::Machine;
+
+    pub fn solve() {
+        let input = utils::read_input("../input_9.txt");
+        let program = input[0].split(",").map(|x| x.parse::<isize>().unwrap()).collect::<Vec::<isize>>();
         
-        if locations.contains_key(&start) {
-            locations.get_mut(&start).unwrap().insert(end, km);
-        } else {
-            let mut temp = HashMap::<&str, i32>::new();
-            temp.insert(end, km);
-            locations.insert(start, temp);
-        }        
+        let now = Instant::now();
+        
+        let res1 = part1(&program);
+        let elapsed = now.elapsed();                
+        println!("{} {} ({:.2?})", utils::santa(9, 1), res1, elapsed);
+
+        let res2 = part2(&program);
+        let elapsed = now.elapsed();
+        println!("{} {} ({:.2?})", utils::christmas_tree(9, 2), res2, elapsed);        
     }
 
-    pub fn part1(input: &Vec<String>) {
-        let re = Regex::new(r"(\w+)\sto\s(\w+)\s=\s([0-9]+)").unwrap();
-        let mut locations = HashMap::<&str, HashMap<&str, i32>>::new();
-        for line in input.iter() {
-            for (_, [from, to, dist]) in re.captures_iter(line).map(|c| c.extract()) {
-                insert_location(&mut locations, from, to, dist);
-                insert_location(&mut locations, to, from, dist);                
-            }
-        }
-        let k: Vec<_> = locations.keys().collect();
-
-        let mut min_distance = i32::MAX;
-        for perm in k.iter().permutations(k.len()) {
-            let mut dist = 0;
-            for i in 0..perm.len()-1 {
-                dist += locations.get(*perm[i]).unwrap().get(*perm[i+1]).unwrap();
-            }
-            if dist < min_distance {
-                min_distance = dist;
-            }
-        }
-
-        println!("{} {}", utils::santa(9, 1), min_distance);
+    fn part1(program: &[isize]) -> isize {
+        let mut machine = Machine::with_program(program);
+        let mut output = Vec::<isize>::new();
+        let input = vec![1];
+        let _exit = machine.run(input.iter().copied(), |a| output.push(a));
+        *output.last().unwrap()
     }
-    
-    pub fn part2(input: &Vec<String>) {
-        let re = Regex::new(r"(\w+)\sto\s(\w+)\s=\s([0-9]+)").unwrap();
-        
-        let mut locations = HashMap::<&str, HashMap<&str, i32>>::new();
-        for line in input.iter() {
-            for (_, [from, to, dist]) in re.captures_iter(line).map(|c| c.extract()) {
-                insert_location(&mut locations, from, to, dist);
-                insert_location(&mut locations, to, from, dist);                
-            }
-        }
-        let k: Vec<_> = locations.keys().collect();
 
-        let mut max_distance = 0;
-        for perm in k.iter().permutations(k.len()) {
-            let mut dist = 0;
-            for i in 0..perm.len()-1 {
-                dist += locations.get(*perm[i]).unwrap().get(*perm[i+1]).unwrap();
-            }
-            if dist > max_distance {
-                max_distance = dist;
-            }
-        }
-
-        println!("{} {}", utils::christmas_tree(9, 2), max_distance);
+    fn part2(program: &[isize]) -> isize {
+        let mut machine = Machine::with_program(program);
+        let mut output = Vec::<isize>::new();
+        let input = vec![2];
+        let _exit = machine.run(input.iter().copied(), |a| output.push(a));
+        *output.last().unwrap()
     }
 }

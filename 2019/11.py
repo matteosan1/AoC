@@ -1,5 +1,8 @@
 import time
 
+from queue import Queue
+from threading import Thread
+
 from utils import readInput
 from intcode import IntCode
             
@@ -7,14 +10,15 @@ def loadInput():
     return readInput("input_11.txt")
 
 def painting(prog, hull, channel):
+    thread = Thread(target=prog.run, daemon=True)
+    thread.start()
     dir = 0
-    pos = complex(0, 0)
+    pos = (0, 0)
     while True:
-        prog.run()
-        if len(channel['me']) == 0:
-            break
         for i in range(2):
-            val = channel["me"].pop()
+            val = channel["me"].get()
+            if val == "BYE":
+                return
             if i == 0:
                 hull[pos] = val
             else:
@@ -24,30 +28,31 @@ def painting(prog, hull, channel):
                     dir += 1
                 dir = dir % 4
         if dir == 0:
-            pos += complex(0,-1)
+            pos = (pos[0], pos[1]-1)
         elif dir == 1:
-            pos += complex(1,0)
+            pos = (pos[0]+1, pos[1])
         elif dir == 2:
-            pos += complex(0,1)
+            pos = (pos[0], pos[1]+1)
         elif dir == 3:
-            pos += complex(-1,0)
-        channel["Robot"].insert(0, hull.get(pos, 0))         
+            pos = (pos[0]-1, pos[1])
+        channel["Robot"].put(hull.get(pos, 0))
     
 def part1(lines):
-    channel = {"Robot":[0], "me":[]}
-    prog = IntCode("Robot", lines[0], channel=channel, mode="channel", output="me")
+    channel = {"Robot":Queue(), "me":Queue()}
+    prog = IntCode("Robot", lines[0], qin=channel['Robot'], qout=channel['me'], mode="channel")
+    channel['Robot'].put(0)
     hull = {}
     painting(prog, hull, channel)
     print (f"🎅 Part 1: {len(hull)}")
 
 def show_hull(hull):
-    xs = [h.real for h in hull]
-    ys = [h.imag for h in hull]
+    xs = [h[0] for h in hull]
+    ys = [h[1] for h in hull]
     xmin, xmax = min(xs), max(xs)
     ymin, ymax = min(ys), max(ys)
     for y in range(int(ymin), int(ymax+1)):
         for x in range(int(xmin), int(xmax+1)):
-            val = hull.get(complex(x, y), 0)
+            val = hull.get((x, y), 0)
             if val == 1:
                 print("▮", end='')
             else:
@@ -55,8 +60,9 @@ def show_hull(hull):
         print()
     
 def part2(lines):
-    channel = {"Robot":[1], "me":[]}
-    prog = IntCode("Robot", lines[0], channel=channel, mode="channel", output="me")
+    channel = {"Robot":Queue(), "me":Queue()}
+    channel['Robot'].put(1)
+    prog = IntCode("Robot", lines[0], qin=channel['Robot'], qout=channel['me'], mode="channel")
     hull = {}
     painting(prog, hull, channel)
     print (f"🎅🎄 Part 2:")

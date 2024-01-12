@@ -1,11 +1,11 @@
 import time
 
 from itertools import permutations
-#from queue import Queue
+from queue import Queue
 from threading import Thread
 
 from utils import readInput
-from intcode import IntCode, BlockingQueue
+from intcode import IntCode
             
 def loadInput():
     return readInput("input_7.txt")
@@ -13,40 +13,36 @@ def loadInput():
 def part1(lines):
     max_val = 0
     phases = [0,1,2,3,4]
-    progs = []
-    threads = []
-    queue = BlockingQueue()
+    qin = [Queue() for _ in range(len(phases))]
     for perm in permutations(phases, 5):
+        threads = []
+        progs = []
         for i in range(5):
-            progs.append(IntCode(i, lines[0], queue=queue, mode="thread", output=(i+1)%5))
-            threads.append(Thread(target=progs[-1].run))
-            threads[-1].start()
-            queue.put((i, perm[i]))
-            if i == 0:
-                queue.put((0, 0))
+            progs.append(IntCode(i, lines[0], qin=qin[i], mode="thread", qout=qin[(i+1)%5]))
+            threads.append(Thread(target=progs[i].run))
+            threads[i].start()
+            qin[i].put(perm[i])
+        qin[0].put(0)
         threads[-1].join()
-        max_val = max(max_val, queue.get()[1])
-        break
-    print (f"ðŸŽ„ Part 1: {max_val}")
+        max_val = max(max_val, qin[0].get())
+    print (f"🎅 Part 1: {max_val}")
 
 def part2(lines):
-    return 0
     max_val = 0
     phases = [9,8,7,6,5]
+    qin = [Queue() for _ in range(len(phases))]
     for perm in permutations(phases, 5):
-        channels = {i:[p] for i, p in enumerate(perm)}
-        channels[0].insert(0, 0)
-        progs = [IntCode(i, lines[0], channels, mode="channel", output=(i+1)%5) for i in range(5)]
-        nalive = sum([p.alive for p in progs])
-        while nalive > 0:
-            for i in range(5):
-                if progs[i].alive:
-                    progs[i].run()
-            
-            nalive = sum([p.alive for p in progs])            
-
-        max_val = max(max_val, channels[0][0])
-    print (f"ðŸŽ„ðŸŽ… Part 2: {max_val}")
+        progs = []            
+        threads = []
+        for i in range(5):
+            progs.append(IntCode(i, lines[0], qin=qin[i], mode="thread", qout=qin[(i+1)%5]))
+            qin[i].put(perm[i])
+            threads.append(Thread(target=progs[i].run))
+            threads[i].start()
+        qin[0].put(0)
+        threads[-1].join()
+        max_val = max(max_val, qin[0].get())
+    print (f"🎅🎄 Part 2: {max_val}")
 
 if __name__ == "__main__":
     title = "Day 7: Amplification Circuit"
