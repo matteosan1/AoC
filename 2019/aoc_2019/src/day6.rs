@@ -1,111 +1,113 @@
 pub mod day6 {
+    use std::collections::{HashMap, BinaryHeap};
     use std::time::Instant;
     
     extern crate aoc;
     use aoc::utils;
 
-    fn preprocess() -> Vec::<[[usize;2]; 2]> {
-        let mut inputs = Vec::<[[usize;2]; 2]>::new();
-        let lines = utils::read_input("../instructions6a.txt");
-        for line in lines {
-            let parts: Vec<_> = line.split(" ").collect();
-            
-            let keyword;
-            let mut idx = (2, 4);
-            if parts[0] == "turn" {
-                keyword = parts[1];
-            } else {
-                keyword = "toggle";
-                idx = (1, 3);
-            }
-            
-            let c1 = parts[idx.0].split_once(",").unwrap();//.map(|x| *x.parse::<usize>().unwrap());//.collect();
-            let c2 = parts[idx.1].split_once(",").unwrap();//.map(|x| *x.parse::<usize>().unwrap());//.collect();         
-            //println!("{}", c1);
-            //let c2: Vec<_> = parts[idx.1].split(",")
-            //    .map(|x| x.parse::<usize>().unwrap()).collect();
-            inputs.push([[c1.0.parse::<usize>().unwrap(), c1.1.parse::<usize>().unwrap()],
-                         [c2.0.parse::<usize>().unwrap(), c2.1.parse::<usize>().unwrap()]]); 
-            //println!("{:?} {:?}", c1, c2);
-        }
-        inputs
-    }
-
     pub fn solve() {
-        let inputs = preprocess();
+        let lines = utils::read_input("../input_6.txt");
+        let mut orbits = HashMap::<String, Vec<String>>::new();
+        for l in lines.iter() {
+            let parts = l.split_once(")").unwrap();
+            if orbits.contains_key(parts.0) {
+                orbits.get_mut(parts.0).unwrap().push(parts.1.to_string());
+            } else {
+                let temp = vec![parts.1.to_string()];
+                orbits.insert(parts.0.to_string(), temp);
+            }
+            if orbits.contains_key(parts.1) {
+                orbits.get_mut(parts.1).unwrap().push(parts.0.to_string());
+            } else {
+                let temp = vec![parts.0.to_string()];
+                orbits.insert(parts.1.to_string(), temp);
+            }
+        }
+        
         let now = Instant::now();
         
-        let res1 = part1(&inputs);
+        let res1 = part1(&orbits);
         let elapsed = now.elapsed();                
         println!("{} {} ({:.2?})", utils::santa(6, 1), res1, elapsed);
         
-//        let res2 = part2(&inputs);
-//        let elapsed = now.elapsed();
-//        println!("{} {} ({:.2?})", utils::christmas_tree(6, 2), res2, elapsed);        
+        let res2 = part2(&orbits);
+        let elapsed = now.elapsed();
+        println!("{} {} ({:.2?})", utils::christmas_tree(6, 2), res2, elapsed);        
     }
 
-    fn part1(inputs: &Vec::<[[usize;2]; 2]>) -> u32 {
-        let mut lights = vec![[0u8; 1000]; 1000];
-        
-        for c in inputs {
-            for row in &mut lights[c[0][0]..=c[1][0]] {
-                for light in &mut row[c[0][1]..=c[1][1]] {
-                    *light = match keyword {
-			"on" => 1,
-			"off" => 0,
-                        "toggle" => if *light == 1 {0} else {1},
-                        _ => 0
-		    };
+    fn find_paths(orbits: &HashMap::<String, Vec<String>>) -> usize {
+        let mut paths = Vec::<Vec::<String>>::new();
+        let mut temp = Vec::<String>::new();
+        temp.push("COM".to_string());
+        let mut queue = Vec::<Vec::<String>>::new();
+        queue.push(temp);
+        while queue.len() != 0 {
+            let path = queue.pop().unwrap();
+            let pos = path.last().unwrap();
+            let dests = orbits.get(pos).unwrap();
+            let mut grow = false;
+            for d in dests {
+                if path.contains(d) {
+                    continue;
                 }
+                grow = true;
+                let mut new_path = path.clone();
+                new_path.push(d.clone());
+                queue.push(new_path);
+            }
+            if !grow {
+                paths.push(path);
             }
         }
 
-        let mut tot: u32 = 0;
-        for row in &mut lights[..] {
-		for light in &mut row[..] {
-			tot += *light as u32;
-		}
-	}
-        tot
+        let mut tot_orbits = 0usize;
+        for k in orbits.keys() {
+            if k == "COM" {
+                continue;
+            }
+            for path in &paths {
+                let mut found = false;
+                for (i, p) in path.iter().enumerate() {
+                    if p == k {
+                        tot_orbits += i;
+                        found = true;
+                    }
+                }
+                if found {
+                    break;
+                }
+            }
+        }
+        tot_orbits
     }
     
-    fn part2(input: &Vec<String>) -> u32 {
-        let mut lights = vec![[0u8; 1000]; 1000];
-        
-        for line in input.iter() {
-            let parts: Vec<_> = line.split(" ").collect();
-            
-            let keyword;
-            let mut idx = (2, 4);
-            if parts[0] == "turn" {
-                keyword = parts[1];
-            } else {
-                keyword = "toggle";
-                idx = (1, 3);
+    fn part1(orbits: &HashMap::<String, Vec<String>>) -> usize {
+        find_paths(orbits)
+    }
+
+    fn transfers(orbits: &HashMap::<String, Vec<String>>) -> i32 {
+        let start = String::from("YOU");
+        let target = String::from("SAN");
+        let mut visited = Vec::<String>::new();
+
+        let mut heap = BinaryHeap::<(i32, String)>::new();
+        heap.push((0, start));
+        while heap.len() > 0 {
+            let (steps, pos) = heap.pop().unwrap();
+            visited.push(pos.clone());
+            if pos == target {
+                return -steps-2;
             }
-            
-            let c1: Vec<_> = parts[idx.0].split(",")
-                .map(|x| x.parse::<usize>().unwrap()).collect();
-            let c2: Vec<_> = parts[idx.1].split(",")
-                .map(|x| x.parse::<usize>().unwrap()).collect();
-            for row in &mut lights[c1[0]..=c2[0]] {
-                for light in &mut row[c1[1]..=c2[1]] {
-                    *light = match keyword {
-			"on" => *light + 1,
-			"off" => if *light <= 0 {0} else {*light - 1},
-                        "toggle" => *light + 2,
-                        _ => 0
-		    };
+            for new_pos in orbits.get(&pos).unwrap() {
+                if !visited.contains(new_pos) {
+                    heap.push((steps-1, new_pos.clone()));
                 }
             }
         }
+        0
+    }
 
-        let mut tot: u32 = 0;
-        for row in &mut lights[..] {
-	    for light in &mut row[..] {
-		tot += *light as u32;
-	    }
-	}
-        tot
+    fn part2(orbits: &HashMap::<String, Vec<String>>) -> i32 {
+        transfers(orbits)
     }
 }

@@ -17,13 +17,14 @@ def part1(image):
         c = (image[i, :, :] == 0).sum()
         if c < mins[1]:
             mins = (i, c)
-    print (f"ðŸŽ„ Part 1: {(image[mins[0], :, :] == 1).sum() * (image[mins[0], :, :] == 2).sum()}")
+    print (mins)
+    print (f"🎅 Part 1: {(image[mins[0], :, :] == 1).sum() * (image[mins[0], :, :] == 2).sum()}")
 
 def show_image(image):
     for y in range(image.shape[0]):
         for x in range(image.shape[1]):
             if image[y, x] == 1:
-                print ("X", end='')
+                print ("▮", end='')
             elif image[y, x] == 0:
                 print (" ", end='')
         print ()
@@ -36,7 +37,7 @@ def part2(image):
                 if image[i, y, x] != 2:
                     rendering[y, x] = image[i, y, x]
                     break
-    print (f"ðŸŽ„ðŸŽ… Part 2:")
+    print (f"🎅🎄 Part 2:")
     show_image(rendering)
 
 if __name__ == "__main__":
