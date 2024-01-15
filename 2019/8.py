@@ -1,57 +1,60 @@
-from utils import readLine
-from anytree import AnyNode, LevelOrderGroupIter
+import time, numpy as np
 
-line = readLine("license.txt")
+from utils import readInput
 
-license = list(map(int, line.split()))
+def loadInput():
+    lines = readInput("input_8.txt")
+    image = np.zeros(shape=(len(lines[0]),))
+    nlayers = len(lines[0])//(25*6)
+    for i, c in enumerate(lines[0]):
+        image[i] = int(c)
+    image = image.reshape(nlayers, 6, 25)
+    return image
 
-def parse(data):
-    children, metas = data[:2]
-    data = data[2:]
-    scores = []
-    totals = 0
+def part1(image):
+    mins = (-1, float('inf'))
+    for i in range(image.shape[0]):
+        c = (image[i, :, :] == 0).sum()
+        if c < mins[1]:
+            mins = (i, c)
+    print (f"ðŸŽ„ Part 1: {(image[mins[0], :, :] == 1).sum() * (image[mins[0], :, :] == 2).sum()}")
 
-    for i in range(children):
-        total, score, data = parse(data)
-        totals += total
-        scores.append(score)
+def show_image(image):
+    for y in range(image.shape[0]):
+        for x in range(image.shape[1]):
+            if image[y, x] == 1:
+                print ("X", end='')
+            elif image[y, x] == 0:
+                print (" ", end='')
+        print ()
+    
+def part2(image):
+    rendering = np.ones_like(image[0])*2
+    for y in range(6):
+        for x in range(25):
+            for i in range(image.shape[0]):
+                if image[i, y, x] != 2:
+                    rendering[y, x] = image[i, y, x]
+                    break
+    print (f"ðŸŽ„ðŸŽ… Part 2:")
+    show_image(rendering)
 
-    totals += sum(data[:metas])
+if __name__ == "__main__":
+    title = "Day 8: Space Image Format"
+    sub = "-"*(len(title)+2)
 
-    if children == 0:
-        return (totals, sum(data[:metas]), data[metas:])
-    else:
-        return (totals, sum(scores[k-1] for k in data[:metas] if k>0 and k<=len(scores)), data[metas:])
+    print()
+    print(f" {title} ")
+    print(sub)
+    
+    inputs = loadInput()
+    
+    t0 = time.time()
+    part1(inputs)
+    print ("Time: {:.5f}".format(time.time()-t0))
+    
+    t0 = time.time()
+    part2(inputs)
+    print ("Time: {:.5f}".format(time.time()-t0))
 
-total, value, remaining = parse(license)
-
-print ('part 1:', total)
-print ('part 2:', value)
-
-#nodes = []
-
-#level = 0
-#root = AnyNode(id=str(level) + "_0", nmetadata = 0, metadata = 0)
-#nodes.append(root)
-
-#n = LevelOrderGroupIter(root)
-#print (n)
-# j = 0
-# current_node = root
-# while j < len(license):
-#     children = int(license[j])
-#     level = level + 1
-#     for i in range(children):
-#         nodes.append(AnyNode(id=str(level) + "_" + str(i), nmetadata = 0, metadata = 0, parent=current_node))
-#     j = j + 1
-#     current_node.nmetadata = int(license[j])
-#
-#
-#     nodes[j] = Node(license[j], license[j+1])
-#     if nchildren == 0:
-#         j = j + 1
-#         for i in range(nmetadata):
-#             metadata = metadata + license[j + 1 + i]
-#         j = j + 1 + nmetadata
-#     else:
-#         for i in range(nchildren
+    
