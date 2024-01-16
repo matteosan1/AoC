@@ -6,8 +6,7 @@ from utils import readInput
 
 def loadInput():
     r = re.compile(r"(\w\=(-?\d+))")
-    lines = readInput("prova.txt")
-    #lines = readInput("input_12.txt")
+    lines = readInput("input_12.txt")
     moons = []
     for l in lines:
         g = r.findall(l)
@@ -42,30 +41,18 @@ def part1(moons):
     
 def part2(moons):
     init = copy.deepcopy(moons)
-    print (init)
     period = [0 for _ in range(3)]
-    cycles = 0
-    #moons = copy.deepcopy(init)
+    cycles = 1
     while True:
         move(moons)
         cycles += 1
         for coord in range(3):
-            if moons[0][4] == 0:
+            if period[coord] == 0:
                 if all([moons[i][coord] == init[i][coord] for i in range(len(moons))]):
                     period[coord] = cycles
-                    print (moons)
         if all([p != 0 for p in period]):
             break
-    print (period)
-    for i in range(3):
-        print (math.lcm(period[i]))
-#    for coord in range(6):
-#        temp = []
-#        for i in range(len(moons)):
-#            temp.append(periods[coord][i])
-#        print (np.lcm(reduce(temp)))
-#            
-    #print (f"🎅🎄 Part 2:")
+    print (f"🎅🎄 Part 2: {math.lcm(*period)}")
 
 
 if __name__ == "__main__":
@@ -78,9 +65,9 @@ if __name__ == "__main__":
     
     inputs = loadInput()
     
-    #t0 = time.time()
-    #part1(inputs[:])
-    #print ("Time: {:.5f}".format(time.time()-t0))
+    t0 = time.time()
+    part1(copy.deepcopy(inputs))
+    print ("Time: {:.5f}".format(time.time()-t0))
     
     t0 = time.time()
     part2(inputs)

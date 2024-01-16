@@ -1,114 +1,71 @@
-import ast, copy
+import time, copy
 
-cmds = ["addr", "addi", "mulr", "muli", "banr", "bani",
-        "borr", "bori", "setr", "seti", "gtir", "gtri",
-        "gtrr", "eqir", "eqri", "eqrr"]
+from utils import readInput
 
-def doCmd(cmd, params, reg):
-    reg = copy.deepcopy(reg)
-    if cmd == "addr":
-        reg[params[3]] = reg[params[1]] + reg[params[2]] 
-    elif cmd == "addi":
-        reg[params[3]] = reg[params[1]] + params[2] 
-    elif cmd == "mulr":
-        reg[params[3]] = reg[params[1]] * reg[params[2]] 
-    elif cmd == "muli":
-        reg[params[3]] = reg[params[1]] * params[2] 
-    elif cmd == "banr":
-        reg[params[3]] = reg[params[1]] & reg[params[2]] 
-    elif cmd == "bani":
-        reg[params[3]] = reg[params[1]] & params[2] 
-    elif cmd == "borr":
-        reg[params[3]] = reg[params[1]] | reg[params[2]] 
-    elif cmd == "bori":
-        reg[params[3]] = reg[params[1]] | params[2] 
-    elif cmd == "setr":
-        reg[params[3]] = reg[params[1]]
-    elif cmd == "seti":
-        reg[params[3]] = params[1]
-    elif cmd == "gtir":
-        if params[1] > reg[params[2]]:
-            reg[params[3]] = 1
-        else:
-            reg[params[3]] = 0
-    elif cmd == "gtri":
-        if reg[params[1]] > params[2]:
-            reg[params[3]] = 1
-        else:
-            reg[params[3]] = 0
-    elif cmd == "gtrr":
-        if reg[params[1]] > reg[params[2]]:
-            reg[params[3]] = 1
-        else:
-            reg[params[3]] = 0
-    elif cmd == "eqir":
-        if params[1] == reg[params[2]]:
-            reg[params[3]] = 1
-        else:
-            reg[params[3]] = 0
-    elif cmd == "eqri":
-        if reg[params[1]] == params[2]:
-            reg[params[3]] = 1
-        else:
-            reg[params[3]] = 0
-    elif cmd == "eqrr":
-        if reg[params[1]] == reg[params[2]]:
-            reg[params[3]] = 1
-        else:
-            reg[params[3]] = 0
-    else:
-        print "Command not found"
-    return reg
+def loadInput():
+    #lines = readInput("prova.txt")
+    lines = readInput("input_16.txt")
+    input = list(map(int, lines[0]))
+    print (input)
+    return input
 
-with open("optcodes.txt", "r") as f:
-    lines = f.readlines()
+def pattern(phase, length):
+    c = phase+1
+    pattern = [0]*c + [1]*c + [0]*c + [-1]*c
+    if len(pattern) <= length:
+        pattern = pattern*((length//len(pattern))+1)
+    return pattern[1:length+1]
+    
+def part1(input):
+    fft = copy.deepcopy(input)
+    for phase in range(100):
+        temp = []
+        for i in range(len(input)):
+            p = pattern(i, len(input))
+            #print (p)
+            val = 0
+            for x in range(len(input)):
+                val += (p[x]*fft[x])
+                #print (val)
+            #print (abs(val)%10)
+            temp.append(abs(val)%10)
+        fft = temp
+    print ("".join([str(t) for t in fft[:8]]))
 
-opcode = {}
-inputs = 0
-for i in range(0, len(lines), 4):
-    reg_state_bef = ast.literal_eval(lines[i][8:])
-    cmd = map(int, lines[i+1].split())
-    reg_state_aft = ast.literal_eval(lines[i+2][8:])
-    isOK = 0
-    for c in cmds:
-        reg =  doCmd(c, cmd, reg_state_bef)
-        #print (c, cmd ,reg_state_bef)
-        #print reg
-        if reg == reg_state_aft:
-            #print c, reg
-            isOK = isOK + 1
-            opcode.setdefault(cmd[0], set([])).add(c)
-    if isOK >= 3:
-        inputs = inputs + 1
-    #print cmd[0], isOK
-print inputs
+    print (f"🎅 Part 1: {0}")
+    
+def part2(moons):
+    init = copy.deepcopy(moons)
+    period = [0 for _ in range(3)]
+    cycles = 1
+    while True:
+        move(moons)
+        cycles += 1
+        for coord in range(3):
+            if period[coord] == 0:
+                if all([moons[i][coord] == init[i][coord] for i in range(len(moons))]):
+                    period[coord] = cycles
+        if all([p != 0 for p in period]):
+            break
+    print (f"🎅🎄 Part 2: {math.lcm(*period)}")
 
-unique_opcode = {}
-while 1:
-    #print (opcode)
-    for op, ops in opcode.iteritems():
-        if len(ops) == 1:
-            unique_opcode[op] = ops
-    for op1, ops1 in unique_opcode.iteritems():
-        for op, ops in opcode.iteritems():
-            #print set(ops), set(ops1)
-            if op1 != op:
-                opcode[op].difference_update(set(ops1))
-    if len(unique_opcode) == len(opcode):
-        break
 
-for op, ops in unique_opcode.iteritems():
-    opcode[op] = unique_opcode[op].pop()
+if __name__ == "__main__":
+    title = "Day 16: Flawed Frequency Transmission"
+    sub = "-"*(len(title)+2)
 
-with open("program.txt", "r") as f:
-    lines = f.readlines()
+    print()
+    print(f" {title} ")
+    print(sub)
+    
+    inputs = loadInput()
+    
+    t0 = time.time()
+    part1(copy.deepcopy(inputs))
+    print ("Time: {:.5f}".format(time.time()-t0))
+    
+    #t0 = time.time()
+    #part2(inputs)
+    #print ("Time: {:.5f}".format(time.time()-t0))
 
-reg = [0,0,0,0]
-for l in lines:
-    items = map(int, l.split())
-    #print reg, items, opcode[items[0]]
-    reg = doCmd(opcode[items[0]], items, reg)
-    #print reg
-
-print reg
-
+    
