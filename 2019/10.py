@@ -25,7 +25,7 @@ def part1(asteroids):
                 continue
             angles.append(np.arctan2(x[1]-a[1], x[0]-a[0]))
         seen.append(len(set(angles)))
-    print (f"ðŸŽ„ Part 1: {max(seen)}")
+    print (f"🎅 Part 1: {max(seen)}")
     return asteroids[seen.index(max(seen))]
     
 def angle(a):
@@ -79,7 +79,7 @@ def part2(asteroids, station):
                 #print (f"vaporized {n}", sorted_ast[i][0]+station, sorted_ast[i][1:])
                 if n == 200:
                     pos = sorted_ast[i][0]+station
-                    print (f"ðŸŽ„ðŸŽ… Part 2: {pos[0]*100+pos[1]}")
+                    print (f"🎅🎄 Part 2: {pos[0]*100+pos[1]}")
                     return
                 prev = sorted_ast[i][1]
         sorted_ast = copy.deepcopy(left_over)

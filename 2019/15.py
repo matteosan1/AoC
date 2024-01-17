@@ -2,7 +2,6 @@ import time
 
 from utils import readInput
 from intcode import IntCode
-from collections import deque
             
 def loadInput():
     return readInput("input_15.txt")

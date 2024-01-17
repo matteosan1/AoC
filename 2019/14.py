@@ -1,55 +1,54 @@
-i1 = 0
-i2 = 1
-rec = [3, 7]
+import time, copy, numpy as np
 
-def printRec(rec, i1, i2):
-    for i,r in enumerate(rec):
-        if i == i1:
-            print (" ("+str(r)+") ", end='')
-        elif i == i2:
-            print (" ["+str(r)+"] ", end='')
-        else:
-            print (" " + str(r) + " ", end='')
-    print ()
+from utils import readInput
 
-#printRec(rec, i1, i2)
-n = 2
-end = "170641"
-nrecipes = 10
-last_ten = ""
-while 1:
-    new_recipe = rec[i1] + rec[i2]
-    n_new_recipe = len(str(new_recipe))
-    for i in str(new_recipe):
-        rec.append(int(i))
+def loadInput():
+    reactions = {}
+    lines = readInput("input_14.txt")
+    for l in lines:
+        parts = l.split(" => ")
+        reactions[parts[1]] = parts[0].split(", ")
+    print (reactions)
+    return input
+    
+def part1(input):
+    return 0
+    fft = copy.deepcopy(input)
+    for phase in range(100):
+        temp = []
+        for i in range(len(input)):
+            p = pattern(i, len(input))
+            val = 0
+            for x in range(len(input)):
+                val += (p[x]*fft[x])
+            temp.append(abs(val)%10)
+        fft = temp
+    print (f"🎅 Part 1: {''.join(list(map(str, fft[:8])))}")
+    
+def part2(input):
+    offset = int("".join([str(t) for t in input[:7]]))
+    input = np.array(list(reversed((input*10000)[offset:])))
+    for phase in range(100):
+        fft = np.mod(np.cumsum(input), 10)
+        input = fft.copy()
+    print (f"🎅🎄 Part 2: {''.join(list(map(str, reversed(input[-8:]))))}")
 
-    i1 = (i1 + rec[i1] + 1) % (len(rec))
-    i2 = (i2 + rec[i2] + 1) % (len(rec))
+if __name__ == "__main__":
+    title = "Day 14: Space Stoichiometry"
+    sub = "-"*(len(title)+2)
 
-    exit = False
-    for i in range(n_new_recipe):
-        n = n + 1
-        #if n < end:
-        #    print ("prima ", new_recipe)
-        #if n > end:
-        #    last_ten = last_ten + str(new_recipe)[i]
-        #if n >= (end + nrecipes):
-        #    exit = True
-        #    break
-        if n > len(end):
-            #print ("".join(list(map(str, rec[-5:]))))
-            #print (str(end))
-            if "".join(list(map(str, rec[-len(end):]))) == end:
-                print (n_new_recipe, i)
-                print (len(rec) - len(end))
-                print ("".join(list(map(str, rec[-len(end):]))))
-                #print (rec)
-                exit = True
-                break
+    print()
+    print(f" {title} ")
+    print(sub)
+    
+    inputs = loadInput()
+    
+    t0 = time.time()
+    part1(copy.deepcopy(inputs))
+    print ("Time: {:.5f}".format(time.time()-t0))
+    
+    #t0 = time.time()
+    #part2(inputs)
+    #print ("Time: {:.5f}".format(time.time()-t0))
 
-    if (exit):
-        break
-
-#print (last_ten)
-
-
+    

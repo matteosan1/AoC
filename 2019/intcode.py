@@ -92,7 +92,7 @@ class IntCode:
         else:
             return self.code.get(idx, 0)
 
-    def run(self):
+    def run(self, logic=None):
         #print ("GO")
         while True:
             op = self.code[self.pointer]%100

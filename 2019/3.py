@@ -3,8 +3,8 @@ import time
 from utils import readInput
             
 def loadInput():
-    #lines = readInput("input_3.txt")
-    lines = readInput("prova.txt")
+    lines = readInput("input_3.txt")
+    #lines = readInput("prova.txt")
     wires = [[],[]]
     wires[0] = lines[0].split(",")
     wires[1] = lines[1].split(",")
