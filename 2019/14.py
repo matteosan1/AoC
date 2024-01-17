@@ -1,55 +1,91 @@
-i1 = 0
-i2 = 1
-rec = [3, 7]
+import time
 
-def printRec(rec, i1, i2):
-    for i,r in enumerate(rec):
-        if i == i1:
-            print (" ("+str(r)+") ", end='')
-        elif i == i2:
-            print (" ["+str(r)+"] ", end='')
-        else:
-            print (" " + str(r) + " ", end='')
-    print ()
+from collections import defaultdict
+from math import ceil
 
-#printRec(rec, i1, i2)
-n = 2
-end = "170641"
-nrecipes = 10
-last_ten = ""
-while 1:
-    new_recipe = rec[i1] + rec[i2]
-    n_new_recipe = len(str(new_recipe))
-    for i in str(new_recipe):
-        rec.append(int(i))
+from utils import readInput
 
-    i1 = (i1 + rec[i1] + 1) % (len(rec))
-    i2 = (i2 + rec[i2] + 1) % (len(rec))
+def loadInput():
+    #lines = readInput("prova.txt")
+    lines = readInput("input_14.txt")
+    def parse_chem(s):
+        units, name = s.split(' ')
+        return int(units), name
 
-    exit = False
-    for i in range(n_new_recipe):
-        n = n + 1
-        #if n < end:
-        #    print ("prima ", new_recipe)
-        #if n > end:
-        #    last_ten = last_ten + str(new_recipe)[i]
-        #if n >= (end + nrecipes):
-        #    exit = True
-        #    break
-        if n > len(end):
-            #print ("".join(list(map(str, rec[-5:]))))
-            #print (str(end))
-            if "".join(list(map(str, rec[-len(end):]))) == end:
-                print (n_new_recipe, i)
-                print (len(rec) - len(end))
-                print ("".join(list(map(str, rec[-len(end):]))))
-                #print (rec)
-                exit = True
-                break
+    reactions = {}
+    for reaction in lines:
+        input, output = reaction.split(' => ')
+        inputs = []
+        for chem in input.split(', '):
+            inputs.append(parse_chem(chem))
+        out_units, out_chem = parse_chem(output)
+        reactions[out_chem] = (out_units, inputs)
+    return reactions
 
-    if (exit):
-        break
+def minimum_ore(reactions, chem='FUEL', units=1, waste=None):
+    if waste is None:
+        waste = defaultdict(int)
 
-#print (last_ten)
+    if chem == 'ORE':
+        return units
 
+    # Re-use waste chemicals.
+    reuse = min(units, waste[chem])
+    units -= reuse
+    waste[chem] -= reuse
 
+    # Work out how many reactions we need to perform.
+    produced, inputs = reactions[chem]
+    n = ceil(units / produced)
+
+    # Determine the minimum ore required to produce each input.
+    ore = 0
+    for required, input in inputs:
+        ore += minimum_ore(reactions, input, n * required, waste)
+
+    # Store waste so it can be re-used
+    waste[chem] += n * produced - units
+    return ore
+    
+def part1(reactions):
+    ore = minimum_ore(reactions)
+    print (f"ðŸŽ… Part 1: {ore}")
+    
+def part2(reactions):
+    target = 1000000000000
+    lower = None
+    upper = 1
+
+    # Find upper bound.
+    while minimum_ore(reactions, units=upper) < target:
+        lower = upper
+        upper *= 2
+
+    # Binary search to find maximum fuel produced.
+    while lower + 1 < upper:
+        mid = (lower + upper) // 2
+        ore = minimum_ore(reactions, units=mid)
+        if ore > target:
+            upper = mid
+        elif ore < target:
+            lower = mid
+
+    print (f"ðŸŽ…ðŸŽ„ Part 2: {lower}")
+
+if __name__ == "__main__":
+    title = "Day 14: Space Stoichiometry"
+    sub = "-"*(len(title)+2)
+
+    print()
+    print(f" {title} ")
+    print(sub)
+    
+    inputs = loadInput()
+    
+    t0 = time.time()
+    part1(inputs)
+    print ("Time: {:.5f}".format(time.time()-t0))
+    
+    t0 = time.time()
+    part2(inputs)
+    print ("Time: {:.5f}".format(time.time()-t0))

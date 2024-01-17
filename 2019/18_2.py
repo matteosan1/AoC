@@ -56,7 +56,6 @@ def shortest_path(grid, p1, p2):
   visited = set()
 
   q = [(0, p1, set())]
-
   while len(q):
     steps, pos, doors = heapq.heappop(q)
     visited.add(pos)
@@ -73,43 +72,39 @@ def shortest_path(grid, p1, p2):
       nx, ny = pos[0] + dx, pos[1] + dy
       if grid.get((nx, ny), "#") != "#" and (nx, ny) not in visited:
         heapq.heappush(q, (steps + 1, (nx, ny), doors))
-
   return path_steps, doors
 
 
 def find_key_paths(grid, doors, keys, starts):
   keypaths = {k: {} for k in keys.keys()}
-
+  
   for i, pos in enumerate(starts):
     keypaths["@" + str(i)] = {}
 
     for key, key_pt in keys.items():
-      print (key, key_pt)
       steps, doors = shortest_path(grid, starts[i], key_pt)
       if steps is not None:
         keypaths["@" + str(i)][key] = {"pos": key_pt, "steps": steps, "doors": doors}
-
       for dest, dest_pt in keys.items():
-        print (dest, dest_pt)
         if dest != key and key not in keypaths[dest]:
           steps, doors = shortest_path(grid, key_pt, dest_pt)
           if steps is not None:
             keypaths[key][dest] = {"pos": dest_pt, "steps": steps, "doors": doors}
             keypaths[dest][key] = {"pos": key_pt, "steps": steps, "doors": doors}
-  #print (keypaths)
   return keypaths
 
 
 def find_keys(grid, keypaths, pos, bot_id="@0", key="@0", found=None, cache={}):
   if found is None:
     found = set(x for x in keypaths.keys() if x[0] == "@")
-
+  
   pos[bot_id] = key
 
   if len(found) == len(keypaths):
     return 0, [key]
 
   cachekey = "".join(sorted(pos.values())) + "".join(sorted(set(keypaths.keys()) - found))
+  
   if cachekey not in cache:
     paths = []
 
@@ -138,7 +133,9 @@ def run():
   t0 = time.time()
   keypaths = find_key_paths(grid, doors, keys, [pos])
   print (time.time()-t0)
-  #steps, keypath = find_keys(grid, keypaths, {"@0": "@0"})
+  for k, v in keypaths.items():
+    print (k, len(v))
+  steps, keypath = find_keys(grid, keypaths, {"@0": "@0"})  
   #print(f"Steps to find all keys: {steps}\nPath: {keypath[1:]})")
 
 
