@@ -25,6 +25,7 @@ def part1(input):
                 val += (p[x]*fft[x])
             temp.append(abs(val)%10)
         fft = temp
+
     print (f"🎅 Part 1: {''.join(list(map(str, fft[:8])))}")
     
 def part2(input):
@@ -52,5 +53,3 @@ if __name__ == "__main__":
     t0 = time.time()
     part2(inputs)
     print ("Time: {:.5f}".format(time.time()-t0))
-
-    
