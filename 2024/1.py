@@ -10,7 +10,6 @@ def loadInput():
         id2.append(int(l.split()[1]))
     return id1, id2
 
-    
 def part1(id1, id2):
     id1 = np.array(sorted(id1))
     id2 = np.array(sorted(id2))

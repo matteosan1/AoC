@@ -1,0 +1,17 @@
+[package]
+name = "aoc_2019"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+aoc = { path = "../../aoc" }
+intcode = { path = "intcode" }
+md5 = "*"
+regex = "*"
+itertools = "*"
+rand = "*"
+crossbeam-channel = "*"
+rust-crypto = "*"
+num = "*"
