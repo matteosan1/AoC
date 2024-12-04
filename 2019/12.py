@@ -52,6 +52,7 @@ def part2(moons):
                     period[coord] = cycles
         if all([p != 0 for p in period]):
             break
+    print (period)
     print (f"🎅🎄 Part 2: {math.lcm(*period)}")
 
 
