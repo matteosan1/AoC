@@ -38,6 +38,7 @@ def find_word(square):
         occ += 1
     if diag[3::-1] == keyword:
         occ += 1
+
     if antidiag[3:] == keyword:
         occ += 1
     if antidiag[3::-1] == keyword:
