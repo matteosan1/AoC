@@ -32,38 +32,20 @@ def part1(orderings, updates):
     print (f"🎄 Part 1: {mid_page}")
     return ordered
 
-from copy import deepcopy
-def finder(upd, orderings):
-    new_orderings = [o for o in orderings if o[0] in upd and o[1] in upd]   
-    for page in upd:
-        queue = [[page]]        
-        while len(queue) > 0:
-            #print (queue)
-            path = queue.pop()
-            current = path[-1]
-            #print ("current ", current)
-            for o in new_orderings:
-                #print ("ord", o)
-                if current == o[0] and o[1] in upd:
-                    new_path = deepcopy(path) + [o[1]]
-                    #print ("AGGIUNTO", new_path)
-                    if len(new_path) == len(upd):
-                        return new_path
-                    queue.append(new_path)
-                    #print ("queue ", queue)
-    return None
-
 def part2(orderings, updates, ordered):
     mid_page = 0
-    print (len(updates))
     for iu, upd in enumerate(updates):
         if iu in ordered:
             continue
-        print (iu)
-        new_order = finder(upd, orderings)
-        #print (new_order)
-        mid_val = new_order[len(new_order)//2]
-        mid_page += mid_val
+        new_orderings = [o for o in orderings if o[0] in upd and o[1] in upd]   
+        rank = {}
+        for u in upd:
+            rank[u] = 0
+            for o in new_orderings:
+                if o[1] == u:
+                    rank[u] += 1
+        sorted_dict = list(dict(sorted(rank.items(), key=lambda item: item[1])).keys())
+        mid_page += sorted_dict[len(sorted_dict)//2]
         
     print (f"🎄🎅 Part 2: {mid_page}")
 
