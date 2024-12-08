@@ -276,4 +276,30 @@ class ListNode:
                 return True  
 		return False
 \end{ipython}
+
+\section{Year 2024}
+
+\subsection{Day 7 - Bridge Repair}
+It should be possible to speed up the calculation by checking each number on the right for the divisibility of the result. If so we could remove the corresponding operation $*$.
+
+\subsubsection {Implementation with Python}
+\begin{ipython}
+	class ListNode:
+	def __init__(self, val):
+	self.val = val
+	self.next = None
+	
+	def detectCycle(head):
+	slow = head
+	fast = head
+	
+	while fast and fast.next:
+	slow = slow.next
+	fast = fast.next.next
+	
+	if slow == fast:
+	return True  
+	return False
+\end{ipython}
+
 \end{document}
