@@ -27,6 +27,7 @@ else
             echo "File $DAY.txt already exists."
         else
             touch input_$DAY.txt
+            touch input_${DAY}_prova.txt
         fi
     	echo "New day ($DAY.jl) template created."
     fi
