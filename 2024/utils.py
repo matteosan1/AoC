@@ -28,7 +28,6 @@ class bcolors:
 #			Purple	45
 #			Cyan	46
 
-
 def readInput(filename):
     lines = []
     with open(filename) as f:
@@ -198,3 +197,68 @@ full_dirs = {0:lambda c:c + Point(0,1),
              5:lambda c:c + Point(-1,-1),
              6:lambda c:c + Point(-1,0),
              7:lambda c:c + Point(-1,1),}
+
+class Node:
+    def __init__(self, data):
+        self.data = data
+        self.next = None
+        self.prev = None
+
+class DoublyLinkedList:
+    def __init__(self):
+        self.head = None
+
+    def tail(self):
+        if self.head is None:
+            return None
+        current = self.head
+        while True:
+            n = current.next
+            if n is None:
+                return current
+            else:
+                current = n
+        
+    def append(self, data):
+        new_node = Node(data)
+        if self.head is None:
+            self.head = new_node
+        else:
+            current = self.head
+            while current.next:
+                current = current.next
+            current.next = new_node
+            new_node.prev = current
+
+    def prepend(self, data):
+        new_node = Node(data)
+        new_node.next = self.head
+        if self.head:
+            self.head.prev = new_node
+        self.head = new_node
+
+    def after(self, node, data):
+        if node is None:
+            raise ValueError("Node must be nonnull")
+        new_node = Node(data)
+        new_node.prev = node
+        new_node.next = node.next
+        if node.next:
+            node.nect.prev = new_node
+        node.next = new_node
+
+    def before(self, node, data):
+        if node is None:
+            raise ValueError("Node must be nonnull")
+        new_node = Node(data)
+        new_node.prev = node.prev
+        new_node.next = node
+        if node.prev:
+            node.prev.next = new_node
+        node.prev = new_node
+
+    def print_list(self):
+        cur_node = self.head
+        while cur_node:
+            print(cur_node.data)
+            cur_node = cur_node.next
