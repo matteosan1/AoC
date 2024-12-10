@@ -4,6 +4,7 @@ from itertools import product
 from math import log10
 from utils import readInput
 
+# TRY USING RECURSION
 def loadInput():
     #lines = readInput("input_7_prova.txt")
     lines = readInput("input_7.txt")
