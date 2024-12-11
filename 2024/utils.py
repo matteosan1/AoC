@@ -244,7 +244,7 @@ class DoublyLinkedList:
         new_node.prev = node
         new_node.next = node.next
         if node.next:
-            node.nect.prev = new_node
+            node.next.prev = new_node
         node.next = new_node
 
     def before(self, node, data):
@@ -255,7 +255,17 @@ class DoublyLinkedList:
         new_node.next = node
         if node.prev:
             node.prev.next = new_node
+        if new_node.prev is None:
+            self.head = new_node
         node.prev = new_node
+
+    def length(self):
+        l = 0
+        cur_node = self.head
+        while cur_node:
+            l += 1
+            cur_node = cur_node.next
+        return l
 
     def print_list(self):
         cur_node = self.head
