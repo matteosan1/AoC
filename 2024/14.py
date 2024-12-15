@@ -3,9 +3,9 @@ import timeit, numpy as np, copy
 from utils import readInput
 
 def loadInput():
-    #lines = readInput("input_14_prova.txt")
+    lines = readInput("input_14_prova.txt")
     #xmax, ymax = 11, 7
-    lines = readInput("input_14.txt")  
+    #lines = readInput("input_14.txt")  
     xmax, ymax = 101, 103
 
     robots = []
@@ -31,7 +31,6 @@ def quadrants(robots, xmax, ymax):
                 quadrants[3] += 1
     return quadrants
 
-import copy
 def part1(r, vels, xmax, ymax):
     robots = copy.deepcopy(r)
     for i in range(len(robots)):
@@ -50,7 +49,8 @@ def draw(ps, xmax, ymax):
                 print (" ", end='')
         print (" ")
 
-def part2(robots, vels, xmax, ymax):
+def part2(r, vels, xmax, ymax):
+    robots = copy.deepcopy(r)
     seconds = 10403 # found when the starting position is found again
     #positions = [r[0] for r in robots]
     bye = False
@@ -64,6 +64,11 @@ def part2(robots, vels, xmax, ymax):
         if std[0] <= stds[0] and std[1] <= stds[1]:
             stds = std
             christmas_tree = second
+
+    for i in range(len(r)):
+        npos = complex(r[i]+vels[i]*christmas_tree)
+        r[i] = complex(npos.real%xmax, npos.imag%ymax)
+    draw(r, xmax, ymax)
     print (f"🎄🎅 Part 2: {christmas_tree}")
 
 if __name__ == '__main__':
