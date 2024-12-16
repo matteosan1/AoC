@@ -2,6 +2,26 @@ import timeit, heapq, copy
 
 from utils import readInput
 
+# TOGLIERE PARTE 1 e FARE TUTTO CON LA DUE PROVARE AD USARE NUMERI COMPLESSI CON HEAPQ
+
+# On to the Python trick of the day: more and more people are starting to use complex numbers for grid puzzles, and they might have hit a roadblock when using them in a priority queue.
+# Suppose you have a queue of (score, position) tuples. As long as the scores are unique, they can fully determine the order of the queue. But when there are duplicate scores (which can easily happen today), Python wants to sort on the second element, position.
+# Since complex numbers can't be sorted (1+9j isn't necessarily "less" than 2+2j), Python throws an error:
+# TypeError: '<' not supported between instances of 'complex' and 'complex'
+# There are a few ways to mitigate this:
+# write your own complex number class, inheriting from the built-in complex but redefining less-than (u/xelf did this here),
+# store the number as a string, and "re-hydrate" it to complex upon retrieval (u/atreju3647 did this here),
+# store the real and imaginary parts separately, and combine them upon retrieval (u/TiCoinCoin did this here),
+# when inserting to the priority queue, add a "tie-breaker" to your tuple. So (score, position) becomes (score, t, position), where t is a unique value. This can be a random number, or an ever incrementing value.
+# Here's a simple example:
+# from heapq import heappush, heappop
+# Q = [(1, i:=0, complex(1))]
+# for x in [2, 3, 4]:
+#     heappush(Q, (x, i := i+1, complex(x,x)))
+# When extracting values from the queue, just ignore the tie-breaker:
+# x, _, y = heappop(Q)
+# If anyone has questions, suggestions or other solutions, feel free to let me know!
+
 DIRECTIONS = [(0, 1), (1, 0), (0, -1), (-1, 0)]
 
 def loadInput():
