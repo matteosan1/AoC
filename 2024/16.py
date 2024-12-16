@@ -2,9 +2,11 @@ import timeit, heapq, copy
 
 from utils import readInput
 
+DIRECTIONS = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+
 def loadInput():
-    lines = readInput("input_16_prova.txt")
-    #lines = readInput("input_16.txt")
+    #lines = readInput("input_16_prova.txt")
+    lines = readInput("input_16.txt")
     pitch = {}
     start = None
     target = None
@@ -24,44 +26,29 @@ def loadInput():
     #draw(pitch, start, target)                       
     return pitch, start, target
 
-def draw(pitch, start=None, target=None):
-    xmax = int(max([c[0] for c in pitch]))+1
-    ymax = int(max([c[1] for c in pitch]))+1
-    for y in range(ymax):
-        for x in range(xmax):
-            c = (x, y)
-            if pitch[c] == 1:
-                print ("#", end='')
-            elif c == start:
-                print ("S", end='')
-            elif c == target:
-                print ("E", end='')    
-            elif pitch[c] == 0:
-                print (".", end='')
-        print ("")
-
 def is_valid(grid, c):
     return c in grid and grid[c] != 1
 
 def get_neighbors(grid, c, direction):
     neighbors = []
-    # row, column
-    dc = [(0, 1), (1, 0), (0, -1), (-1, 0)][direction]
-    nc = (c[0] + dc[0], c[1] + dc[1])
-    if is_valid(grid, nc):
-        neighbors.append((nc, direction, 1))
-    neighbors.append((c, (direction + 1) % 4, 1000))
-    neighbors.append((c, (direction - 1) % 4, 1000))
+    for idc, dc in enumerate(DIRECTIONS):
+        if dc == (-DIRECTIONS[direction][0], -DIRECTIONS[direction][1]):
+            continue
+        nc = (c[0] + dc[0], c[1] + dc[1])
+        if is_valid(grid, nc):
+            if dc == DIRECTIONS[direction]: 
+                neighbors.append((nc, direction, 1))
+            else:
+                neighbors.append((nc, idc, 1001))
     return neighbors
 
 def solve(grid, start, target):
-    q = [(0, start, 0)]
+    q = [(0, start, 1)]
     visited = set()
-    predecessors = {}  # Store predecessors (parent nodes)
+    predecessors = {}
 
     while q:
         cost, c, direction = heapq.heappop(q)
-
         if (c, direction) in visited:
             continue
         visited.add((c, direction))
@@ -79,80 +66,64 @@ def solve(grid, start, target):
             if neighbor not in visited:
                 new_cost = cost + move_cost
                 heapq.heappush(q, (new_cost, nc, nd))
-                predecessors[neighbor] = (c, direction) # Store the predecessor
-    return -1, None  # No path found
+                predecessors[neighbor] = (c, direction)
+    return -1, None
 
 def part1(pitch, start, target):
     cost, path = solve(pitch, start, target)
+    #draw(pitch, path)
     print (f"🎄 Part 1: {cost}")
 
-def part2(inputs):
-    print (f"🎄🎅 Part 2: {0}")
+def solve2(grid, start, target):
+    DIRECTIONS = set([(0, 1), (1, 0), (0, -1), (-1, 0)])
+    q = [(0, start, (1, 0), set())]  # score, position, direction, visited tiles
+    seen_states = {
+        pos: {direction: {"score": float("inf"), "tiles": set()} for direction in DIRECTIONS}
+        for pos in grid.keys()
+    }
+    while q:
+        score, coord, direction, tiles = heapq.heappop(q)
+        allowed = DIRECTIONS - {(-direction[0], -direction[1])}  # avoid reversing direction
+        for dc in allowed:
+            new_coord = (coord[0] + dc[0], coord[1] + dc[1])
+            if not is_valid(grid, new_coord):
+                continue
+            new_score = score + 1 + (1000 if dc != direction else 0)
+            state = seen_states[new_coord][dc]
+            if new_score > state["score"]:
+                continue
+            new_tiles = tiles | {new_coord}
+            state["score"] = new_score
+            if new_score < state["score"]:
+                state["tiles"] = new_tiles
+            elif new_score == state["score"]:
+                state["tiles"] |= new_tiles        
+            heapq.heappush(q, (new_score, new_coord, dc, state["tiles"]))
+    return seen_states
+    
+def part2(pitch, start, target):
+    visited = solve2(pitch, start, target)
+    min_direction = min(visited[target].values(), key=lambda d: d["score"])
+    #draw(pitch, min_direction['tiles'])
+    print (f"🎄🎅 Part 2: {len(min_direction["tiles"]) + 1}")
 
-def draw2(pitch, sits):
+def draw(pitch, sits):
     xmax = int(max([c[0] for c in pitch]))+1
     ymax = int(max([c[1] for c in pitch]))+1
-    points = {c[0]:c[1] for c in sits}
+    print ( xmax, ymax)
+    #points = {c[0]:c[1] for c in sits}
     dirs = ['v','>','^','<']
     for y in range(ymax):
         for x in range(xmax):
             c = (x, y)
-            if c in points:
-                print (dirs[points[c]], end='')
+            if c in sits:
+                #print (dirs[points[c]], end='')
+                print ("O", end='')
             elif pitch[c] == 1:
                 print ("#", end='')
             elif pitch[c] == 0:
                 print (".", end='')
         print ("")
-
-def solve_with_path(grid, start, target):
-    # rows = len(grid)
-    # cols = len(grid[0])
-    # start_row, start_col = next((r, c) for r in range(rows) for c in range(cols) if grid[r][c] == 'S')
-    # end_row, end_col = next((r, c) for r in range(rows) for c in range(cols) if grid[r][c] == 'E')
-
-    def is_valid(grid, c):
-        #return 0 <= r < rows and 0 <= c < cols and grid[r][c] != '#'
-        return c in grid and grid[c] != 1
-
-    def get_neighbors(grid, c, direction):
-        dc = [(0, 1), (1, 0), (0, -1), (-1, 0)][direction]
-        nc = (c[0] + dc[0], c[1]+dc[1])
-        neighbors = []
-        if is_valid(grid, nc):
-            neighbors.append((nc, direction, 1))
-        neighbors.append((c, (direction + 1) % 4, 1000))
-        neighbors.append((c, (direction - 1 + 4) % 4, 1000))
-        return neighbors
-
-    q = [(0, start, 0)]
-    visited = set()
-    predecessors = {}  # Store predecessors (parent nodes)
-
-    while q:
-        cost, c, direction = heapq.heappop(q)
-
-        if (c, direction) in visited:
-            continue
-        visited.add((c, direction))
-
-        if c == target: # r == end_row and c == end_col:
-            # Reconstruct the path
-            path = []
-            current = (c, direction)
-            while current:
-                path.append((current[0],current[1]))
-                current = predecessors.get(current)
-            return cost, path[::-1] # Reverse the path to get it from start to end
-
-        for nc, nd, move_cost in get_neighbors(grid, c, direction):
-            neighbor = (nc, nd)
-            if neighbor not in visited:
-                new_cost = cost + move_cost
-                heapq.heappush(q, (new_cost, nc, nd))
-                predecessors[neighbor] = (c, direction) # Store the predecessor
-
-    return -1, None  # No path found
 
 if __name__ == '__main__':
     title = "Day 16: Reindeer Maze"
@@ -164,23 +135,9 @@ if __name__ == '__main__':
     
     inputs = loadInput()
     
-    #t1 = timeit.timeit(lambda: part1(*inputs), number=1)
-    #print (f"{t1*1000:.3f} ms")
-    res = (solve_with_path(*inputs))
-    print (res[0])
-    draw2(inputs[0], res[1])
-    # t2 = timeit.timeit(lambda: part2(*inputs), number=1)
-    # print (f"{t2*1000:.3f} ms")
+    t1 = timeit.timeit(lambda: part1(*inputs), number=1)
+    print (f"{t1*1000:.3f} ms")
+    
+    t2 = timeit.timeit(lambda: part2(*inputs), number=1)
+    print (f"{t2*1000:.3f} ms")
 
-
-# # Example usage:
-# with open("input_16.txt", "r") as f:
-#     grid = [list(line.strip()) for line in f]
-
-# cost, path = solve_with_path(grid)
-
-# if path:
-#     print(f"Lowest Cost: {cost}")
-#     print(f"Best Path: {path}")
-# else:
-#     print("No path found.")
