@@ -1,4 +1,4 @@
-import timeit, heapq, copy
+import timeit, heapq
 
 from utils import readInput
 

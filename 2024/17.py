@@ -2,6 +2,9 @@ import timeit, copy
 
 from utils import readInputWithBlank
 
+# CONSIDERAZIONI SU reminder vs module
+# DISASSEMBLER
+
 class IntCode:
     def __init__(self):
         self.A = 0
