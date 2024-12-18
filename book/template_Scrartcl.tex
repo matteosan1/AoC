@@ -302,4 +302,33 @@ It should be possible to speed up the calculation by checking each number on the
 	return False
 \end{ipython}
 
+\subsection{Day 18 - RAM Run}
+
+In order to use complex numbers for grid puzzles, we need to find a solution to the common problem
+\begin{ipython}
+TypeError: '<' not supported between instances of 'complex' and 'complex'
+\end{ipython}
+when using them in a priority queue.
+
+Suppose you have a queue of (score, position) tuples. As long as the scores are unique, they can fully determine the order of the queue. But when there are duplicate scores \texttt{Python} wants to sort on the second element, position. Since complex numbers can't be sorted ($1+9j$ isn't necessarily "less" than $2+2j$), \texttt{Python} throws the previous error.
+
+Luckily there are a few ways to mitigate this:
+\begin{itemize}
+\item write your own complex number class, inheriting from the built-in complex but redefining less-than;
+\item store the number as a string, and "re-hydrate" it to complex upon retrieval;
+\item store the real and imaginary parts separately, and combine them upon retrieval;
+\item when inserting to the priority queue, add a \emph{tie-breaker} to your tuple. So (score, position) becomes (score, t, position), where t is a unique value. This can be a random number, or an ever incrementing value.
+\end{itemize}
+
+I have implemented this last trick:
+\begin{ipython}
+from heapq import heappush, heappop
+
+Q = [(1, i:=0, complex(1))]
+for x in [2, 3, 4]:
+    heappush(Q, (x, i := i+1, complex(x,x)))
+x, _, y = heappop(Q)
+\end{ipython}
+When extracting values from the queue, just ignore the tie-breaker !
+
 \end{document}
