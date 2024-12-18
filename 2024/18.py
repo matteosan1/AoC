@@ -84,9 +84,14 @@ def part2(bytes):
     low = 1024
     high = len(bytes) - 1
 
+    path = None
     while low <= high:
         mid = (low + high) // 2
-        cost, path = solve(memory, width, new_walls=bytes[1024:mid])
+        if path is not None and bytes[mid-1] not in path:
+            low += 1
+            continue
+
+        cost, path = solve(memory, width, new_walls=bytes[1024:mid], get_path=True)
 
         if cost != -1:
             low = mid + 1
