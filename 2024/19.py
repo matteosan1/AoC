@@ -22,12 +22,12 @@ def remove_prefix(prefix, word):
 @cache
 def check_design(design, towels):
     if not design:
-        return True
-    vals = []
+        return 1
+    res = 0
     for towel in towels:
         if design.startswith(towel):
-            vals.append(check_design(remove_prefix(towel, design), towels))
-    return sum(vals)
+            res += check_design(remove_prefix(towel, design), towels)
+    return res
 
 def part1(towels, designs):
     found = 0
@@ -61,7 +61,7 @@ def part2(towels, designs):
     print (f"🎄🎅 Part 2: {found}")
 
 if __name__ == '__main__':
-    title = "Day 19: "
+    title = "Day 19: Linen Layout"
     sub = "-"*(len(title)+2)
 
     print()
