@@ -1,12 +1,10 @@
-import timeit, heapq
+import timeit
 
-from utils import readInput, bcolors
-
-DIRECTIONS = [complex(0, 1), complex(1, 0), complex(0, -1), complex(-1, 0)]
+from utils import readInput, bcolors, solve_BFS_with_path, manhattan_circle
 
 def loadInput():
-    lines = readInput("input_20_prova.txt")
-    #lines = readInput("input_20.txt")
+    #lines = readInput("input_20_prova.txt")
+    lines = readInput("input_20.txt")
 
     racetrack = {}
     for l in lines:
@@ -28,61 +26,41 @@ def loadInput():
 def is_valid(grid, c):
     return grid.get(c, 1) != 1
 
-def get_neighbors(grid, c, cheated, cheat):
+def get_neighbors(grid, c, cheated, cheat, no_cheat_path):
     neighbors = []
     for dc in DIRECTIONS:
         nc = c + dc
         if is_valid(grid, nc):
             neighbors.append((nc, cheated))
-        if cheat and not cheated:
+        elif cheat and not cheated:
             nc2 = c + 2*dc
-            if is_valid(grid, nc2):
+            if is_valid(grid, nc2) and nc2 in no_cheat_path:
                 neighbors.append((nc2, True))
     return neighbors
 
-def solve(grid, start, target, cheat=False, get_path=False):
-    q = [(0, i:=0, start, False)]
-    visited = set()
-    #predecessors = {}
-    costs = []
-    while q:
-        cost, _, c, cheated = heapq.heappop(q)
-        if (c, cheated) in visited:
-            continue
-        visited.add((c, cheated))
-
-        if c == target:
-            if not get_path:
-                costs.append(cost)
-                continue
-                #return cost, None
-            # else:
-            #     path = []
-            #     current = c
-            #     while current:
-            #         path.append(current)
-            #         current = predecessors.get(current)
-            #     return cost, path[::-1]
-
-        for nc in get_neighbors(grid, c, cheated, cheat):
-            if nc not in visited:
-                new_cost = cost + 1 + int(nc[1])*1
-                heapq.heappush(q, (new_cost, i:=i+1, nc[0], nc[1]))
-                #predecessors[(nc, cheated)] = c
-    return costs
-    #return -1, None
-
 def part1(racetrack, start, end):
-    #cost, path = solve(racetrack, start, end, get_path=True)
-    #draw(racetrack, path)
-    benchmark = min(solve(racetrack, start, end, get_path=False))
-    print (benchmark)
-    costs = solve(racetrack, start, end, cheat=True, get_path=False)
-    print (costs)
-    print (f"🎄 Part 1: {0}")
-
-def part2(bytes):
-    print (f"🎄🎅 Part 2: {0}")
+    path_no_cheat = solve_BFS_with_path(racetrack, start, end)
+    path_no_cheat = {p:i for i, p in enumerate(path_no_cheat)}
+    n = 0
+    for c, cost in path_no_cheat.items():
+        # path[n] - i - 2 is how much closer to the goal we 
+        # end up. 2 because if we stay on the path after 2
+        # steps, we end up 2 steps closer
+        for nc in manhattan_circle(c, 2):
+            if nc in path_no_cheat and path_no_cheat[nc] - cost - 2 >= 100:
+                n += 1
+    print (f"🎄 Part 1: {n}")
+    
+def part2(racetrack, start, end):
+    path_no_cheat = solve_BFS_with_path(racetrack, start, end)
+    path_no_cheat = {p:i for i, p in enumerate(path_no_cheat)}
+    n = 0
+    for c, cost in path_no_cheat.items():
+        for delta in range(2, 21):
+            for nc in manhattan_circle(c, delta):
+                if nc in path_no_cheat and path_no_cheat[nc] - cost - delta >= 100:
+                    n += 1
+    print (f"🎄🎅 Part 2: {n}")
 
 def draw(memory, sits=None, width=None):
     print("")
@@ -115,5 +93,5 @@ if __name__ == '__main__':
     t1 = timeit.timeit(lambda: part1(*inputs), number=1)
     print (f"{t1*1000:.3f} ms")
     
-    t2 = timeit.timeit(lambda: part2(inputs), number=1)
+    t2 = timeit.timeit(lambda: part2(*inputs), number=1)
     print (f"{t2*1000:.3f} ms")
