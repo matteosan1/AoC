@@ -1,24 +1,70 @@
 import timeit
 
-from math import floor
-
 from utils import readInput
 
-def loadInput():
-    lines = readInput("input_23_prova.txt")
-    #lines = readInput("input_23.txt")
-    return list(map(int, lines))
+# CHANGE FIRST PART TO USE DICT OF SETS 
 
-def part1(secret_numbers):
-    secret_sum = 0
-    print (f"🎄 Part 1: {secret_sum}")
+def loadInput():
+    #lines = readInput("input_23_prova.txt")
+    lines = readInput("input_23.txt")
+    connections = []
+    for l in lines:
+        connections.append([*l.split("-")])
+    graph = {}
+    for c1, c2 in connections:
+        graph.setdefault(c1, []).append(c2)
+        graph.setdefault(c2, []).append(c1)
+    return graph
+
+def find_lan_party_sets(graph):
+    sets_of_three = []
+    for computer in graph:
+        neighbors = graph[computer]
+        for i in range(len(neighbors)):
+            for j in range(i + 1, len(neighbors)):
+                if neighbors[i] in graph[neighbors[j]]:
+                    sets_of_three.append(set(sorted([computer, neighbors[i], neighbors[j]])))
+    sets_of_three = [set(s) for s in set(frozenset(s) for s in sets_of_three)]
+    return sets_of_three
+
+def part1(connections):
+    sets_of_three = find_lan_party_sets(connections)
+
+    count_t_sets = 0
+    for s in sets_of_three:
+        if any(computer.startswith("t") for computer in s):
+            count_t_sets += 1
+    print (f"🎄 Part 1: {count_t_sets}")
     
-def part2(secret_numbers):
-    x = max(totals.values())
-    print (f"🎄🎅 Part 2: {x}")
+def bron_kerbosch(R, P, X, graph):
+    """
+    Finds all maximal cliques in an undirected graph using the Bron-Kerbosch algorithm.
+
+    Args:
+        R: Set of vertices already in the current clique.
+        P: Set of candidate vertices to be added to the current clique.
+        X: Set of vertices that cannot be added to the current clique.
+        graph: A dictionary representing the graph, where keys are nodes and values are 
+              sets of neighboring nodes.
+
+    Yields:
+        Maximal cliques found in the graph.
+    """
+    if not P and not X:
+        yield R
+    while P:
+        v = P.pop()
+        yield from bron_kerbosch(R | {v}, P & graph[v], X & graph[v], graph)
+        X.add(v)
+
+def part2(graph):    
+    graph = {k:set(v) for k, v in graph.items()}
+    all_cliques = list(bron_kerbosch(set(), set(graph.keys()), set(), graph))
+    largest_clique = sorted(max(all_cliques, key=len, default=[]))
+    print (f"🎄🎅 Part 2: {",".join(sorted(max(all_cliques, key=len, default=[])))}")
 
 if __name__ == '__main__':
-    title = "Day 23: "
+    title = "Day 23: LAN Party"
     sub = "-"*(len(title)+2)
 
     print()
@@ -30,5 +76,5 @@ if __name__ == '__main__':
     t1 = timeit.timeit(lambda: part1(inputs), number=1)
     print (f"{t1*1000:.3f} ms")
     
-    # t2 = timeit.timeit(lambda: part2(inputs), number=1)
-    # print (f"{t2*1000:.3f} ms")
+    t2 = timeit.timeit(lambda: part2(inputs), number=1)
+    print (f"{t2*1000:.3f} ms")

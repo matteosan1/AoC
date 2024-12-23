@@ -9,20 +9,23 @@ def loadInput():
     lines = readInput("input_22.txt")
     return list(map(int, lines))
 
-mix = lambda val, n: val ^ n
-prune = lambda n: n % 16777216
+# mix = lambda val, n: val ^ n
+# prune = lambda n: n % 16777216
 
-def generate(n):
-    n = prune(mix(n*64, n)
-    n = prune(mix(floor(n/32), n))
-    return prune(mix(n *2048, n))
+# def generate(n):
+#     n = (n << 6 ^ n) & 0xFFFFFF
+#     n = (n >> 5 ^ n) & 0xFFFFFF
+#     return (n << 11 ^ n) & 0xFFFFFF
 
 def part1(secret_numbers):
     secret_sum = 0
     for n in secret_numbers:
         #print (f"{n}: ", end='')
         for i in range(2000):
-            n = generate(n)
+            n = (n << 6 ^ n) & 0xFFFFFF
+            n = (n >> 5 ^ n) & 0xFFFFFF
+            n = (n << 11 ^ n) & 0xFFFFFF
+            #n = generate(n)
         #print (n)
         secret_sum += n
     print (f"🎄 Part 1: {secret_sum}")
@@ -34,7 +37,10 @@ def part2(secret_numbers):
         seq = (0,0,0,0)
         for i in range(2000):
             prev = n%10
-            n = generate(n)
+            n = (n << 6 ^ n) & 0xFFFFFF
+            n = (n >> 5 ^ n) & 0xFFFFFF
+            n = (n << 11 ^ n) & 0xFFFFFF
+            #n = generate(n)
             seq = (*seq[1:], n%10-prev)
             if i >= 3 and seq not in seqs:
                 seqs[seq] = n%10
