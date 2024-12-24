@@ -1,4 +1,4 @@
-import numpy as np
+import numpy as np, heapq
 
 class bcolors:
     HEADER = '\033[95m'
@@ -90,51 +90,16 @@ def printPath(cm, paths, start, end):
 
     printArray(cm, path, bcolors.BOLD)
 
-class Point:
-    def __init__(self, x, y, typ=0, edge=0):
-        self.x = x
-        self.y = y
-        self.prev = None
-        self.g = 0
-        self.h = 0
-        self.f = 0
-        self.edge = edge
-        self.next = []
-        self.next2 = {}
-        self.typ = typ
-
-    def distance(self, other):
-        return np.sqrt((self.x-other.x)**2 + (self.y-other.y)**2)
-        
-    def mod(self):
-        return np.sqrt(self.x**2 + self.y**2)
-
-    def __hash__(self):
-        return hash((self.x, self.y))
-    
-    def __lt__(self, other):
-        return self.mod() < other.mod()
-
-    def __ge__(self, other):
-        return self.mod() >= other.mod()
-
-    def __eq__(self, other):
-        return self.x == other.x and self.y == other.y
-
-    def __neq__(self, other):
-        return self.x != other.x and self.y != other.y
-
-    def __add__(self, other):
-        return Point(self.x+other.x, self.y+other.y)
-
-    def __sub__(self, other):
-        return Point(self.x-other.x, self.y-other.y)
-
-    def __repr__(self):
-        return f"({self.x},{self.y})"
-        
 def manhattan_dist(p1, p2):
-    return abs(p1.x-p2.x) + abs(p1.y-p2.y)
+    return abs(p1.real-p2.real) + abs(p1.imag-p2.imag)
+
+def manhattan_circle(c, radius):
+    points = set()
+    for x in range(-radius, radius + 1):
+        y = radius - abs(x)
+        points.add(c + complex(x, y))
+        points.add(c + complex(x, -y))
+    return points
 
 def shoelace(vertices):
     A = 0
@@ -272,3 +237,78 @@ class DoublyLinkedList:
         while cur_node:
             print(cur_node.data)
             cur_node = cur_node.next
+
+DIRECTIONS = [complex(0, 1), complex(1, 0), complex(0, -1), complex(-1, 0)]
+
+def get_neighbors_basic(grid, c):
+    neighbors = []
+    for dc in DIRECTIONS:
+        nc = c + dc
+        if grid.get(nc, 1) != 1:
+            neighbors.append(nc)
+        # if cheat and not cheated:
+        #     nc2 = c + 2*dc
+        #     if grid.get(nc2, 1) != 1:
+        #         neighbors.append((nc2, True))
+    return neighbors
+
+def solve_DFS(grid, start, target, path=None):
+    if path is None:
+        path = [start]
+
+    if start == target:
+        return [path]
+
+    paths = []
+    for neighbor in get_neighbors_basic(grid, start):
+        if neighbor not in path:
+            new_path = list(path)
+            new_path.append(neighbor)
+            new_paths = solve_DFS(grid, neighbor, target, new_path)
+            if new_paths:
+                paths.extend(new_paths)
+    return paths
+
+def solve_BFS_with_path(grid, start, target):
+    q = [[start]]
+    visited = set([start])
+    while len(q) > 0:
+        path = q.pop()
+        c = path[-1]
+        if c == target:
+            break
+        for nc in get_neighbors_basic(grid, c):
+            if nc not in visited:
+                visited.add(nc)
+                new_path = list([*path, nc])
+                q.append(new_path)
+    return path
+
+def solve_Djikstra(grid, start, target, get_path=False):
+    q = [(0, i:=0, start)]
+    visited = set()
+    predecessors = {}
+    while q:
+        cost, _, c = heapq.heappop(q)
+        if c in visited:
+            continue
+        visited.add(c)
+
+        if c == target:
+            if not get_path:
+                return cost, None
+            else:
+                path = []
+                current = c
+                while current:
+                    path.append(current)
+                    current = predecessors.get(current)
+                return cost, path[::-1]
+
+        for nc in get_neighbors_basic(grid, c):
+            if nc not in visited:
+                new_cost = cost + 1
+                heapq.heappush(q, (new_cost, i:=i+1, nc))
+                predecessors[nc] = c
+    return -1, None
+
