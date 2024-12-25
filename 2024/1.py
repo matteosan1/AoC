@@ -1,26 +1,24 @@
-import time, numpy as np
+import time
+
+from collections import Counter
+
 from utils import readInput
 
-def loadInput():
-    lines = readInput("input_1.txt")
-    id1 = []
-    id2 = []
+def loadInput(filename: str) -> tuple[list[int], list[int]]:
+    lines = readInput(filename)
+    ids: list[tuple[int, ...]] = []
     for l in lines:
-        id1.append(int(l.split()[0]))
-        id2.append(int(l.split()[1]))
-    return id1, id2
+        ids.append(tuple(map(int, l.split())))
+    return tuple(zip(*ids))
 
-def part1(id1, id2):
-    id1 = np.array(sorted(id1))
-    id2 = np.array(sorted(id2))
-    print (f"🎄 Part 1: {np.sum(np.abs(id1-id2))}")
+def part1(id1: list[int], id2: list[int]) -> None:
+    print (f"🎄 Part 1: {sum([abs(x-y)for x, y in zip(sorted(id1), sorted(id2))])}")
 
-def part2(id1, id2):
+def part2(id1: list[int], id2: list[int]) -> None:
     tot = 0
-    unique, counts = np.unique(id2, return_counts=True)
-    id2 = dict(zip(unique, counts))
-    for i in id1:
-        tot += i*id2.get(i, 0)
+    counts = Counter(id2)
+    for n in id1:
+        tot += n*counts[n]
     print (f"🎄🎅 Part 2: {tot}")
 
 if __name__ == "__main__":
@@ -29,9 +27,9 @@ if __name__ == "__main__":
 
     print()
     print(f" {title} ")
-    print(sub) #"⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄")
+    print(sub)
     
-    inputs1, inputs2 = loadInput()
+    inputs1, inputs2 = loadInput("input_1.txt")
     
     t0 = time.time()
     part1(inputs1, inputs2)

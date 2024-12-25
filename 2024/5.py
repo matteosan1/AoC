@@ -1,11 +1,12 @@
-import time, heapq
+import time
+
 from utils import readInput
 
-def loadInput():
-    lines = readInput("input_5.txt")
+def loadInput(filename: str) -> tuple[list[list[int]], list[list[int]]]:
+    lines = readInput(filename)                                   
 
-    orderings = []
-    updates = []
+    orderings: list[list[int]] = []
+    updates: list[list[int]] = []
     for l in lines:
         if "|" in l:
             orderings.append(list(map(int, l.split("|"))))
@@ -13,13 +14,12 @@ def loadInput():
             updates.append(list(map(int, l.split(","))))
         else:
             continue
-
     return  orderings, updates
 
 
-def part1(orderings, updates):
+def part1(orderings: list[list[int]], updates: list[list[int]]) -> list[int]:
     mid_page = 0
-    ordered = []
+    ordered: list[int] = []
     for iu, upd in enumerate(updates):
         for x in range(len(upd)-1):
             if [upd[x], upd[x+1]] not in orderings:
@@ -32,7 +32,7 @@ def part1(orderings, updates):
     print (f"🎄 Part 1: {mid_page}")
     return ordered
 
-def part2(orderings, updates, ordered):
+def part2(orderings: list[list[int]], updates: list[list[int]], ordered: list[int]) -> None:
     mid_page = 0
     for iu, upd in enumerate(updates):
         if iu in ordered:
@@ -44,8 +44,7 @@ def part2(orderings, updates, ordered):
             for o in new_orderings:
                 if o[1] == u:
                     rank[u] += 1
-        sorted_dict = list(dict(sorted(rank.items(), key=lambda item: item[1])).keys())
-        mid_page += sorted_dict[len(sorted_dict)//2]
+        mid_page += sorted_dict[len(list(dict(sorted(rank.items(), key=lambda item: item[1])).keys()))//2]
         
     print (f"🎄🎅 Part 2: {mid_page}")
 
@@ -55,9 +54,9 @@ if __name__ == "__main__":
 
     print()
     print(f" {title} ")
-    print(sub) #"⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄")
+    print(sub)
     
-    inputs = loadInput()
+    inputs = loadInput("input_5.txt")
     
     t0 = time.time()
     ordered = part1(*inputs)

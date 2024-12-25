@@ -1,20 +1,20 @@
 import time, re, math
+
 from utils import readInput
 
-def loadInput():
-    return readInput("input_3.txt")
+def loadInput(filename: str) -> list[str]:
+    return readInput(filename)
     
-def part1(memory):
+def part1(memory: list[str]) -> None:
     r = re.compile(r"mul\((\d{1,3}),(\d{1,3})\)")
     tot = 0
     for mem in memory:
         matches = r.findall(mem)
         for m in matches:
             tot += math.prod(list(map(int, m)))
-    
     print (f"🎄 Part 1: {tot}")
 
-def part2(memory):
+def part2(memory: list[str]) -> None:
     r = re.compile(r"mul\(\d{1,3},\d{1,3}\)|do\(\)|don't\(\)")
     enabled = True
     tot = 0
@@ -37,9 +37,9 @@ if __name__ == "__main__":
 
     print()
     print(f" {title} ")
-    print(sub) #"⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄")
+    print(sub)
     
-    inputs = loadInput()
+    inputs = loadInput("input_3.txt")
     
     t0 = time.time()
     part1(inputs)
