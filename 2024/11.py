@@ -5,15 +5,14 @@ from math import log10
 
 from utils import readInput
                       
-def loadInput():
-    lines = readInput("input_11_prova.txt")
-    #lines = readInput("input_11.txt")
+def loadInput(filename: str) -> list[int]:
+    lines = readInput("input_11.txt")
 
     stones = list(map(int, lines[0].split()))
     return stones
 
 @cache
-def rules(s):
+def rules(s: int):
     if s == 0:
         return [1]
     oom = int(log10(s)+1)
@@ -24,9 +23,9 @@ def rules(s):
     else:
         return  [int(s*2024)]
 
-def blinking(vect, blinks):
+def blinking(vect: dict[int, int], blinks: int):
     for _ in range(blinks):
-        new_vect = {}
+        new_vect: dict[int, int] = {}
         for stone, i in vect.items():
             s = rules(stone)
             for item in s:
@@ -34,36 +33,32 @@ def blinking(vect, blinks):
         vect = new_vect
     return sum(vect.values())
 
-def part1(stones):
+def part1(stones: list[int]):
     length = 0
     for stone in stones:
-        init = {stone: 1}
-        length += blinking(init, 1000)        
-    return length
-
-def part2(stones):
+        length += blinking({stone: 1}, 25)   
+    print (f"🎄 Part 1: {length}", end="")
+     
+def part2(stones: list[int]):
     length = 0
     for stone in stones:
-        init = {stone: 1}
-        length += blinking(init, 75)
-    return length
+        length += blinking({stone: 1}, 75)
+    print (f"🎄🎅 Part 2: {length}", end="")
     
 if __name__ == '__main__':
     title = "Day 11: Plutonian Pebbles"
-    sub = "-"*(len(title)+2)
+    sub = "❄ "*(len(title)//2+2)
 
     print()
     print(f" {title} ")
     print(sub)
     
-    inputs = loadInput()
+    inputs = loadInput("input_11.txt")
 
     t0 = time.time()
     res1 = part1(inputs)
-    t1 = time.time()-t0
+    print (f" - {time.time()-t0:.5f}")
     
     t0 = time.time()
     res2 = part2(inputs)
-    t2 = time.time()-t0
-    
-    print (f"🎄 Part 1: {res1} ({t1:.5f}) - 🎄🎅 Part 2: {res2} ({t2:.5f})")
+    print (f" - {time.time()-t0:.5f}")

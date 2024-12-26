@@ -1,5 +1,8 @@
 import time
-from utils import readInput
+
+from utils import readInput, DIRECTIONS
+
+dirs = {i:d for i,d in enumerate(DIRECTIONS)}
 
 # TRY DFS to speed up
 
@@ -14,11 +17,10 @@ from utils import readInput
 #     if neighbor not in visited:
 #       dfs(graph, neighbor, visited)
 
-def loadInput():
-    lines = readInput("input_10_prova.txt")
-    #lines = readInput("input_10.txt")
-    starts = []
-    map = {}
+def loadInput(filename: str) -> tuple[dict[complex, int], list[complex]]:
+    lines = readInput(filename)
+    starts: list[complex] = []
+    map: dict[complex, int] = {}
     for y in range(len(lines)):
         for x in range(len(lines[0])):
             if lines[y][x] == ".":
@@ -30,10 +32,7 @@ def loadInput():
                 map[complex(x, y)] = int(lines[y][x])
     return map, starts
 
-dirs = {0:complex(0, -1), 1:complex(1, 0),
-        2:complex(0, 1), 3:complex(-1, 0)}
-
-def part1(map, starts):
+def part1(map: dict[complex, int], starts: list[complex]):
     score = 0
     for start in starts:
         queue = [(start, 0)]
@@ -49,10 +48,11 @@ def part1(map, starts):
                 if npos in map and npos not in visited:
                     if (map[npos] - pos[1]) == 1:
                         queue.append((npos, map[npos]))
-    return score
+    print (f"🎄 Part 1: {score}", end="")
 
-def part2(map, starts):
-    rate = {}
+
+def part2(map: dict[complex, int], starts: list[complex]):
+    rate: dict[complex, int] = {}
     for start in starts:
         queue = [(start, 0)]
         pos = start
@@ -65,24 +65,24 @@ def part2(map, starts):
                 if npos in map:
                     if (map[npos] - pos[1]) == 1:
                         queue.append((npos, map[npos]))
-    return sum(rate.values())
+    print (f"🎄🎅 Part 2: {sum(rate.values())}", end="")
+
     
 if __name__ == '__main__':
     title = "Day 10: Hoof It"
-    sub = "-"*(len(title)+2)
+    sub = "❄ "*(len(title)//2+2)
 
     print()
     print(f" {title} ")
     print(sub)
     
-    inputs = loadInput()
+    inputs = loadInput("input_10.txt")
 
     t0 = time.time()
-    res1 = part1(*inputs)
-    t1 = time.time()-t0
+    part1(*inputs)
+    print (f" - {time.time()-t0:.5f}")
     
     t0 = time.time()
-    res2 = part2(*inputs)
-    t2 = time.time()-t0
+    part2(*inputs)
+    print (f" - {time.time()-t0:.5f}")
     
-    print (f"🎄 Part 1: {res1} ({t1:.5f}) - 🎄🎅 Part 2: {res2} ({t2:.5f})")
