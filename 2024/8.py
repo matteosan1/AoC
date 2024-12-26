@@ -1,100 +1,95 @@
 import time
+
 from utils import readInput
 
-def loadInput():
-    #lines = readInput("input_8_prova.txt")
-    lines = readInput("input_8.txt")
+def loadInput(filename: str) -> tuple[dict[str, list[complex]], int, int]:
+    lines: list[str] = readInput(filename)
     
-    antennas = {}
+    antennas: dict[str, list[complex]] = {}
     for y in range(len(lines)):
         for x in range(len(lines[0])):
             if lines[y][x] != "." and lines[y][x] != "#":
-                antennas.setdefault(lines[y][x], []).append((x, y))
+                antennas.setdefault(lines[y][x], []).append(complex(x, y))
 
     xmax = len(lines[0])
     ymax = len(lines)
-    #print (antennas)
     return antennas, xmax, ymax
 
-def draw_map(antennas, antinodes, xmax, ymax):
-    antennas_drawing = {}
-    for k, v in antennas.items():
-        for item in v:
-            antennas_drawing[item] = k
+# def draw_map(antennas, antinodes, xmax, ymax):
+#     antennas_drawing = {}
+#     for k, v in antennas.items():
+#         for item in v:
+#             antennas_drawing[item] = k
 
-    for y in range(ymax):
-        for x in range(xmax):
-            if (x, y) in antennas_drawing:
-                print (antennas_drawing[(x,y)], end="")
-            elif (x, y) in antinodes:
-                print ("#", end="")
-            else:
-                print (".", end="")
-        print ()
+#     for y in range(ymax):
+#         for x in range(xmax):
+#             if (x, y) in antennas_drawing:
+#                 print (antennas_drawing[(x,y)], end="")
+#             elif (x, y) in antinodes:
+#                 print ("#", end="")
+#             else:
+#                 print (".", end="")
+#         print ()
 
-def part1(antennas, xmax, ymax):
-    antinodes = set([])
-    for freq, poss in antennas.items():
+def part1(antennas: dict[str, list[complex]], xmax: int, ymax: int):
+    antinodes: set[complex] = set([])
+    for poss in antennas.values():
         for i in range(len(poss)-1):
             for j in range(i+1, len(poss)):
-                dx = poss[j][0] - poss[i][0]
-                dy = poss[j][1] - poss[i][1]
-
+                dpos = poss[j] - poss[i]
                 for c in [-1, 2]:
-                    an = (poss[i][0]+c*dx, poss[i][1]+c*dy)
-                    if an[0] >= 0 and an[0] < xmax and an[1] >= 0 and an[1] < ymax:
+                    an = poss[i]+c*dpos
+                    if an.real >= 0 and an.real < xmax and an.imag >= 0 and an.imag < ymax:
                         antinodes.add(an)
-    return len(antinodes)
+    print (f"🎄 Part 1: {len(antinodes)}", end='')
 
-def part2(antennas, xmax, ymax):
-    antinodes = set([])
-    for freq, poss in antennas.items():
+def part2(antennas: dict[str, list[complex]], xmax: int, ymax: int):
+    antinodes: set[complex] = set([])
+    for poss in antennas.values():
         for i in range(len(poss)-1):
             for j in range(i+1, len(poss)):
                 antinodes.add(poss[i])
                 antinodes.add(poss[j])
-                dx = poss[j][0] - poss[i][0]
-                dy = poss[j][1] - poss[i][1]
+                dpos = poss[j] - poss[i]
 
                 an = poss[i]
                 forward = backward = True
                 c = 0
                 while True:
-                    an = (poss[i][0] + c*dx, poss[i][1] + c*dy)
-                    if an[0] >= 0 and an[0] < xmax and an[1] >= 0 and an[1] < ymax:
-                        antinodes.add(an)
-                    else:
-                        forward = False
+                    if forward:
+                        an = poss[i] + c*dpos
+                        if an.real >= 0 and an.real < xmax and an.imag >= 0 and an.imag < ymax:
+                            antinodes.add(an)
+                        else:
+                            forward = False
                     
-                    an = (poss[i][0] - c*dx, poss[i][1] - c*dy)
-                    if an[0] >= 0 and an[0] < xmax and an[1] >= 0 and an[1] < ymax:
-                        antinodes.add(an)
-                    else:
-                        backward = False
+                    if backward:
+                        an = poss[i] - c*dpos
+                        if an.real >= 0 and an.real < xmax and an.imag >= 0 and an.imag < ymax:
+                            antinodes.add(an)
+                        else:
+                            backward = False
 
                     if not forward and not backward:
                         break
                     else:
                         c += 1
-                        
-    return len(antinodes)
+    print (f"🎄🎅 Part 2: {len(antinodes)}", end='')
 
 if __name__ == '__main__':
     title = "Day 8: Resonant Collinearity"
-    sub = "-"*(len(title)+2)
+    sub = "❄ "*(len(title)//2+2)
 
     print()
     print(f" {title} ")
     print(sub)
     
-    inputs = loadInput()
+    inputs = loadInput("input_8.txt")
 
     t0 = time.time()
-    res1 = part1(*inputs)
-    t1 = time.time()-t0
+    part1(*inputs)
+    print (f" - {time.time()-t0:.5f}")
     
     t0 = time.time()
-    res2 = part2(*inputs)
-    t2 = time.time()-t0
-    
-    print (f"🎄 Part 1: {res1} ({t1:.5f}) - 🎄🎅 Part 2: {res2} ({t2:.5f})")
+    part2(*inputs)
+    print (f" - {time.time()-t0:.5f}")

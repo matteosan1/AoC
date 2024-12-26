@@ -1,10 +1,13 @@
 import time
-from utils import readInput
 
-def loadInput():
-    lines = readInput("input_6.txt")
-    area = {}
-    start = None
+from utils import readInput, DIRECTIONS
+
+movements: dict[int, complex] = {i:d for i, d in enumerate(DIRECTIONS)}
+
+def loadInput(filename: str) -> tuple[dict[complex, int], complex | None]:
+    lines = readInput(filename)
+    area: dict[complex, int] = {}
+    start: complex | None = None
     for y in range(len(lines)):
         for x in range(len(lines[0])):
             if lines[y][x] == ".":
@@ -16,16 +19,15 @@ def loadInput():
                 area[complex(x, y)] = 1
     return  area, start
 
-movements = {0: complex(0, -1), 1: complex(1, 0),
-             2: complex(0, 1), 3: complex(-1, 0)}
-
-def part1(area, start):
+def part1(area: dict[complex, int], start: complex|None) -> set[complex]:
+    if start is None:
+        raise ValueError("We need a start")
     face = 0
-    pos = start
+    pos: complex|None = start
     distincts = set([pos])
     try: 
         while True:
-            new_pos = pos + movements[face]
+            new_pos: complex|None = pos + movements[face]
             if area[new_pos] == 1:
                 face = (face+1)%4
             else:
@@ -36,9 +38,12 @@ def part1(area, start):
     print (f"🎄 Part 1: {len(distincts)}")
     return distincts
 
-def part2(area, start, path):
-    blocks = []
-    path = list(path)
+def part2(area: dict[complex, int], start: complex|None, thepath: set[complex]) -> None:
+    if start is None:
+        raise ValueError("We need a start")
+
+    blocks: list[complex] = []
+    path = list(thepath)
     path.remove(start)
     for p in path:
         if p in blocks:
@@ -46,7 +51,7 @@ def part2(area, start, path):
         area[p] = 1
         face = 0
         pos = start
-        turns = set([])
+        turns: set[tuple[complex, int]] = set([])
         isloop = False
         try:
             while True:
@@ -73,9 +78,9 @@ if __name__ == "__main__":
 
     print()
     print(f" {title} ")
-    print(sub) #"⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄")
-    
-    inputs = loadInput()
+    print(sub)
+
+    inputs = loadInput("input_6.txt")
     
     t0 = time.time()
     path = part1(*inputs)

@@ -1,87 +1,74 @@
 import time
 
 from itertools import product
-from math import log10
+from operator import __add__, __mul__
+
 from utils import readInput
 
+operators = {"+":__add__, "*":__mul__}
+
 # TRY USING RECURSION
-def loadInput():
-    #lines = readInput("input_7_prova.txt")
-    lines = readInput("input_7.txt")
-    operations = []
+def loadInput(filename: str) -> tuple[list[int], list[list[int]]]:
+    lines = readInput(filename)
+    results: list[int] = []
+    operations: list[list[int]] = []
     for l in lines:
-        oper = [int(l.split(": ")[0]), list(map(int, l.split(": ")[1].split(" ")))]
+        oper: list[int] = list(map(int, l.split(": ")[1].split(" ")))
         operations.append(oper)
-    return operations
+        results.append(int(l.split(": ")[0]))
+    return results, operations
 
-def replace_spaces(text, replacement_chars):
-    index = 0
-    output = ""
-    for char in text:
-        if char == " ":
-            output += replacement_chars[index % len(replacement_chars)]
-            index += 1
-        else:
-             output += char
-    return output
-
-def part1(operations):
+def part1(results: list[int], operations: list[list[int]]) -> None:
     valid = 0
-    for o in operations:
-        spaces = len(o[1])-1
-        sequences = product(["+", "*"], repeat=spaces)
-        for s in sequences:
-            result = o[1][0]
-            for i in range(spaces):
-                if s[i] == "+":
-                    result += o[1][i+1]
-                else:
-                    result *= o[1][i+1]
-                if result > o[0]:
+    for i in range(len(results)):
+        spaces = len(operations[i])-1
+        for seq in product(["+", "*"], repeat=spaces):
+            result = operations[i][0]
+            for j in range(spaces):
+                result = operators[seq[j]](result, operations[i][j+1])
+                if result > results[i]:
                     break
-            if o[0] == result:
+            if results[i] == result:
                 valid += result
                 break
-    return valid
+    print (f"🎄 Part 1: {valid}", end='')
 
-def part2(operations):
+def concat(num1: int, num2: int) -> int:
+    return int(str(num1) + str(num2))
+
+def is_sum_concat_possible(nums: list[int], result: int, current: int, index: int) -> int:
+    if index == 0:
+        return is_sum_concat_possible(nums, result, nums[0], 1)
+
+    if index == len(nums) - 1:
+        return (current + nums[index] == result) or (current * nums[index] == result) or (concat(current, nums[index]) == result)
+
+    return is_sum_concat_possible(nums, result, current + nums[index], index + 1) or \
+           is_sum_concat_possible(nums, result, current * nums[index], index + 1) or \
+           is_sum_concat_possible(nums, result, concat(current, nums[index]), index + 1)
+
+def part2(results: list[int], operations: list[list[int]]) -> None:
     valid = 0
-    for o in operations:
-        spaces = len(o[1])-1
-        sequences = product(["+", "*", "||"], repeat=spaces)
-        for s in sequences:
-            result = o[1][0]
-            for i in range(spaces):
-                if s[i] == "+":
-                    result += o[1][i+1]
-                elif s[i] == "*":
-                    result *= o[1][i+1]
-                else:
-                    ofm = int(log10(abs(o[1][i+1])))+1
-                    result = result*10**ofm + o[1][i+1]
-                if result > o[0]:
-                    break
-            if o[0] == result:
-                valid += result
-                break
-    return valid
+    for i in range(len(operations)):
+        if is_sum_concat_possible(operations[i], results[i], 0, 0):
+            valid += results[i]
+    print (f"🎄🎅 Part 2: {valid}", end='')
+
 
 if __name__ == '__main__':
     title = "Day 7: Bridge Repair"
-    sub = "-"*(len(title)+2)
+    sub = "❄ "*(len(title)//2+2)
 
     print()
     print(f" {title} ")
     print(sub)
     
-    inputs = loadInput()
+    inputs = loadInput("input_7.txt")
 
     t0 = time.time()
-    res1 = part1(inputs)
-    t1 = time.time()-t0
+    part1(*inputs)
+    print (f" - {time.time()-t0:.5f}")
     
     t0 = time.time()
-    res2 = part2(inputs)
-    t2 = time.time()-t0
-    
-    print (f"🎄 Part 1: {res1} ({t1:.5f}) - 🎄🎅 Part 2: {res2} ({t2:.5f})")
+    part2(*inputs)
+    print (f" - {time.time()-t0:.5f}")

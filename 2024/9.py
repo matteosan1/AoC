@@ -1,14 +1,12 @@
 import time
+
 from utils import readInput
 
-def loadInput():
-    #lines = readInput("input_9_prova.txt")
-    lines = readInput("input_9.txt")
-    disk = lines[0]
-    return disk
+def loadInput(filename: str) -> str:
+    return readInput(filename)[0]
 
-def part1(disk):
-    fragments = []
+def part1(disk: str):
+    fragments: list[int] = []
     try:
         for i in range(0, len(disk), 2):
             fragments += [i//2]*int(disk[i])
@@ -26,23 +24,21 @@ def part1(disk):
         if idx == idx_rvs:
             break
 
-    checksum = 0
-    for i in range(idx+1):
-        checksum += i*int(fragments[i])
-    return checksum
+    checksum = sum([i*int(fragments[i]) for i in range(idx_rvs+1)])
+    print (f"🎄 Part 1: {checksum}", end='')
 
 class Fragment:
-    def __init__(self, id, length):
+    def __init__(self, id: int, length: int):
         self.id = id
         self.length = length
 
-    def checksum(self, idx):
+    def checksum(self, idx: int) -> int:
         v = 0
         for i in range(self.length):
             v += self.id*(idx+i)
         return v
     
-    def __repr__(self):
+    def __repr__(self) -> str:
         s = ""
         for _ in range(self.length):
             if self.id == -1:
@@ -51,8 +47,8 @@ class Fragment:
                 s += str(self.id)
         return s
 
-def part2(disk):
-    fragments = []
+def part2(disk: str):
+    fragments: list[Fragment] = []
     for i in range(0, len(disk)):
         id = -1
         if i%2 == 0:
@@ -80,9 +76,6 @@ def part2(disk):
                         break
                 idx += 1
         idx_rvs -= 1
-    # for f in fragments:
-    #     print (f, end="")
-    # print()
 
     idx = 0
     checksum = 0
@@ -90,24 +83,22 @@ def part2(disk):
         if f.id != -1:
             checksum += f.checksum(idx)
         idx += f.length
-    return checksum
+    print (f"🎄🎅 Part 2: {checksum}", end='')
 
 if __name__ == '__main__':
     title = "Day 9: Disk Fragmenter"
-    sub = "-"*(len(title)+2)
+    sub = "❄ "*(len(title)//2+2)
 
     print()
     print(f" {title} ")
     print(sub)
     
-    inputs = loadInput()
+    inputs = loadInput("input_9.txt")
 
     t0 = time.time()
-    res1 = part1(inputs)
-    t1 = time.time()-t0
+    part1(inputs)
+    print (f" - {time.time()-t0:.5f}")
     
     t0 = time.time()
-    res2 = part2(inputs)
-    t2 = time.time()-t0
-    
-    print (f"🎄 Part 1: {res1} ({t1:.5f}) - 🎄🎅 Part 2: {res2} ({t2:.5f})")
+    part2(inputs)
+    print (f" - {time.time()-t0:.5f}")
