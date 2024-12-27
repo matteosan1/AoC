@@ -1,10 +1,9 @@
-import timeit
+import time
 
-from utils import readInput, bcolors, solve_BFS_with_path, manhattan_circle
+from utils import readInput, bcolors, manhattan_dist, DIRECTIONS
 
-def loadInput():
-    #lines = readInput("input_20_prova.txt")
-    lines = readInput("input_20.txt")
+def loadInput(filename: str):
+    lines = readInput(filename)
 
     racetrack = {}
     for l in lines:
@@ -23,44 +22,41 @@ def loadInput():
                     racetrack[c] = 0
     return racetrack, start, end
 
-def is_valid(grid, c):
-    return grid.get(c, 1) != 1
-
-def get_neighbors(grid, c, cheated, cheat, no_cheat_path):
-    neighbors = []
-    for dc in DIRECTIONS:
-        nc = c + dc
-        if is_valid(grid, nc):
-            neighbors.append((nc, cheated))
-        elif cheat and not cheated:
-            nc2 = c + 2*dc
-            if is_valid(grid, nc2) and nc2 in no_cheat_path:
-                neighbors.append((nc2, True))
-    return neighbors
+def dijkstra(grid, end):
+    D = {end: 0}
+    Q = [end]
+    while Q:
+        p = Q.pop()
+        for p2 in [p + dp for dp in DIRECTIONS]:
+            if grid[p2] != 1 and p2 not in D:
+                Q.append(p2)
+                D[p2] = D[p] + 1
+    return D
 
 def part1(racetrack, start, end):
-    path_no_cheat = solve_BFS_with_path(racetrack, start, end)
-    path_no_cheat = {p:i for i, p in enumerate(path_no_cheat)}
-    n = 0
-    for c, cost in path_no_cheat.items():
-        # path[n] - i - 2 is how much closer to the goal we 
-        # end up. 2 because if we stay on the path after 2
-        # steps, we end up 2 steps closer
-        for nc in manhattan_circle(c, 2):
-            if nc in path_no_cheat and path_no_cheat[nc] - cost - 2 >= 100:
-                n += 1
-    print (f"🎄 Part 1: {n}")
+    lower_bound = -100
+    D = dijkstra(racetrack, end)
+    res = [(p1, p3, t) for p1 in D
+            for p2 in [p1 + dp for dp in DIRECTIONS] if racetrack[p2] == 1
+                for p3 in [p2 + dp for dp in DIRECTIONS]
+                    if  p3 in D and (t := D[p3] - D[p1] + 2) <= lower_bound]
+    print (f"🎄 Part 1: {len(res)}", end='')
     
+
+def neighborhood(p, radius):
+    return [p + complex(dx, 0) + complex(0, dy) 
+            for dx in range(-radius, radius + 1)
+            for dy in range(-(radius - abs(dx)), radius - abs(dx) + 1)]
+
 def part2(racetrack, start, end):
-    path_no_cheat = solve_BFS_with_path(racetrack, start, end)
-    path_no_cheat = {p:i for i, p in enumerate(path_no_cheat)}
-    n = 0
-    for c, cost in path_no_cheat.items():
-        for delta in range(2, 21):
-            for nc in manhattan_circle(c, delta):
-                if nc in path_no_cheat and path_no_cheat[nc] - cost - delta >= 100:
-                    n += 1
-    print (f"🎄🎅 Part 2: {n}")
+    radius = 20
+    lower_bound = -100
+    D = dijkstra(racetrack, end)
+    res = [(p1, p2, t)
+            for p1 in D
+            for p2 in neighborhood(p1, radius)
+            if  p2 in D and (t := D[p1] - D[p2] + manhattan_dist(p1, p2)) <= lower_bound]
+    print (f"🎄🎅 Part 2: {len(res)}", end='')
 
 def draw(memory, sits=None, width=None):
     print("")
@@ -82,16 +78,18 @@ def draw(memory, sits=None, width=None):
 
 if __name__ == '__main__':
     title = "Day 20: Race Condition"
-    sub = "-"*(len(title)+2)
+    sub = "❄ "*(len(title)//2+2)
 
     print()
     print(f" {title} ")
     print(sub)
     
-    inputs = loadInput()
+    inputs = loadInput("input_20.txt")
     
-    t1 = timeit.timeit(lambda: part1(*inputs), number=1)
-    print (f"{t1*1000:.3f} ms")
+    t0 = time.time()
+    part1(*inputs)
+    print (" - {:.5f}".format(time.time()-t0))
     
-    t2 = timeit.timeit(lambda: part2(*inputs), number=1)
-    print (f"{t2*1000:.3f} ms")
+    t0 = time.time()
+    part2(*inputs)
+    print (" - {:.5f}".format(time.time()-t0))

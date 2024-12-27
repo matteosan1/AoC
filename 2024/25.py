@@ -1,4 +1,4 @@
-import timeit
+import time
 
 from utils import readInputWithBlank
 
@@ -33,11 +33,11 @@ def part1(locks: list[list[int]], keys: list[list[int]]) -> None:
         for key in keys:
             if all([key[i]+lock[i] <= 5 for i in range(len(lock))]):
                 matches += 1
-    print (f"🎄 Part 1: {matches}")
+    print (f"🎄 Part 1: {matches}", end='')
     
 if __name__ == '__main__':
     title = "Day 25: Code Chronicle"
-    sub = "-"*(len(title)+2)
+    sub = "❄ "*(len(title)//2+2)
 
     print()
     print(f" {title} ")
@@ -45,5 +45,6 @@ if __name__ == '__main__':
     
     inputs = loadInput("input_25.txt")
     
-    t1 = timeit.timeit(lambda: part1(*inputs), number=1)
-    print (f"{t1*1000:.3f} ms")
+    t0 = time.time()
+    part1(*inputs)
+    print (" - {:.5f}".format(time.time()-t0))

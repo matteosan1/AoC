@@ -1,12 +1,9 @@
-import timeit, heapq
+import time, heapq
 
-from utils import readInput, bcolors
+from utils import readInput, bcolors, DIRECTIONS
 
-DIRECTIONS = [complex(0, 1), complex(1, 0), complex(0, -1), complex(-1, 0)]
-
-def loadInput():
-    #lines = readInput("input_18_prova.txt")
-    lines = readInput("input_18.txt")
+def loadInput(filename: str) -> list[complex]:
+    lines = readInput(filename)
     bytes = []
     for l in lines:
         bytes.append(complex(*(map(int, l.split(",")))))
@@ -70,15 +67,15 @@ def solve(grid, width, new_walls=None, get_path=False):
                 predecessors[nc] = c
     return -1, None
 
-def part1(bytes):
+def part1(bytes: list[complex]):
     nbytes = 1024
     width = 71
     memory = simulate_falling(bytes, nbytes, width)
     cost, path = solve(memory, width, get_path=True)
-    draw(memory, path, width)
-    print (f"🎄 Part 1: {cost}")
+    #draw(memory, path, width)
+    print (f"🎄 Part 1: {cost}", end='')
 
-def part2(bytes):
+def part2(bytes: list[complex]):
     width = 71
     memory = simulate_falling(bytes, 1024, width)
     low = 1024
@@ -101,7 +98,7 @@ def part2(bytes):
             else:
                 high = mid - 1
     #draw(memory, path)
-    print (f"🎄🎅 Part 2: {bytes[mid-1]}")
+    print (f"🎄🎅 Part 2: {int(bytes[mid-1].real)},{int(bytes[mid-1].imag)}", end='')
 
 def draw(memory, sits=None, width=None):
     print("")
@@ -123,16 +120,18 @@ def draw(memory, sits=None, width=None):
 
 if __name__ == '__main__':
     title = "Day 18: RAM Run"
-    sub = "-"*(len(title)+2)
+    sub = "❄ "*(len(title)//2+2)
 
     print()
     print(f" {title} ")
     print(sub)
     
-    inputs = loadInput()
+    inputs = loadInput("input_18.txt")
     
-    t1 = timeit.timeit(lambda: part1(inputs), number=1)
-    print (f"{t1*1000:.3f} ms")
+    t0 = time.time()
+    part1(inputs)
+    print (" - {:.5f}".format(time.time()-t0))
     
-    t2 = timeit.timeit(lambda: part2(inputs), number=1)
-    print (f"{t2*1000:.3f} ms")
+    t0 = time.time()
+    part2(inputs)
+    print (" - {:.5f}".format(time.time()-t0))

@@ -1,101 +1,48 @@
-import time, numpy as np
-from utils import readInput
+import time
 
-def loadInput():
-    lines = readInput("input_4.txt")
-    crosswords = []
+from utils import readInput, ALL_DIRECTIONS
+
+diagonal_pairs: tuple[tuple[int, int]] = ((1, 3), (7, 5), (1, 7), (3, 5))
+
+def loadInput(filename: str) -> dict[complex, str]:
+    lines = readInput(filename)
+    xwords = {}
     for y in range(len(lines)):
-        crosswords.append([ x for x in lines[y]])
+        for x in range(len(lines[y])):
+            xwords[complex(x, y)] = lines[y][x]
+    return xwords
 
-    for _ in range(3):
-        crosswords.insert(0, ["." for _ in range(len(crosswords[0]))])
-    for _ in range(3):
-        crosswords.append(["." for _ in range(len(crosswords[0]))])
-    for i in range(len(crosswords)):
-        crosswords[i] = ['.', '.', '.'] + crosswords[i] + ['.', '.', '.']
-    return  np.array(crosswords)
-    
-def find_word(square):
-    keyword = "XMAS"
-    occ = 0
+def find_word(xwords: dict[complex, str], start: complex, dir: complex, word: str) -> bool:
+    return all(xwords.get(start + i*dir, "") == word[i] for i in range(len(word)))
 
-    if "".join(square[3, 3:]) == keyword:
-        occ += 1
+def part1(xwords: dict[complex, str], word:str="XMAS"):
+    occurrencies: int = sum([find_word(xwords, start, dir, word)                    
+           for start in xwords if xwords[start] == word[0] for dir in ALL_DIRECTIONS.values()])
+    print (f"🎄 Part 1: {occurrencies}", end='')
 
-    if "".join(square[3, 3::-1]) == keyword:
-        occ += 1
-
-    if "".join(square[3::-1, 3]) == keyword:
-        occ += 1
-
-    if "".join(square[3:, 3]) == keyword:
-        occ += 1
-
-    diag = "".join(np.diagonal(square))
-    antidiag = "".join(np.flipud(square).diagonal())
-
-    if diag[3:] == keyword:
-        occ += 1
-    if diag[3::-1] == keyword:
-        occ += 1
-
-    if antidiag[3:] == keyword:
-        occ += 1
-    if antidiag[3::-1] == keyword:
-        occ += 1
-    return occ
-
-def part1(xwords):
-    occurrencies = 0
-    xmax, ymax = xwords.shape
-    for y in range(3, ymax-3):
-        for x in range(3, xmax-3):
-            if (xwords[y][x] == "X"):
-                square = xwords[y-3:y+4, x-3:x+4]
-                occ = find_word(square)
-                if occ > 0:
-                   occurrencies += occ
-    print (f"🎄 Part 1: {occurrencies}")
-
-def find_word2(square):
-    keyword = "MAS"
-    x_dd = 0
-    diag = "".join(np.diagonal(square))
-    antidiag = "".join(np.flipud(square).diagonal())
-
-    if diag == keyword or diag[::-1] == keyword:
-        x_dd += 1
-    if antidiag == keyword or antidiag[::-1] == keyword:
-        x_dd += 1
-
-    return x_dd >= 2
-
-def part2(xwords):
-    occurrencies = 0
-    xmax, ymax = xwords.shape
-    for y in range(3, ymax-3):
-        for x in range(3, xmax-3):
-            if (xwords[y][x] == "A"):
-                square = xwords[y-1:y+2, x-1:x+2]
-                if find_word2(square):
-                   occurrencies += 1
-
-    print (f"🎄🎅 Part 2: {occurrencies}")
+def part2(xwords: dict[complex, str], word: str="MAS"):
+    occurrencies: int = sum([find_word(xwords, mid_pos-ALL_DIRECTIONS[dir1], 
+                                       ALL_DIRECTIONS[dir1], word) and
+                             find_word(xwords, mid_pos-ALL_DIRECTIONS[dir2], 
+                                       ALL_DIRECTIONS[dir2], word)
+                             for mid_pos in xwords if xwords[mid_pos] == word[1] 
+                             for dir1, dir2 in diagonal_pairs])
+    print (f"🎄🎅 Part 2: {occurrencies}", end='')
 
 if __name__ == "__main__":
     title = "Day 4: Ceres Search"
-    sub = "⛄"*(len(title)//2-1+2)
+    sub = "❄ "*(len(title)//2+2)
 
     print()
     print(f" {title} ")
-    print(sub) #"⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄⛄")
+    print(sub)
     
-    inputs = loadInput()
+    inputs = loadInput("input_4.txt")
     
     t0 = time.time()
     part1(inputs)
-    print ("Time: {:.5f}".format(time.time()-t0))
+    print (" - {:.5f}".format(time.time()-t0))
     
     t0 = time.time()
     part2(inputs)
-    print ("Time: {:.5f}".format(time.time()-t0))
+    print (" - {:.5f}".format(time.time()-t0))

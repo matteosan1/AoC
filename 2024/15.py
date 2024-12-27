@@ -1,4 +1,4 @@
-import timeit
+import time
 
 from utils import readInput
 
@@ -7,9 +7,8 @@ from utils import readInput
 
 dirs = {'^':complex(0,-1), ">":complex(1,0), "<":complex(-1,0), "v":complex(0,1)}
 
-def loadInput(part=1):
-    #lines = readInput("input_15_prova.txt")
-    lines = readInput("input_15.txt")
+def loadInput(filename: str, part: int=1):
+    lines = readInput(filename)
 
     grid = {}
     instructions = ""
@@ -72,7 +71,7 @@ def part1(grid, instructions, start):
         start = move(start, grid, dirs[i])
     score = GPS(grid)
     #draw(grid, start)
-    print (f"🎄 Part 1: {int(score)}")
+    print (f"🎄 Part 1: {int(score)}", end='')
 
 def move2(pos, grid, dir):
     new_pos = [p + dir for p in pos]
@@ -109,7 +108,7 @@ def part2(grid, instructions, start):
         start = move2([start], grid, dirs[i])
     score = GPS(grid)
     #draw(grid, start, 2)
-    print (f"🎄🎅 Part 2: {int(score)}")
+    print (f"🎄🎅 Part 2: {int(score)}", end='')
 
 def draw(grid, start, part=1):
     xmax = int(max([c.real for c in grid]))+1
@@ -134,18 +133,20 @@ def draw(grid, start, part=1):
 
 if __name__ == '__main__':
     title = "Day 15: Warehouse Woes"
-    sub = "-"*(len(title)+2)
+    sub = "❄ "*(len(title)//2+2)
 
     print()
     print(f" {title} ")
     print(sub)
     
-    inputs = loadInput()
+    inputs = loadInput("input_15.txt")
     
-    t1 = timeit.timeit(lambda: part1(*inputs), number=1)
-    print (f"{t1*1000:.3f} ms")
+    t0 = time.time()
+    part1(*inputs)
+    print (" - {:.6f}s".format(time.time()-t0))
 
-    inputs = loadInput(part=2)
+    inputs = loadInput("input_15.txt", part=2)
 
-    t2 = timeit.timeit(lambda: part2(*inputs), number=1)
-    print (f"{t2*1000:.3f} ms")
+    t0 = time.time()
+    part2(*inputs)
+    print (" - {:.6f}s".format(time.time()-t0))

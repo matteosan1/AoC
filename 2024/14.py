@@ -1,11 +1,11 @@
-import timeit, numpy as np, copy
+import time, numpy as np, copy
 
-from utils import readInput
+from utils import readInput, manhattan_dist
 
-def loadInput():
-    lines = readInput("input_14_prova.txt")
-    #xmax, ymax = 11, 7
-    #lines = readInput("input_14.txt")  
+# FIXME PROVARE CON DISCRETE FOURIER TRANSFORM
+
+def loadInput(filename: str) -> tuple[list[complex], list[complex], int, int]:
+    lines = readInput(filename)
     xmax, ymax = 101, 103
 
     robots = []
@@ -31,12 +31,12 @@ def quadrants(robots, xmax, ymax):
                 quadrants[3] += 1
     return quadrants
 
-def part1(r, vels, xmax, ymax):
-    robots = copy.deepcopy(r)
+def part1(robots, vels, xmax, ymax):
+    robots = copy.deepcopy(robots)
     for i in range(len(robots)):
         npos = complex(robots[i]+vels[i]*100)
         robots[i] = complex(npos.real%xmax, npos.imag%ymax)
-    print (f"🎄 Part 1: {np.prod(quadrants(robots, xmax, ymax))}")
+    print (f"🎄 Part 1: {np.prod(quadrants(robots, xmax, ymax))}", end='')
 
 def draw(ps, xmax, ymax):
     for y in range(0, ymax):
@@ -49,40 +49,55 @@ def draw(ps, xmax, ymax):
                 print (" ", end='')
         print (" ")
 
-def part2(r, vels, xmax, ymax):
-    robots = copy.deepcopy(r)
+def mean_distance_to_centroid(robots, distance=manhattan_dist) -> float:
+    centroid = np.mean(robots)
+    return np.mean([distance(r, centroid) for r in robots])
+
+def part2_bis(robots, vels, xmax, ymax):
     seconds = 10403 # found when the starting position is found again
-    #positions = [r[0] for r in robots]
-    bye = False
-    stds = [np.inf, np.inf]
+    minimum = (-1, float("inf"))
+    for second in range(1, seconds):
+        for i in range(len(robots)):
+            npos = complex(robots[i]+vels[i])
+            robots[i] = complex(npos.real%xmax, npos.imag%ymax)
+        dist = mean_distance_to_centroid(robots)
+        if dist < minimum[1]:
+            minimum = (second, dist)
+    print (f"🎄🎅 Part 2: {minimum}", end='')
+
+def part2(robots, vels, xmax, ymax):
+    seconds = 10403 # found when the starting position is found again
+
+    stds = (-1, float("inf"), float("inf"))
     for second in range(1, seconds):
         for i in range(len(robots)):
             npos = complex(robots[i]+vels[i])
             robots[i] = complex(npos.real%xmax, npos.imag%ymax)
 
         std = (np.std([float(r.real) for r in robots]), np.std([float(r.imag) for r in robots]))
-        if std[0] <= stds[0] and std[1] <= stds[1]:
-            stds = std
-            christmas_tree = second
+        if std[0] <= stds[1] and std[1] <= stds[2]:
+            stds = (second, std[0], std[1])
 
-    for i in range(len(r)):
-        npos = complex(r[i]+vels[i]*christmas_tree)
-        r[i] = complex(npos.real%xmax, npos.imag%ymax)
-    draw(r, xmax, ymax)
-    print (f"🎄🎅 Part 2: {christmas_tree}")
+    # for i in range(len(r)):
+    #     npos = complex(r[i]+vels[i]*christmas_tree)
+    #     r[i] = complex(npos.real%xmax, npos.imag%ymax)
+    #draw(r, xmax, ymax)
+    print (f"🎄🎅 Part 2: {stds[0]}", end='')
 
 if __name__ == '__main__':
     title = "Day 14: Restroom Redoubt"
-    sub = "-"*(len(title)+2)
+    sub = "❄ "*(len(title)//2+2)
 
     print()
     print(f" {title} ")
     print(sub)
     
-    inputs = loadInput()
+    inputs = loadInput("input_14.txt")
     
-    t1 = timeit.timeit(lambda: part1(*inputs), number=1)
-    print (f"{t1*1000:.3f} ms")
-
-    t2 = timeit.timeit(lambda: part2(*inputs), number=1)
-    print (f"{t2*1000:.3f} ms")
+    t0 = time.time()
+    part1(*inputs)
+    print (" - {:.6f}s".format(time.time()-t0))
+    
+    t0 = time.time()
+    part2(*inputs)
+    print (" - {:.6f}s".format(time.time()-t0))

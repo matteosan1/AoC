@@ -1,12 +1,11 @@
-import timeit
+import time
 
 from utils import readInput
 
 # CHANGE FIRST PART TO USE DICT OF SETS 
 
-def loadInput():
-    #lines = readInput("input_23_prova.txt")
-    lines = readInput("input_23.txt")
+def loadInput(filename):
+    lines = readInput(filename)
     connections = []
     for l in lines:
         connections.append([*l.split("-")])
@@ -34,7 +33,7 @@ def part1(connections):
     for s in sets_of_three:
         if any(computer.startswith("t") for computer in s):
             count_t_sets += 1
-    print (f"🎄 Part 1: {count_t_sets}")
+    print (f"🎄 Part 1: {count_t_sets}", end='')
     
 def bron_kerbosch(R, P, X, graph):
     """
@@ -61,20 +60,22 @@ def part2(graph):
     graph = {k:set(v) for k, v in graph.items()}
     all_cliques = list(bron_kerbosch(set(), set(graph.keys()), set(), graph))
     largest_clique = sorted(max(all_cliques, key=len, default=[]))
-    print (f"🎄🎅 Part 2: {",".join(sorted(max(all_cliques, key=len, default=[])))}")
+    print (f"🎄🎅 Part 2: {",".join(sorted(max(all_cliques, key=len, default=[])))}", end='')
 
 if __name__ == '__main__':
     title = "Day 23: LAN Party"
-    sub = "-"*(len(title)+2)
+    sub = "❄ "*(len(title)+2)
 
     print()
     print(f" {title} ")
     print(sub)
     
-    inputs = loadInput()
+    inputs = loadInput("input_23.txt")
     
-    t1 = timeit.timeit(lambda: part1(inputs), number=1)
-    print (f"{t1*1000:.3f} ms")
+    t0 = time.time()
+    part1(inputs)
+    print (" - {:.5f}".format(time.time()-t0))
     
-    t2 = timeit.timeit(lambda: part2(inputs), number=1)
-    print (f"{t2*1000:.3f} ms")
+    t0 = time.time()
+    part2(inputs)
+    print (" - {:.5f}".format(time.time()-t0))

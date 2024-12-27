@@ -1,4 +1,4 @@
-import timeit, heapq
+import time, heapq
 
 from utils import readInput
 
@@ -24,9 +24,9 @@ from utils import readInput
 
 DIRECTIONS = [(0, 1), (1, 0), (0, -1), (-1, 0)]
 
-def loadInput():
-    #lines = readInput("input_16_prova.txt")
-    lines = readInput("input_16.txt")
+def loadInput(filename: str):
+    lines = readInput(filename)
+
     pitch = {}
     start = None
     target = None
@@ -92,7 +92,7 @@ def solve(grid, start, target):
 def part1(pitch, start, target):
     cost, path = solve(pitch, start, target)
     #draw(pitch, path)
-    print (f"🎄 Part 1: {cost}")
+    print (f"🎄 Part 1: {cost}", end='')
 
 def solve2(grid, start, target):
     DIRECTIONS = set([(0, 1), (1, 0), (0, -1), (-1, 0)])
@@ -125,7 +125,7 @@ def part2(pitch, start, target):
     visited = solve2(pitch, start, target)
     min_direction = min(visited[target].values(), key=lambda d: d["score"])
     #draw(pitch, min_direction['tiles'])
-    print (f"🎄🎅 Part 2: {len(min_direction["tiles"]) + 1}")
+    print (f"🎄🎅 Part 2: {len(min_direction["tiles"]) + 1}", end='')
 
 def draw(pitch, sits):
     xmax = int(max([c[0] for c in pitch]))+1
@@ -147,17 +147,18 @@ def draw(pitch, sits):
 
 if __name__ == '__main__':
     title = "Day 16: Reindeer Maze"
-    sub = "-"*(len(title)+2)
+    sub = "❄ "*(len(title)//2+2)
 
     print()
     print(f" {title} ")
     print(sub)
     
-    inputs = loadInput()
+    inputs = loadInput("input_16.txt")
     
-    t1 = timeit.timeit(lambda: part1(*inputs), number=1)
-    print (f"{t1*1000:.3f} ms")
+    t0 = time.time()
+    part1(*inputs)
+    print (" - {:.5f}".format(time.time()-t0))
     
-    t2 = timeit.timeit(lambda: part2(*inputs), number=1)
-    print (f"{t2*1000:.3f} ms")
-
+    t0 = time.time()
+    part2(*inputs)
+    print (" - {:.5f}".format(time.time()-t0))

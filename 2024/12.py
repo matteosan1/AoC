@@ -1,61 +1,42 @@
 import time
 
-from math import log10
+from utils import readInput, DIRECTIONS
 
-from utils import readInput
+dirs = {i:d for i, d in enumerate(DIRECTIONS)}
 
-# PROVARE PART1 CON FLOODFILL RICORSIVO  
-# SPEED UP parte 2
-def loadInput():
-    #lines = readInput("input_12_prova.txt")
-    lines = readInput("input_12.txt")
-
-    garden = {}
+def loadInput(filename: str) -> list[set[complex]]:
+    lines = readInput(filename)
+    gardens: dict[complex, str] = {}
     for y in range(len(lines)):
         for x in range(len(lines[0])):
-            garden[complex(x, y)] = lines[y][x]
-    return garden
-
-dirs = {0: complex(0, -1), 1: complex(1, 0), 2: complex(0, 1), 3: complex(-1, 0)}
-
-def get_regions(garden):
-    gardens = {}
-    for pos, gtype in garden.items():
-        gardens.setdefault(gtype, []).append(pos)
-
-    regions = {}
-    for gtype in gardens.keys():
-        regions[gtype] = []
-        visited = []
-        for pos in gardens[gtype]:
-            group = []
-            if pos in visited:
-                continue
-            neighs = [pos]
-            visited.append(pos)
-            while len(neighs) != 0:
-                spot = neighs.pop()
-                group.append(spot)
-                for d in dirs.values():
-                    new_spot = spot + d
-                    if new_spot in garden and new_spot not in visited and garden[new_spot] == gtype:
-                        visited.append(new_spot)
-                        neighs.append(new_spot)
-            regions[gtype].append(group)                        
-            group = []
+            gardens[complex(x, y)] = lines[y][x]
+    regions = get_regions(gardens)
     return regions
 
-def part1(garden):
-    regions = get_regions(garden)
+def floodfill(gardens:dict[complex, str], pos: complex, 
+              region: set[complex], visited: set[complex]) -> set[complex]:
+    if pos not in visited:
+        visited.add(pos)
+        region.add(pos)
+        for d in dirs.values():
+            new_pos = pos + d
+            if gardens.get(new_pos, "") == gardens[pos]:
+                floodfill(gardens, new_pos, region, visited)
+    return region
+
+def get_regions(gardens: dict[complex, str]) -> list[set[complex]]:
+    visited = set()
+    return [floodfill(gardens, pos, set(), visited) for pos in gardens if pos not in visited]
+
+def part1(regions: list[set[complex]]):
     cost = 0
-    for k, v in regions.items():
-        for subregion in v:
-            area = len(subregion)
-            perimeter = 0
-            for spot in subregion:
-                perimeter += sum([spot+d not in subregion for d in dirs.values()])
-            cost += area*perimeter
-    return cost, regions
+    for region in regions:
+        area = len(region)
+        perimeter = 0
+        for spot in region:
+            perimeter += sum([spot+d not in region for d in dirs.values()])
+        cost += area*perimeter
+    print (f"🎄 Part 1: {cost}", end='')
 
 full_dirs = { 0: complex(0,-1), 2: complex(1,0), 4: complex(0,1), 6: complex(-1,0),
               1: complex(1,-1), # NE
@@ -64,7 +45,7 @@ full_dirs = { 0: complex(0,-1), 2: complex(1,0), 4: complex(0,1), 6: complex(-1,
               7: complex(-1,-1) # NW
             }
 
-def count_corners(pos, region):
+def count_corners(pos: complex, region: set[complex]) -> int:
     corners = 0
     adjacent = [False for _ in range(8)]
     for i, d in full_dirs.items():
@@ -105,34 +86,30 @@ def count_corners(pos, region):
        corners+=1
     return corners
 
-def part2(regions):
-    #regions = get_regions(garden)
+def part2(regions: list[set[complex]]):
     cost = 0
-    for k, v in regions.items():
-        for subregion in v:
-            area = len(subregion)
-            perimeter = 0 
-            for pos in subregion:
-                perimeter += count_corners(pos, subregion)
-            cost += area*perimeter
-    return cost
+    for region in regions:
+        area = len(region)
+        perimeter = 0 
+        for pos in region:
+            perimeter += count_corners(pos, region)
+        cost += area*perimeter
+    print (f"🎄🎅 Part 2: {cost}", end='')
 
 if __name__ == '__main__':
     title = "Day 12: Garden Groups"
-    sub = "-"*(len(title)+2)
+    sub = "❄ "*(len(title)//2+2)
 
     print()
     print(f" {title} ")
     print(sub)
     
-    inputs = loadInput()
+    inputs = loadInput("input_12.txt")
     
     t0 = time.time()
-    res1, regions = part1(inputs)
-    t1 = time.time()-t0
+    part1(inputs)
+    print (f" - {time.time()-t0:.5f}")
     
     t0 = time.time()
-    res2 = part2(regions)
-    t2 = time.time()-t0
-    
-    print (f"🎄 Part 1: {res1} ({t1:.5f}) - 🎄🎅 Part 2: {res2} ({t2:.5f})")
+    part2(inputs)
+    print (f" - {time.time()-t0:.5f}")

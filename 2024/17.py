@@ -1,4 +1,4 @@
-import timeit, copy
+import time, copy
 
 from utils import readInputWithBlank
 
@@ -105,9 +105,8 @@ class IntCode:
             if debug:
                 input()
 
-def loadInput():
-    #lines = readInputWithBlank("input_17_prova.txt")
-    lines = readInputWithBlank("input_17.txt")
+def loadInput(filename: str) -> IntCode:
+    lines = readInputWithBlank(filename)
 
     intcode = IntCode()
     for l in lines:
@@ -123,9 +122,9 @@ def loadInput():
             intcode.setCode(l.split(": ")[1])
     return intcode
 
-def part1(intcode):
+def part1(intcode: IntCode):
     intcode.run()
-    print (f"🎄 Part 1: {intcode.output()}")
+    print (f"🎄 Part 1: {intcode.output()}", end='')
 
 def pyintcode(A):
     B = A%8
@@ -145,28 +144,29 @@ def findQuin(A, program, col=0, res=[]):
         for B in range(8):
             findQuin(A * 8 + B, program, col + 1, res)
 
-def part2(intcode):
+def part2(intcode: IntCode):
     intcode.reset()
     program = intcode.code
     res = []
     for a in range(8):
         findQuin(a, program, res=res)
 
-    print (f"🎄🎅 Part 2: {res[0]}")
+    print (f"🎄🎅 Part 2: {res[0]}", end='')
 
 if __name__ == '__main__':
     title = "Day 17: Chronospatial Computer"
-    sub = "-"*(len(title)+2)
+    sub = "❄ "*(len(title)//2+2)
 
     print()
     print(f" {title} ")
     print(sub)
     
-    inputs = loadInput()
+    inputs = loadInput("input_17.txt")
     
-    t1 = timeit.timeit(lambda: part1(inputs), number=1)
-    print (f"{t1*1000:.3f} ms")
+    t0 = time.time()
+    part1(inputs)
+    print (" - {:.5f}".format(time.time()-t0))
     
-    t2 = timeit.timeit(lambda: part2(inputs), number=1)
-    print (f"{t2*1000:.3f} ms")
-
+    t0 = time.time()
+    part2(inputs)
+    print (" - {:.5f}".format(time.time()-t0))

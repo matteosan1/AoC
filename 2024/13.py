@@ -1,4 +1,4 @@
-import timeit, numpy as np
+import time, numpy as np
 
 from utils import readInput
 
@@ -34,9 +34,8 @@ class Machine:
     def __repr__(self):
         return (f"A: {self.buttonA}, B: {self.buttonB}, prize: {self.prize}")
 
-def loadInput():
-    #lines = readInput("input_13_prova.txt")
-    lines = readInput("input_13.txt")
+def loadInput(filename: str) -> list[Machine]:
+    lines = readInput(filename)
     machines = []
     for l in lines:
         if l == "":
@@ -53,32 +52,32 @@ def loadInput():
             machines.append(machine)
     return machines
 
-def part1(machines):
-    cost = 0
-    for m in machines:
-        cost += m.cost()
-    print (f"🎄 Part 1: {cost}")
+def part1(machines: list[Machine]):
+    cost = sum([m.cost() for m in machines])
+    print (f"🎄 Part 1: {cost}", end='')
     
-def part2(machines):
+def part2(machines: list[Machine]):
     const = 10000000000000
     cost = 0
     for m in machines:
         m.prize = [const+p for p in m.prize]
         cost += m.cost()
-    print (f"🎄🎅 Part 2: {cost}")
+    print (f"🎄🎅 Part 2: {cost}", end='')
 
 if __name__ == '__main__':
     title = "Day 13: Claw Contraption"
-    sub = "-"*(len(title)+2)
+    sub = "❄ "*(len(title)//2+2)
 
     print()
     print(f" {title} ")
     print(sub)
     
-    inputs = loadInput()
+    inputs = loadInput("input_13.txt")
     
-    t1 = timeit.timeit(lambda: part1(inputs), number=1)
-    print(f"Timing: {t1*1000:.3f} ms")
-
-    t2 = timeit.timeit(lambda: part2(inputs), number=1)
-    print(f"Timing: {t2*1000:.3f} ms")
+    t0 = time.time()
+    part1(inputs)
+    print (" - {:.6f} s".format(time.time()-t0))
+    
+    t0 = time.time()
+    part2(inputs)
+    print (" - {:.6f} s".format(time.time()-t0))
