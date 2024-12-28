@@ -36,7 +36,7 @@ def blinking(vect: dict[int, int], blinks: int):
 def part1(stones: list[int]):
     length = 0
     for stone in stones:
-        length += blinking({stone: 1}, 25)   
+        length += blinking({stone: 1}, 25)
     print (f"🎄 Part 1: {length}", end="")
      
 def part2(stones: list[int]):

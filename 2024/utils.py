@@ -28,8 +28,8 @@ class bcolors:
 #			Purple	45
 #			Cyan	46
 
-def readInput(filename):
-    lines = []
+def readInput(filename: str) -> list[str]:
+    lines: list[str] = []
     with open(filename) as f:
         for l in f:
             if l.lstrip() == "":
@@ -37,8 +37,8 @@ def readInput(filename):
             lines.append(l.split("\n")[0])
     return lines
 
-def readInputWithBlank(filename):
-    lines = []
+def readInputWithBlank(filename: str) -> list[str]:
+    lines: list[str] = []
     with open(filename) as f:
         for l in f:
             lines.append(l.split("\n")[0])

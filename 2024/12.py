@@ -99,11 +99,13 @@ def part2(regions: list[set[complex]]):
 if __name__ == '__main__':
     title = "Day 12: Garden Groups"
     sub = "❄ "*(len(title)//2+2)
+    sub = "❄ "*(len(title)//2+2)
 
     print()
     print(f" {title} ")
     print(sub)
     
+    inputs = loadInput("input_12.txt")
     inputs = loadInput("input_12.txt")
     
     t0 = time.time()

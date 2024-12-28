@@ -36,7 +36,9 @@ if __name__ == "__main__":
     print()
     print(f" {title} ")
     print(sub)
+    print(sub)
     
+    inputs = loadInput("input_4.txt")
     inputs = loadInput("input_4.txt")
     
     t0 = time.time()
