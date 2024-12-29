@@ -23,18 +23,18 @@ def part2(id1: list[int], id2: list[int]) -> None:
 
 if __name__ == "__main__":
     title = "Day 1: Historian Hysteria"
-    sub = "⛄"*(len(title)//2-1+2)
+    sub = "❄ "*(len(title)//2-1+2)
 
     print()
     print(f" {title} ")
     print(sub)
     
-    inputs1, inputs2 = loadInput("input_1.txt")
+    inputs = loadInput("input_1.txt")
     
     t0 = time.time()
-    part1(inputs1, inputs2)
+    part1(*inputs)
     print ("Time: {:.5f}".format(time.time()-t0))
     
     t0 = time.time()
-    part2(inputs1, inputs2)
+    part2(*inputs)
     print ("Time: {:.5f}".format(time.time()-t0))

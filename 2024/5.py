@@ -26,10 +26,9 @@ def part1(orderings: list[list[int]], updates: list[list[int]]) -> list[int]:
                 break
         else:
             ordered.append(iu)
-            mid_val = upd[len(upd)//2]
-            mid_page += mid_val
+            mid_page += upd[len(upd)//2]
 
-    print (f"🎄 Part 1: {mid_page}")
+    print (f"🎄 Part 1: {mid_page}", end='')
     return ordered
 
 def part2(orderings: list[list[int]], updates: list[list[int]], ordered: list[int]) -> None:
@@ -44,13 +43,14 @@ def part2(orderings: list[list[int]], updates: list[list[int]], ordered: list[in
             for o in new_orderings:
                 if o[1] == u:
                     rank[u] += 1
-        mid_page += sorted_dict[len(list(dict(sorted(rank.items(), key=lambda item: item[1])).keys()))//2]
+        sorted_dict = list(dict(sorted(rank.items(), key=lambda item: item[1])).keys())
+        mid_page += sorted_dict[len(sorted_dict)//2]
         
-    print (f"🎄🎅 Part 2: {mid_page}")
+    print (f"🎄🎅 Part 2: {mid_page}", end='')
 
 if __name__ == "__main__":
     title = "Day 5: Print Queue"
-    sub = "⛄"*(len(title)//2-1+2)
+    sub = "❄ "*(len(title)//2+2)
 
     print()
     print(f" {title} ")
@@ -60,8 +60,8 @@ if __name__ == "__main__":
     
     t0 = time.time()
     ordered = part1(*inputs)
-    print ("Time: {:.5f}".format(time.time()-t0))
+    print (" - {:.5f}".format(time.time()-t0))
     
     t0 = time.time()
     part2(*inputs, ordered)
-    print ("Time: {:.5f}".format(time.time()-t0))
+    print (" - {:.5f}".format(time.time()-t0))

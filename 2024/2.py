@@ -39,7 +39,7 @@ def part2(reports: list[list[int]]) -> None:
 
 if __name__ == "__main__":
     title = "Day 2: Red-Nosed Reports"
-    sub = "⛄"*(len(title)//2-1+2)
+    sub = "❄ "*(len(title)//2-1+2)
 
     print()
     print(f" {title} ")

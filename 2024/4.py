@@ -2,11 +2,11 @@ import time
 
 from utils import readInput, ALL_DIRECTIONS
 
-diagonal_pairs: tuple[tuple[int, int]] = ((1, 3), (7, 5), (1, 7), (3, 5))
+diagonal_pairs: tuple[tuple[int, int], ...] = ((1, 3), (7, 5), (1, 7), (3, 5))
 
 def loadInput(filename: str) -> dict[complex, str]:
     lines = readInput(filename)
-    xwords = {}
+    xwords: dict[complex, str] = {}
     for y in range(len(lines)):
         for x in range(len(lines[y])):
             xwords[complex(x, y)] = lines[y][x]
@@ -36,9 +36,7 @@ if __name__ == "__main__":
     print()
     print(f" {title} ")
     print(sub)
-    print(sub)
     
-    inputs = loadInput("input_4.txt")
     inputs = loadInput("input_4.txt")
     
     t0 = time.time()

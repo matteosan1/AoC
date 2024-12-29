@@ -8,15 +8,15 @@ def loadInput(filename: str) -> tuple[list[complex], list[complex], int, int]:
     lines = readInput(filename)
     xmax, ymax = 101, 103
 
-    robots = []
-    vels = []
+    robots: list[complex] = []
+    vels: list[complex] = []
     for l in lines:
         items = l.split()
         robots.append(complex(*map(int, items[0].split("=")[1].split(","))))
         vels.append(complex(*map(int, items[1].split("=")[1].split(","))))
     return robots, vels, xmax, ymax
 
-def quadrants(robots, xmax, ymax):
+def quadrants(robots: list[complex], xmax: int, ymax: int) -> list[int]:
     quadrants = [0, 0, 0, 0]
     for r in robots:
         if r.real < xmax//2:
@@ -31,14 +31,14 @@ def quadrants(robots, xmax, ymax):
                 quadrants[3] += 1
     return quadrants
 
-def part1(robots, vels, xmax, ymax):
+def part1(robots: list[complex], vels: list[complex], xmax: int, ymax: int):
     robots = copy.deepcopy(robots)
     for i in range(len(robots)):
         npos = complex(robots[i]+vels[i]*100)
         robots[i] = complex(npos.real%xmax, npos.imag%ymax)
     print (f"🎄 Part 1: {np.prod(quadrants(robots, xmax, ymax))}", end='')
 
-def draw(ps, xmax, ymax):
+def draw(ps: list[complex], xmax: int, ymax: int):
     for y in range(0, ymax):
         for x in range(0, xmax):
             pos = complex(x, y)
@@ -49,11 +49,11 @@ def draw(ps, xmax, ymax):
                 print (" ", end='')
         print (" ")
 
-def mean_distance_to_centroid(robots, distance=manhattan_dist) -> float:
+def mean_distance_to_centroid(robots: list[complex], distance=manhattan_dist) -> float:
     centroid = np.mean(robots)
     return np.mean([distance(r, centroid) for r in robots])
 
-def part2_bis(robots, vels, xmax, ymax):
+def part2_bis(robots: list[complex], vels: list[complex], xmax: int, ymax: int):
     seconds = 10403 # found when the starting position is found again
     minimum = (-1, float("inf"))
     for second in range(1, seconds):
@@ -65,7 +65,7 @@ def part2_bis(robots, vels, xmax, ymax):
             minimum = (second, dist)
     print (f"🎄🎅 Part 2: {minimum}", end='')
 
-def part2(robots, vels, xmax, ymax):
+def part2(robots: list[complex], vels: list[complex], xmax: int, ymax: int):
     seconds = 10403 # found when the starting position is found again
 
     stds = (-1, float("inf"), float("inf"))

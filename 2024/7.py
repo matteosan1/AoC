@@ -29,6 +29,7 @@ def part1(results: list[int], operations: list[list[int]]) -> None:
                 if result > results[i]:
                     break
             if results[i] == result:
+                print (results[i], seq)
                 valid += result
                 break
     print (f"🎄 Part 1: {valid}", end='')

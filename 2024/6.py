@@ -35,7 +35,7 @@ def part1(area: dict[complex, int], start: complex|None) -> set[complex]:
                 distincts.add((pos))
     except:
         pass
-    print (f"🎄 Part 1: {len(distincts)}")
+    print (f"🎄 Part 1: {len(distincts)}", end='')
     return distincts
 
 def part2(area: dict[complex, int], start: complex|None, thepath: set[complex]) -> None:
@@ -70,11 +70,11 @@ def part2(area: dict[complex, int], start: complex|None, thepath: set[complex]) 
             blocks.append(p)
         area[p] = 0
 
-    print (f"🎄🎅 Part 2: {len(blocks)}")
+    print (f"🎄🎅 Part 2: {len(blocks)}", end='')
 
 if __name__ == "__main__":
     title = "Day 6: Guard Gallivant"
-    sub = "⛄"*(len(title)//2-1+2)
+    sub = "❄ "*(len(title)//2-1+2)
 
     print()
     print(f" {title} ")
@@ -84,7 +84,7 @@ if __name__ == "__main__":
     
     t0 = time.time()
     path = part1(*inputs)
-    print ("Time: {:.5f}".format(time.time()-t0))
+    print (" - {:.6f} s".format(time.time()-t0))
     
     from utils import bcolors
     for y in range(130):
@@ -100,4 +100,4 @@ if __name__ == "__main__":
 
     t0 = time.time()
     part2(*inputs, path)
-    print ("Time: {:.5f}".format(time.time()-t0))
+    print (" - {:.6f} s".format(time.time()-t0))

@@ -12,7 +12,8 @@ def part1(disk: str):
             fragments += [i//2]*int(disk[i])
             fragments += [-1]*int(disk[i+1])
     except:
-        pass        
+        pass
+    
     idx_rvs = len(fragments)-1
     for idx in range(len(fragments)):
         if fragments[idx] == -1:
@@ -23,7 +24,7 @@ def part1(disk: str):
                 idx_rvs -= 1
         if idx == idx_rvs:
             break
-
+    
     checksum = sum([i*int(fragments[i]) for i in range(idx_rvs+1)])
     print (f"🎄 Part 1: {checksum}", end='')
 
@@ -50,9 +51,7 @@ class Fragment:
 def part2(disk: str):
     fragments: list[Fragment] = []
     for i in range(0, len(disk)):
-        id = -1
-        if i%2 == 0:
-            id = i//2
+        id = i//2 if i%2 == 0 else -1
         fragments.append(Fragment(id, int(disk[i])))
 
     idx_rvs = len(fragments)-1

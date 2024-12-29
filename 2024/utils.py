@@ -238,7 +238,7 @@ class DoublyLinkedList:
             print(cur_node.data)
             cur_node = cur_node.next
 
-DIRECTIONS = [complex(0, 1), complex(1, 0), complex(0, -1), complex(-1, 0)]
+DIRECTIONS = [complex(0, -1), complex(1, 0), complex(0, 1), complex(-1, 0)]
 ALL_DIRECTIONS = {0: complex(0, 1), 1: complex(1, 1), 2: complex(1, 0),
                   3: complex(1, -1), 4: complex(0, -1), 5: complex(-1 ,-1),
                   6: complex(-1, 0), 7: complex(-1, 1)}

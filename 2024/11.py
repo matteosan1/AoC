@@ -56,9 +56,9 @@ if __name__ == '__main__':
     inputs = loadInput("input_11.txt")
 
     t0 = time.time()
-    res1 = part1(inputs)
+    part1(inputs)
     print (f" - {time.time()-t0:.5f}")
     
     t0 = time.time()
-    res2 = part2(inputs)
+    part2(inputs)
     print (f" - {time.time()-t0:.5f}")

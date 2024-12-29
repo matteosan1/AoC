@@ -36,12 +36,12 @@ class Machine:
 
 def loadInput(filename: str) -> list[Machine]:
     lines = readInput(filename)
-    machines = []
+    machines: list[Machine] = []
     for l in lines:
         if l == "":
             continue
         if l.startswith("Button A"):
-            machine = Machine()
+            machine: Machine = Machine()
             #machine.buttonA = [int(item.split("+")[1]) for item in l.split(",")]
             machine.button[0] = np.array([int(item.split("+")[1]) for item in l.split(",")])
         elif l.startswith("Button B"):

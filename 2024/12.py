@@ -25,7 +25,7 @@ def floodfill(gardens:dict[complex, str], pos: complex,
     return region
 
 def get_regions(gardens: dict[complex, str]) -> list[set[complex]]:
-    visited = set()
+    visited: set[complex] = set([])
     return [floodfill(gardens, pos, set(), visited) for pos in gardens if pos not in visited]
 
 def part1(regions: list[set[complex]]):
@@ -99,13 +99,11 @@ def part2(regions: list[set[complex]]):
 if __name__ == '__main__':
     title = "Day 12: Garden Groups"
     sub = "❄ "*(len(title)//2+2)
-    sub = "❄ "*(len(title)//2+2)
 
     print()
     print(f" {title} ")
     print(sub)
     
-    inputs = loadInput("input_12.txt")
     inputs = loadInput("input_12.txt")
     
     t0 = time.time()
