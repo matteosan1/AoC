@@ -7,12 +7,12 @@ from utils import readInput
 
 dirs = {'^':complex(0,-1), ">":complex(1,0), "<":complex(-1,0), "v":complex(0,1)}
 
-def loadInput(filename: str, part: int=1):
+def loadInput(filename: str, part: int=1) -> tuple[dict[complex, int], str, complex]:
     lines = readInput(filename)
 
-    grid = {}
+    grid: dict[complex, int] = {}
     instructions = ""
-    start = None
+    start = complex(0, 0)
     y = 0
     while y < len(lines):
         if lines[y][0] != "#":
@@ -49,37 +49,37 @@ def loadInput(filename: str, part: int=1):
         y += 1
     return grid, instructions, start
 
-def move(pos, grid, dir):
+def move(pos: complex, grid: dict[complex, int], dir: complex) -> complex:
     new_pos = pos + dir
     if grid[new_pos] == 3:
-        res = move(new_pos, grid, dir)
+        move(new_pos, grid, dir)
     if grid[new_pos] == 0:
         grid[new_pos] = grid[pos]
         grid[pos] = 0
         return new_pos
     return pos
 
-def GPS(grid):
+def GPS(grid: dict[complex, int]) -> int:
     gps = 0
     for g in grid:
         if grid[g] == 3:
             gps += g.real + g.imag*100
-    return gps
+    return int(gps)
 
-def part1(grid, instructions, start):
-    for t, i in enumerate(instructions):
+def part1(grid: dict[complex, int], instructions: str, start: complex):
+    for i in instructions:
         start = move(start, grid, dirs[i])
     score = GPS(grid)
     #draw(grid, start)
     print (f"🎄 Part 1: {int(score)}", end='')
 
-def move2(pos, grid, dir):
-    new_pos = [p + dir for p in pos]
+def move2(pos: list[complex], grid: dict[complex, int], dir: complex) -> complex:
+    new_pos: list[complex] = [p + dir for p in pos]
     if dir == -1 or dir ==  1:
         if grid[new_pos[0]] == 3 or grid[new_pos[0]] == 4:
-            res = move2(new_pos, grid, dir)
+            move2(new_pos, grid, dir)
     else:
-        new_new_pos = []
+        new_new_pos: list[complex] = []
         for i in range(len(new_pos)):
             if grid[new_pos[i]] == 3:
                 new_new_pos.append(new_pos[i])
@@ -92,7 +92,7 @@ def move2(pos, grid, dir):
                 break
         new_new_pos = list(set(new_new_pos))
         if len(new_new_pos) > 0:
-            res = move2(new_new_pos, grid, dir)
+            move2(new_new_pos, grid, dir)
             
     if all([grid[new_pos[i]] == 0 for i in range(len(new_pos))]):
         for i in range(len(new_pos)):
@@ -103,14 +103,14 @@ def move2(pos, grid, dir):
     else:
         return pos[0]
 
-def part2(grid, instructions, start):
-    for t, i in enumerate(instructions):
+def part2(grid: dict[complex, int], instructions: str, start: complex):
+    for i in instructions:
         start = move2([start], grid, dirs[i])
     score = GPS(grid)
     #draw(grid, start, 2)
     print (f"🎄🎅 Part 2: {int(score)}", end='')
 
-def draw(grid, start, part=1):
+def draw(grid: dict[complex, int], start: complex, part: int=1):
     xmax = int(max([c.real for c in grid]))+1
     ymax = int(max([c.imag for c in grid]))+1
     for y in range(ymax):
