@@ -34,7 +34,7 @@ def part2(banks: list[str]) -> None:
         tot_joltage += joltage
     print (f"🎄🎅 Part 2: {tot_joltage}")
 
-if __name__ == "__main__":
+def main():
     title = "Day 3: Lobby"
     sub = "❄ "*(len(title)//2-1+2)
 
@@ -51,3 +51,6 @@ if __name__ == "__main__":
     t0 = time.perf_counter()
     part2(inputs)
     print ("Time: {:.5f}".format(time.perf_counter()-t0))
+
+if __name__ == "__main__":
+    main()

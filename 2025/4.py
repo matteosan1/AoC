@@ -31,7 +31,7 @@ def part2(rolls: dict[complex, int]):
             rolls.pop(r)
     print (f"🎄🎅 Part 2: {removed}", end='')
 
-if __name__ == "__main__":
+def main():
     title = "Day 4: Printing Department"
     sub = "❄ "*(len(title)//2+2)
 
@@ -48,3 +48,6 @@ if __name__ == "__main__":
     t0 = time.perf_counter()
     part2(inputs)
     print (" - {:.5f}".format(time.perf_counter()-t0))
+
+if __name__ == "__main__":
+    main()

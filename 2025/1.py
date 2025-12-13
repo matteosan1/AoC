@@ -53,7 +53,7 @@ def part2(rotations: list[str]) -> None:
             current_pos = (current_pos - distance) % 100            
     print (f"🎄🎅 Part 2: {total_zeros}")
 
-if __name__ == "__main__":
+def main():
     title = "Day 1: Secret Entrance"
     sub = "❄ "*(len(title)//2-1+2)
 
@@ -70,3 +70,6 @@ if __name__ == "__main__":
     t0 = time.perf_counter()
     part2(inputs)
     print ("Time: {:.5f}".format(time.perf_counter()-t0))
+
+if __name__ == "__main__":
+    main()

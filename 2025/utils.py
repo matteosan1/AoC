@@ -90,6 +90,9 @@ def printPath(cm, paths, start, end):
 
     printArray(cm, path, bcolors.BOLD)
 
+def euclidean_dist(p1, p2):
+    return np.sqrt((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2 + (p1[2]-p2[2])**2) 
+
 def manhattan_dist(p1, p2):
     return abs(p1.real-p2.real) + abs(p1.imag-p2.imag)
 

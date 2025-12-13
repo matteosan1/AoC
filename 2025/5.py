@@ -31,7 +31,7 @@ def part2(ranges: list) -> None:
     fresh_IDs = sum([(end - start + 1) for start, end in ranges])
     print (f"🎄🎅 Part 2: {fresh_IDs}")
 
-if __name__ == "__main__":
+def main():
     title = "Day 5: Cafeteria"
     sub = "❄ "*(len(title)//2-1+2)
 
@@ -39,14 +39,17 @@ if __name__ == "__main__":
     print(f" {title} ")
     print(sub)
 
-    t0 = time.time()
+    t0 = time.perf_counter()
     inputs = loadInput("input_5.txt")
-    print ("Loding Time: {:.5f}".format(time.time()-t0))
+    print ("Loding Time: {:.5f}".format(time.perf_counter()-t0))
 
-    t0 = time.time()
+    t0 = time.perf_counter()
     part1(*inputs)
-    print ("Time: {:.5f}".format(time.time()-t0))
+    print ("Time: {:.5f}".format(time.perf_counter()-t0))
 
-    t0 = time.time()
+    t0 = time.perf_counter()
     part2(inputs[0])
-    print ("Time: {:.5f}".format(time.time()-t0))
+    print ("Time: {:.5f}".format(time.perf_counter()-t0))
+
+if __name__ == "__main__":
+    main()
