@@ -1,0 +1,28 @@
+import '../../base/day.dart';
+import 'day01.dart';
+import 'day02.dart';
+import 'day03.dart';
+import 'day04.dart';
+import 'day05.dart';
+import 'day06.dart';
+// import 'day07.dart';
+// import 'day08.dart';
+import 'day09.dart';
+import 'day10.dart';
+import 'day11.dart';
+import 'day12.dart';
+
+final Map<int, Day Function()> solutions2025 = {
+  1: () => Day01(),
+  2: () => Day02(),
+  3: () => Day03(),
+  4: () => Day04(),
+  5: () => Day05(),
+  6: () => Day06(),
+  // 7: () => Day07(),
+  // 8: () => Day08(),
+  9: () => Day09(),
+  10: () => Day10(),
+  11: () => Day11(),
+  12: () => Day12(),
+};

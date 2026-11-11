@@ -2,35 +2,12 @@ import 'package:args/args.dart';
 import 'package:aoc/base/day.dart';
 
 // dart run bin/main.dart --year 2023 --day 1
-import 'package:aoc/solutions/2025/day01.dart';
-import 'package:aoc/solutions/2025/day02.dart';
-import 'package:aoc/solutions/2025/day03.dart';
-import 'package:aoc/solutions/2025/day04.dart';
-import 'package:aoc/solutions/2025/day05.dart';
-import 'package:aoc/solutions/2025/day06.dart';
-// import 'package:aoc/solutions/2025/day07.dart';
-// import 'package:aoc/solutions/2025/day08.dart';
-import 'package:aoc/solutions/2025/day09.dart';
-import 'package:aoc/solutions/2025/day10.dart';
-import 'package:aoc/solutions/2025/day11.dart';
-import 'package:aoc/solutions/2025/day12.dart';
+import 'package:aoc/solutions/2015/registry.dart' as year2015;
+import 'package:aoc/solutions/2025/registry.dart' as year2025;
 
-final Map<int, Map<int, Day Function()>> registry = {
-  2025: {
-    1: () => Day01(),
-    2: () => Day02(),
-    3: () => Day03(),
-    4: () => Day04(),
-    5: () => Day05(),
-    6: () => Day06(),
-    // 7: () => Day07(),
-    // 8: () => Day08(),
-    9: () => Day09(),
-    10: () => Day10(),
-    11: () => Day11(),
-    12: () => Day12(),
-  },
-
+final Map<int, Map<int, Day Function()>> masterRegistry = {
+  2015: year2015.solutions2015,
+  2025: year2025.solutions2025,
 };
 
 void main(List<String> arguments) {

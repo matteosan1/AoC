@@ -6,14 +6,11 @@ def loadInput():
     return lines
 
 def part1(lines):
-    char = 0
     floor = 0
     for c in lines[0]:
-        if c == "(":
-            char += 1
+        if c == "(":            
             floor += 1
-        elif c == ")":
-            char += 1
+        elif c == ")":            
             floor -= 1
 
     print (f"🎄 Part 1: {floor}")

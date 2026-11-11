@@ -1,15 +1,6 @@
-import 'dart:io';
-import 'dart:math';
 import 'dart:collection';
 import '../../../base/day.dart';
-import '../../utils/geometry.dart';
 
-typedef IndicatorState = List<bool>;
-typedef ButtonIndices = List<int>;
-typedef ButtonList = List<ButtonIndices>;
-typedef JoltageVector = List<int>;
-typedef Matrix = List<List<int>>;
-// typedef LoadResult = ({List<List<int>> indicators, List<ButtonList> buttons, List<JoltageVector> joltages});
 typedef LoadResult = ({List<List<bool>> indicators, List<List<List<int>>> buttons, List<List<int>> joltages});
 
 class Day10 extends Day {
