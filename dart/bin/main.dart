@@ -44,7 +44,7 @@ void main(List<String> arguments) {
 }
 
 void runDay(int year, int dayNumber) {
-  final yearMap = registry[year];
+  final yearMap = masterRegistry[year];
   if (yearMap == null) {
     print('Nessuna soluzione trovata per l\'anno $year.');
     return;
@@ -61,12 +61,11 @@ void runDay(int year, int dayNumber) {
 }
 
 void runAll() {
-  final sortedYears = registry.keys.toList()..sort();
+  final sortedYears = masterRegistry.keys.toList()..sort();
   for (var year in sortedYears) {
-    final sortedDays = registry[year]!.keys.toList()..sort();
+    final sortedDays = masterRegistry[year]!.keys.toList()..sort();
     for (var day in sortedDays) {
-      // registry[year]![day]().solve();
-      registry[year]?[day]?.call().solve();
+      masterRegistry[year]?[day]?.call().solve();
     }
   }
 }

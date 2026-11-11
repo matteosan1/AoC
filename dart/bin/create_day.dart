@@ -22,7 +22,7 @@ void main(List<String> arguments) {
     final day = int.parse(dayStr);
     final dayPadded = day.toString().padLeft(2, '0');
 
-    final dirPath = p.join('lib', 'solutions', 'y$year');
+    final dirPath = p.join('lib', 'solutions', '$year');
     final filePath = p.join(dirPath, 'day$dayPadded.dart');
 
     final dir = Directory(dirPath);
@@ -62,7 +62,7 @@ class $className extends Day {
     file.writeAsStringSync(skeletonContent.trim() + '\n');
     print('✨ File di soluzione generato con successo: $filePath');
 
-    final sharedInputPath = r'..\inputs';
+    final sharedInputPath = r'lib\inputs';
     final inputDirPath = p.join(sharedInputPath, year.toString());
     final inputFilePath = p.join(inputDirPath, 'day$dayPadded.txt');
 

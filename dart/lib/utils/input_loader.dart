@@ -1,10 +1,12 @@
 import "dart:io";
 import "package:path/path.dart" as path;
 
-const String aocInputPath = "C:\\shared\\AoC\\2025";
+const String aocInputPath = r"lib\inputs\";
 
 T loadInput<T>(String filePath, T Function(String fileContent) parser) {
     try {
+  String currentPath = Directory.current.path;
+  print("Path corrente: $currentPath");
         final file = File(path.join(aocInputPath, filePath));
         final String content = file.readAsStringSync();
 
