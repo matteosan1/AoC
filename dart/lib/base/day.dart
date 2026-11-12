@@ -4,6 +4,7 @@ import '../utils/input_loader.dart';
 abstract class Day {
   final int year;
   final int dayNumber;
+  Object? part1Result;
 
   Day(this.year, this.dayNumber);
 

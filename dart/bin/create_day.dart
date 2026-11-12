@@ -33,13 +33,10 @@ void main(List<String> arguments) {
 
     final file = File(filePath);
     if (file.existsSync()) {
-      print('⚠️ Il file esiste già: $filePath');
-      return;
-    }
-
-    // 2. Contenuto dello skeleton della classe
-    final className = 'Day$dayPadded';
-    final skeletonContent = '''
+      print('⚠️ Il file esiste già: $filePath');      
+    } else {
+      final className = 'Day$dayPadded';
+      final skeletonContent = '''
 import '../../../base/day.dart';
 
 class $className extends Day {
@@ -59,8 +56,67 @@ class $className extends Day {
 }
 ''';
 
-    file.writeAsStringSync(skeletonContent.trim() + '\n');
-    print('✨ File di soluzione generato con successo: $filePath');
+      file.writeAsStringSync('${skeletonContent.trim()}\n');      
+      print('✨ File di soluzione generato con successo: $filePath');
+    }
+
+    final registryPath = p.join(dirPath, 'registry.dart');
+    final registryFile = File(registryPath);
+    final importLine = "import 'day$dayPadded.dart';";
+    final mapEntry = '  $day: () => Day$dayPadded(),';
+
+    if (!registryFile.existsSync()) {
+      final newRegistryContent = '''
+import '../../base/day.dart';
+import 'day$dayPadded.dart';
+
+final Map<int, Day Function()> solutions$year = {
+  $day: () => Day$dayPadded(),
+};
+''';
+      registryFile.writeAsStringSync("${newRegistryContent.trim()}\n");
+      print('📝 File registry.dart creato: $registryPath');
+    } else {
+      var content = registryFile.readAsStringSync();
+      bool modified = false;
+      
+      if (!content.contains(importLine)) {
+        final importRegex = RegExp(r"import\s+[^;]+;\s*");
+        final matches = importRegex.allMatches(content).toList();
+        if (matches.isNotEmpty) {
+          final lastMatch = matches.last;
+          final insertIndex = lastMatch.end;
+          content = "${content.substring(0, insertIndex)}\n$importLine${content.substring(insertIndex)}";          
+          modified = true;
+        } else {
+          content = "$importLine\n$content";
+          modified = true;
+        }
+      }
+
+      // Aggiungi l'entry nella mappa se non è già presente
+      if (!content.contains('$day: () => Day$dayPadded()')) {
+        final mapRegex = RegExp(r'(solutions\d*\s*=\s*\{[^}]*)(\})', multiLine: true, dotAll: true);
+        if (mapRegex.hasMatch(content)) {
+          content = content.replaceFirstMapped(mapRegex, (match) {
+            final existingEntries = match.group(1)!;
+            final trimmed = existingEntries.trimRight();
+            final needsComma = !trimmed.endsWith(',');
+            return '$trimmed${needsComma ? ',' : ''}\n$mapEntry\n}';
+          });
+          modified = true;
+        } else {
+          print('⚠️ Impossibile trovare la mappa dei giorni in registry.dart. Aggiungi manualmente: $mapEntry');
+        }
+      }
+      
+      if (modified) {
+        registryFile.writeAsStringSync(content);
+        print('🔄 File registry.dart aggiornato con successo.');
+      } else {
+        print('ℹ️ Il registry.dart contiene già l\'import e l\'entry per questo giorno.');
+      }
+    }
 
     final sharedInputPath = r'lib\inputs';
     final inputDirPath = p.join(sharedInputPath, year.toString());

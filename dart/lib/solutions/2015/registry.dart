@@ -6,6 +6,12 @@ import 'day04.dart';
 import 'day05.dart';
 import 'day06.dart';
 import 'day07.dart';
+import 'day08.dart';
+import 'day09.dart';
+import 'day10.dart';
+import 'day11.dart';
+import 'day12.dart';
+import 'day13.dart';
 
 final Map<int, Day Function()> solutions2015 = {
   1: () => Day01(),
@@ -15,4 +21,10 @@ final Map<int, Day Function()> solutions2015 = {
   5: () => Day05(),
   6: () => Day06(),
   7: () => Day07(),
+  8: () => Day08(),
+  9: () => Day09(),
+  10: () => Day10(),
+  11: () => Day11(),
+  12: () => Day12(),
+  13: () => Day13(),
 };
