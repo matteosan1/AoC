@@ -81,11 +81,14 @@ final Map<int, Day Function()> solutions$year = {
       bool modified = false;
       
       if (!content.contains(importLine)) {
-        final importRegex = RegExp(r"import\s+[^;]+;\s*");
+        // Rimuoviamo \s* dalla regex per fermarci esattamente al punto e virgola
+        final importRegex = RegExp(r"import\s+[^;]+;");
         final matches = importRegex.allMatches(content).toList();
+        
         if (matches.isNotEmpty) {
           final lastMatch = matches.last;
           final insertIndex = lastMatch.end;
+
           content = "${content.substring(0, insertIndex)}\n$importLine${content.substring(insertIndex)}";          
           modified = true;
         } else {
@@ -94,7 +97,6 @@ final Map<int, Day Function()> solutions$year = {
         }
       }
 
-      // Aggiungi l'entry nella mappa se non è già presente
       if (!content.contains('$day: () => Day$dayPadded()')) {
         final mapRegex = RegExp(r'(solutions\d*\s*=\s*\{[^}]*)(\})', multiLine: true, dotAll: true);
         if (mapRegex.hasMatch(content)) {

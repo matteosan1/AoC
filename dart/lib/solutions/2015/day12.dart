@@ -17,7 +17,7 @@ class Day12 extends Day {
     return sum;
   }
 
-  int sumNumbersExcludingKey(dynamic node, String forbiddenKey) {
+int sumNumbersExcludingKey(dynamic node, String forbiddenKey) {
     if (node is int) {
       return node;
     }
@@ -31,7 +31,7 @@ class Day12 extends Day {
     }
 
     if (node is Map<String, dynamic>) {
-      if (node.containsKey(forbiddenKey)) {
+      if (node.values.contains(forbiddenKey)) {
         return 0;
       }
 
@@ -44,7 +44,7 @@ class Day12 extends Day {
 
     return 0;
   }
-  
+
   @override
   Object? part2(covariant String input) {
     final parsedData = jsonDecode(input);

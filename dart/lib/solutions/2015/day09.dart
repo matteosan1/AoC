@@ -17,6 +17,7 @@ class Day09 extends Day {
       final [dests, distance] = line.split(" = ");
       final [start, end] = dests.split(" to ");
       distancies[(start, end)] = int.parse(distance);
+      distancies[(end, start)] = int.parse(distance);
       cities.add(start);
       cities.add(end);
     }
@@ -28,17 +29,14 @@ class Day09 extends Day {
   Object? part1(covariant LoadResult input) {
     int best = 1 << 62;
     int worst = 0;
-
     for (var path in input.cities.permutations()) {
       int total = 0;
-    
       for (int i = 0; i < path.length - 1; i++) {
-        total += input.distancies[(input.cities[i], input.cities[i+1])]!;
+        total += input.distancies[(path[i], path[i+1])]!;
       }
       if (total < best) best = total;
       if (total > worst) worst = total;
     }
-
     part1Result = worst;
     return best;
   }

@@ -49,7 +49,9 @@ class Day07 extends Day {
   @override
   Object? part1(covariant Map<String, Instruction> input) {
     Map<String, int> cache = {};
-    return input['a']!.eval(input, cache);
+    final result = input['a']!.eval(input, cache);
+    part1Result = result;
+    return result;
   }
 
   @override

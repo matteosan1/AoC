@@ -11,7 +11,7 @@ class Day10 extends Day {
   }
 
   @override
-  Uint8List parser(dynamic rawInput) {
+  Uint8List parser(covariant String rawInput) {
     return Uint8List.fromList(rawInput.codeUnits.map((c) => c - 0x30).toList(),);
   }
 

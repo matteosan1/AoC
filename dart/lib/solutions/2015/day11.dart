@@ -27,17 +27,25 @@ class Day11 extends Day {
     return false;
   }
 
+  bool hasStraight(List<int> units) {
+    for (int i = 0; i < units.length - 2; i++) {
+      if (units[i + 1] == units[i] + 1 && units[i + 2] == units[i + 1] + 1) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   bool check(List<int> units) {
     if (units.contains(111) || units.contains(108) || units.contains(105)) return false;    
-    final differences = units.adjacentPairs.map((p) => p.$2 - p.$1).toList();
-    if (differences.where((d) => d == 1).length < 3) return false;
+    if (!hasStraight(units)) return false;
     if (!hasAtLeastTwoPairs(units)) return false;
 
     return true;
   }
 
   String evolve(String start) {
-    var units = start.codeUnits;
+    var units = start.codeUnits.toList();
 
       while (true) {      
         for (int i=units.length-1; i>=0; i--) {
@@ -63,6 +71,7 @@ class Day11 extends Day {
   @override
   Object? part1(covariant String input) {
     final pwd = evolve(input);
+    part1Result = pwd;
     return pwd;
   }
 

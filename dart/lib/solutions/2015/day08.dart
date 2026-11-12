@@ -10,7 +10,7 @@ class Day08 extends Day {
 
     int count = 0;
 
-    for (int i = 0; i < line.length - 1; i++) {
+    for (int i = 0; i < line.length; i++) {
       if (line.codeUnitAt(i) == backslash) {
         final next = line.codeUnitAt(i + 1);
         if (next == backslash || next == quote) {          
@@ -18,13 +18,12 @@ class Day08 extends Day {
         } else if (next == xChar) {          
           i += 3;
         }
+        count += 1;
       } else if (line.codeUnitAt(i) == quote) {
-        i++;
-      } 
-
-      count += 1;      
+      }  else {
+        count += 1;
+      }     
     }
-
     return count;
   }
 
@@ -45,7 +44,7 @@ class Day08 extends Day {
 
     int count = line.length + 2;
 
-    for (int i = 0; i < line.length - 1; i++) {
+    for (int i = 0; i < line.length; i++) {
       final code = line.codeUnitAt(i);
       if (code == backslash || code == quote) {
         count += 1;
