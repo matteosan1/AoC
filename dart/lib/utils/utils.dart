@@ -32,3 +32,5 @@ extension AdjacentPairsExtension<T> on List<T> {
     }
   }
 }
+
+String trimmed(String s, List<String> chars) => chars.any(s.endsWith) ? s.substring(0, s.length - 1) : s;
