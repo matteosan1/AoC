@@ -38,8 +38,7 @@ class Day13 extends Day {
     return res;
   }
 
-  @override
-  Object? part1(covariant LoadResult input) {
+  int deltaHappiness(LoadResult input) {
     int worst = -2^53;
     for (final start in input.people) {
       var remaining = input.people.where((item) => item != start).toList();
@@ -60,23 +59,12 @@ class Day13 extends Day {
   }
 
   @override
+  Object? part1(covariant LoadResult input) {
+    return deltaHappiness(input);
+  }
+
+  @override
   Object? part2(covariant LoadResult input) {
-    int worst = -2^53;
-    for (final start in input.people) {
-      var remaining = input.people.where((item) => item != start).toList();
-        for (var perm in remaining.permutations()) {
-        final table = [start, ...perm];
-        int total = 0;
-    
-        for (int i = 0; i < table.length; i++) {
-          final current = table[i];
-          final neighbor = table[(i + 1) % table.length];
-          total += input.happiness[(current, neighbor)]!;
-          total += input.happiness[(neighbor, current)]!;
-        }    
-        if (total > worst) worst = total;
-      }
-    }
-    return worst;
+    return deltaHappiness(input);
   }
 }

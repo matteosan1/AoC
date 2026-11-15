@@ -14,22 +14,26 @@ void main(List<String> arguments) {
   final parser = ArgParser()
     ..addOption('year', abbr: 'y', help: 'Anno di Advent of Code')
     ..addOption('day', abbr: 'd', help: 'Giorno da eseguire')
-    ..addFlag('all', abbr: 'a', negatable: false, help: 'Esegui tutti i giorni registrati');
+    ..addFlag('all', abbr: 'a', negatable: false, help: 'Esegui tutti i giorni registrati (opzionalmente filtrati per anno)');
 
   try {
     final argResults = parser.parse(arguments);
 
-    if (argResults['all'] == true) {
-      runAll();
+    final yearStr = argResults['year'];
+    final dayStr = argResults['day'];
+    final isAll = argResults['all'] == true;
+
+    // Se è stato richiesto --all
+    if (isAll) {
+      final year = yearStr != null ? int.parse(yearStr) : null;
+      runAll(year: year);
       return;
     }
 
-    final yearStr = argResults['year'];
-    final dayStr = argResults['day'];
-
+    // Se mancano sia --year che --day (e non siamo in modalità all)
     if (yearStr == null || dayStr == null) {
       print('Uso corretto: dart run bin/main.dart --year <anno> --day <giorno>');
-      print('Oppure: dart run bin/main.dart --all');
+      print('Oppure: dart run bin/main.dart --all [--year <anno>]');
       return;
     }
 
@@ -60,12 +64,22 @@ void runDay(int year, int dayNumber) {
   puzzle.solve();
 }
 
-void runAll() {
-  final sortedYears = masterRegistry.keys.toList()..sort();
-  for (var year in sortedYears) {
-    final sortedDays = masterRegistry[year]!.keys.toList()..sort();
+void runAll({int? year}) {
+  // Se è stato specificato un anno, filtriamo solo quello (se esiste nel registry)
+  final yearsToRun = year != null ? [year] : (masterRegistry.keys.toList()..sort());
+
+  for (var y in yearsToRun) {
+    final yearMap = masterRegistry[y];
+    if (yearMap == null) {
+      if (year != null) {
+        print('Nessuna soluzione trovata per l\'anno $year.');
+      }
+      continue;
+    }
+
+    final sortedDays = yearMap.keys.toList()..sort();
     for (var day in sortedDays) {
-      masterRegistry[year]?[day]?.call().solve();
+      yearMap[day]?.call().solve();
     }
   }
 }

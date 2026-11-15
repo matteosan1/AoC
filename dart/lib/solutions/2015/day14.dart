@@ -21,6 +21,14 @@ class Reindeer {
       required this.rest,
     });
 
+    void reset() {
+        dist = 0;
+        score = 0;
+        timeMoving = 0;
+        timeResting = 0;
+        isResting = false;
+    }
+
     void tick() {
       if (isResting) {
         timeResting++;
@@ -66,16 +74,11 @@ class Day14 extends Day {
   }
 
   void awardPointsToLeaders(List<Reindeer> list) {
+    list.sort((a, b) => b.dist.compareTo(a.dist));
+
     if (list.isEmpty) return;
 
-    list.reduce((curr, next) => next.dist > curr.dist ? next : curr);
     int maxDist = list.first.dist;
-    // for (int i = 1; i < list.length; i++) {
-    //   if (list[i].dist > maxDist) {
-    //     maxDist = list[i].dist;
-    //   }
-    // }
-
     for (final r in list) {
       if (r.dist == maxDist) {
         r.score++;
@@ -85,6 +88,10 @@ class Day14 extends Day {
 
   @override
   Object? part2(covariant List<Reindeer> input) {
+    for (final r in input) {
+      r.reset();
+    }
+
     for (int i=0; i<seconds; i++) {
       for (final reindeer in input) {
         reindeer.tick();
