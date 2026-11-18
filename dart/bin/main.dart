@@ -1,12 +1,15 @@
 import 'package:args/args.dart';
 import 'package:aoc/base/day.dart';
 
-// dart run bin/main.dart --year 2023 --day 1
 import 'package:aoc/solutions/2015/registry.dart' as year2015;
+import 'package:aoc/solutions/2021/registry.dart' as year2021;
+import 'package:aoc/solutions/2022/registry.dart' as year2022;
 import 'package:aoc/solutions/2025/registry.dart' as year2025;
 
 final Map<int, Map<int, Day Function()>> masterRegistry = {
   2015: year2015.solutions2015,
+  2021: year2021.solutions2021,
+  2022: year2022.solutions2022,
   2025: year2025.solutions2025,
 };
 
